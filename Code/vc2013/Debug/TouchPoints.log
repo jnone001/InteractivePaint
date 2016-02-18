@@ -1,0 +1,23 @@
+﻿Build started 2/17/2016 12:42:14 PM.
+     1>Project "C:\SeniorProject\TouchPoints\vc2013\TouchPoints.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /I..\include /I..\..\cinder_0.9.0_vc2013\include /I"C:\Program Files (x86)\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\include" /ZI /nologo /W3 /WX- /MP /Od /Oy- /D WIN32 /D _WIN32_WINNT=0x0601 /D _WINDOWS /D NOMINMAX /D _DEBUG /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MTd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt ..\src\TouchPointsApp.cpp
+         TouchPointsApp.cpp
+     1>c:\seniorproject\touchpoints\src\touchshapes.cpp(179): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\seniorproject\touchpoints\src\touchshapes.cpp(181): warning C4244: 'argument' : conversion from 'int' to 'float', possible loss of data
+     1>c:\seniorproject\touchpoints\src\touchpointsapp.cpp(538): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\seniorproject\touchpoints\src\touchpointsapp.cpp(767): warning C4244: 'argument' : conversion from 'float' to 'const int', possible loss of data
+     1>c:\seniorproject\touchpoints\src\touchpointsapp.cpp(771): warning C4244: 'argument' : conversion from 'float' to 'const int', possible loss of data
+     1>c:\seniorproject\touchpoints\src\touchpointsapp.cpp(797): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\seniorproject\touchpoints\src\touchpointsapp.cpp(813): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+     1>c:\seniorproject\touchpoints\src\touchpointsapp.cpp(868): warning C4244: 'argument' : conversion from 'float' to 'int', possible loss of data
+       Link:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\SeniorProject\TouchPoints\vc2013\Debug\TouchPoints.exe" /INCREMENTAL /NOLOGO /LIBPATH:..\..\cinder_0.9.0_vc2013\lib\msw\x86 /LIBPATH:"C:\Program Files (x86)\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86" "cinder-v120_d.lib" OpenGL32.lib Leap.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /NODEFAULTLIB:LIBCMT /NODEFAULTLIB:LIBCPMT /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\SeniorProject\TouchPoints\vc2013\Debug\TouchPoints.pdb" /SUBSYSTEM:WINDOWS /TLBID:1 /DYNAMICBASE:NO /IMPLIB:"C:\SeniorProject\TouchPoints\vc2013\Debug\TouchPoints.lib" /MACHINE:X86 Debug\Resources.res
+         Debug\TouchPointsApp.obj
+         Debug\TouchShapes.obj
+         TouchPoints.vcxproj -> C:\SeniorProject\TouchPoints\vc2013\Debug\TouchPoints.exe
+     1>Done Building Project "C:\SeniorProject\TouchPoints\vc2013\TouchPoints.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:04.95
