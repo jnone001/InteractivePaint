@@ -28,7 +28,7 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-//#define EYEX
+#define EYEX
 
 #ifdef EYEX
 
@@ -43,8 +43,8 @@ using namespace std;
 
 #pragma comment (lib, "Tobii.EyeX.Client.lib")
 //Stores values of eyePosition(where we are looking) from tobii EyeX
-float eyePositionX = 0.0f;
-float eyePositionY = 0.0f;
+float gazePositionX = 0.0f;
+float gazePositionY = 0.0f;
 
 // ID of the global interactor that provides our data stream; must be unique within the application.
 static const TX_STRING InteractorId = "Twilight Sparkle";
@@ -62,8 +62,8 @@ int resolutionY;
 #define BACKGROUND_COLORS 8
 
 
-#define windowWidth  1919 //getWindowSize().x
-#define windowHeight 1079 //getWindowSize().y
+#define windowWidth  1920
+#define windowHeight 1080
 #define FRAME_RATE 120
 
 
@@ -260,32 +260,32 @@ void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 
 
 
-		int eyeMovementLimit = 10;
+		int gazeMovementLimit = 10;
 
-		if (eventParams.X - eyePositionX >= eyeMovementLimit)
+		if (eventParams.X - gazePositionX >= gazeMovementLimit)
 		{
-			eyePositionX += eyeMovementLimit;
+			gazePositionX += gazeMovementLimit;
 		}
-		else if (eventParams.X - eyePositionX <= eyeMovementLimit){
-			eyePositionX -= eyeMovementLimit;
+		else if (eventParams.X - gazePositionX <= gazeMovementLimit){
+			gazePositionX -= gazeMovementLimit;
 		}
 		else {
-			eyePositionX = eventParams.X;
+			gazePositionX = eventParams.X;
 		}
 
-		if (eventParams.Y - eyePositionY >= eyeMovementLimit)
+		if (eventParams.Y - gazePositionY >= gazeMovementLimit)
 		{
-			eyePositionY += eyeMovementLimit;
+			gazePositionY += gazeMovementLimit;
 		}
-		else if (eventParams.Y - eyePositionY <= eyeMovementLimit){
-			eyePositionY -= eyeMovementLimit;
+		else if (eventParams.Y - gazePositionY <= gazeMovementLimit){
+			gazePositionY -= gazeMovementLimit;
 		}
 		else {
-			eyePositionY = eventParams.Y;
+			gazePositionY = eventParams.Y;
 		}
 
-		//eyePositionX = eventParams.X;
-		//eyePositionY = eventParams.Y;
+		//gazePositionX = eventParams.X;
+		//gazePositionY = eventParams.Y;
 
 
 
@@ -311,6 +311,7 @@ void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userP
 	TX_HANDLE hEvent = TX_EMPTY_HANDLE;
 	TX_HANDLE hBehavior = TX_EMPTY_HANDLE;
 
+
 	txGetAsyncDataContent(hAsyncData, &hEvent);
 
 	// NOTE. Uncomment the following line of code to view the event object. The same function can be used with any interaction object.
@@ -321,11 +322,13 @@ void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userP
 		txReleaseObject(&hBehavior);
 	}
 
+
 	// NOTE since this is a very simple application with a single interactor and a single data stream, 
 	// our event handling code can be very simple too. A more complex application would typically have to 
 	// check for multiple behaviors and route events based on interactor IDs.
 
 	txReleaseObject(&hEvent);
+
 }
 
 #endif
@@ -505,7 +508,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 		if (points.touchDistance() > 0 && points.touchZone() != Leap::Pointable::Zone::ZONE_NONE)
 		{
-			//gl::color(0, 1, 0, 1 - points.touchDistance());
+			gl::color(0, 1, 0, 1 - points.touchDistance());
 			gl::drawSolidCircle(vec2(leapXCoordinate, leapYCoordinate), 40);
 		}
 		else if (points.touchDistance() <= 0)
@@ -694,19 +697,19 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		circleDraw = false;
 		rectDraw = false;
 		triangleDraw = false;
-		if (eyePositionX <= resolutionX / 2 && eyePositionY <= resolutionY / 2)
+		if (gazePositionX <= resolutionX / 2 && gazePositionY <= resolutionY / 2)
 		{
 			lineDraw = true;
 		}
-		else if (eyePositionX >= resolutionX / 2 && eyePositionY <= resolutionY / 2)
+		else if (gazePositionX >= resolutionX / 2 && gazePositionY <= resolutionY / 2)
 		{
 			circleDraw = true;
 		}
-		else if (eyePositionX <= resolutionX / 2 && eyePositionY >= resolutionY / 2)
+		else if (gazePositionX <= resolutionX / 2 && gazePositionY >= resolutionY / 2)
 		{
 			rectDraw = true;
 		}
-		else if (eyePositionX >= resolutionX / 2 && eyePositionY >= resolutionY / 2)
+		else if (gazePositionX >= resolutionX / 2 && gazePositionY >= resolutionY / 2)
 		{
 			triangleDraw = true;
 		}
@@ -1054,16 +1057,29 @@ void TouchPointsApp::draw()
 	gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
 
 
-	gl::color(1.0, 1.0, 1.0);
+
 
 	currentFrame = getLeapFrame(leapContr);
 	leapDraw(currentFrame);
 
 
 #ifdef EYEX
-	vec2 eyes(eyePositionX, eyePositionY);
+	vec2 gaze1(gazePositionX - 10, gazePositionY);
+	vec2 gaze2(gazePositionX + 10, gazePositionY);
 
-	gl::drawStrokedCircle(eyes, 10.0f, 10.0f);
+	gl::drawStrokedCircle(gaze1, 10.0f, 10.0f);
+	gl::drawStrokedCircle(gaze2, 10.0f, 10.0f);
+
+	//UI Box
+	/*
+	if (gazePositionX >= windowWidth*.8 && gazePositionY <= windowHeight*.2)
+	{
+		gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(windowWidth*.8, 0, windowWidth, windowHeight*.2));
+	}
+	*/
+	//gl::color(1.0, 1.0, 1.0);
+	//gl::drawSolidRect(Rectf(1400, 0, 1920, 500));
 #endif
 	//gl::color(0.5,0.7,0.1);
 	//Frame Buffers Setup
@@ -1134,12 +1150,15 @@ void TouchPointsApp::draw()
 	*/
 	if (currLayer == 0)
 	{
+		//Must always draw framebuffers as a set color!
+		gl::color(1.0, 1.0, 1.0);
 		//Layer 1 is on top, second is below
 		gl::draw(secondFbo->getColorTexture());
 		gl::draw(firstFbo->getColorTexture());
 	}
 	else if (currLayer == 1)
 	{
+		gl::color(1.0, 1.0, 1.0);
 		//Layer 2 is on top.
 		gl::draw(firstFbo->getColorTexture());
 		gl::draw(secondFbo->getColorTexture());

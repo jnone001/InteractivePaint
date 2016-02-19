@@ -79,7 +79,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include;..\..\cinder_0.9.0_vc2013\include;C:\Program Files (x86)\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\include;C:\SeniorProject\EyeX\include;C:\SeniorProject\Leap\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\include;C:\SeniorProject\cinder_0.9.0_vc2013\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0601;_WINDOWS;NOMINMAX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -94,7 +94,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>cinder-$(PlatformToolset)_d.lib;OpenGL32.lib;Leap.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\..\cinder_0.9.0_vc2013\lib\msw\$(PlatformTarget);C:\Program Files (x86)\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\SeniorProject\cinder_0.9.0_vc2013\lib\msw\x86;C:\SeniorProject\Leap\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86;C:\SeniorProject\EyeX\lib\x86;..\..\cinder_0.9.0_vc2013\lib\msw\$(PlatformTarget);C:\Program Files (x86)\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
