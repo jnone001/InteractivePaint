@@ -100,6 +100,12 @@ public:
 	void	touchesEnded(TouchEvent event) override;
 	void	keyDown(KeyEvent event) override;
 	void	leapDraw(Leap::Frame frame);
+	void	drawUi();
+	void	modeRectangle();
+	void	modeCircle();
+	void	modeTriangle();
+	void	modeLine();
+
 
 	//List of MODES
 	bool randColor = false;
@@ -153,6 +159,7 @@ private:
 	//This way we can dynamically have multiple layers....????
 	std::shared_ptr<gl::Fbo>		firstFbo;
 	std::shared_ptr<gl::Fbo>		secondFbo;
+	std::shared_ptr<gl::Fbo>		uiFbo;
 
 };
 
@@ -219,33 +226,33 @@ void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connect
 	switch (connectionState) {
 	case TX_CONNECTIONSTATE_CONNECTED: {
 		BOOL success;
-		printf("The connection state is now CONNECTED (We are connected to the EyeX Engine)\n");
+		//printf("The connection state is now CONNECTED (We are connected to the EyeX Engine)\n");
 		// commit the snapshot with the global interactor as soon as the connection to the engine is established.
 		// (it cannot be done earlier because committing means "send to the engine".)
 		success = txCommitSnapshotAsync(g_hGlobalInteractorSnapshot, OnSnapshotCommitted, NULL) == TX_RESULT_OK;
 		if (!success) {
-			printf("Failed to initialize the data stream.\n");
+			//printf("Failed to initialize the data stream.\n");
 		}
 		else {
-			printf("Waiting for gaze data to start streaming...\n");
+			//printf("Waiting for gaze data to start streaming...\n");
 		}
 	}
 									   break;
 
 	case TX_CONNECTIONSTATE_DISCONNECTED:
-		printf("The connection state is now DISCONNECTED (We are disconnected from the EyeX Engine)\n");
+		//printf("The connection state is now DISCONNECTED (We are disconnected from the EyeX Engine)\n");
 		break;
 
 	case TX_CONNECTIONSTATE_TRYINGTOCONNECT:
-		printf("The connection state is now TRYINGTOCONNECT (We are trying to connect to the EyeX Engine)\n");
+		//printf("The connection state is now TRYINGTOCONNECT (We are trying to connect to the EyeX Engine)\n");
 		break;
 
 	case TX_CONNECTIONSTATE_SERVERVERSIONTOOLOW:
-		printf("The connection state is now SERVER_VERSION_TOO_LOW: this application requires a more recent version of the EyeX Engine to run.\n");
+		//printf("The connection state is now SERVER_VERSION_TOO_LOW: this application requires a more recent version of the EyeX Engine to run.\n");
 		break;
 
 	case TX_CONNECTIONSTATE_SERVERVERSIONTOOHIGH:
-		printf("The connection state is now SERVER_VERSION_TOO_HIGH: this application requires an older version of the EyeX Engine to run.\n");
+		//printf("The connection state is now SERVER_VERSION_TOO_HIGH: this application requires an older version of the EyeX Engine to run.\n");
 		break;
 	}
 }
@@ -259,7 +266,7 @@ void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 	if (txGetGazePointDataEventParams(hGazeDataBehavior, &eventParams) == TX_RESULT_OK) {
 
 
-
+		/*
 		int gazeMovementLimit = 10;
 
 		if (eventParams.X - gazePositionX >= gazeMovementLimit)
@@ -283,13 +290,13 @@ void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 		else {
 			gazePositionY = eventParams.Y;
 		}
+		*/
+		gazePositionX = eventParams.X;
+		gazePositionY = eventParams.Y;
 
-		//gazePositionX = eventParams.X;
-		//gazePositionY = eventParams.Y;
 
 
-
-		printf("Gaze Data: (%.1f, %.1f) timestamp %.0f ms\n", eventParams.X, eventParams.Y, eventParams.Timestamp);
+		//printf("Gaze Data: (%.1f, %.1f) timestamp %.0f ms\n", eventParams.X, eventParams.Y, eventParams.Timestamp);
 
 		//gl::clear();
 		//Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
@@ -299,7 +306,7 @@ void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 		//gl::drawStrokedCircle(mCenter, 10.0f, 10.0f);
 	}
 	else {
-		printf("Failed to interpret gaze data event packet.\n");
+		//printf("Failed to interpret gaze data event packet.\n");
 	}
 }
 
@@ -338,14 +345,18 @@ void TouchPointsApp::setup()
 	//Sets max mulitouch points
 	CI_LOG_I("MT: " << System::hasMultiTouch() << " Max points: " << System::getMaxMultiTouchPoints());
 	glEnable(GL_LINE_SMOOTH);
-
-	setFullScreen(true);
+	//setWindowSize(windowWidth, windowHeight);
+	setFullScreen(1);
 
 	//Sets window size and initializes framebuffers (layers).
 	setWindowSize(windowWidth, windowHeight);
 	gl::Fbo::Format format;
 	firstFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	secondFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+
+	//Set up UI
+	uiFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+	//drawUi();
 
 	setFrameRate(FRAME_RATE);
 
@@ -357,6 +368,10 @@ void TouchPointsApp::setup()
 	GetWindowRect(hDesktop, &desktop);
 	resolutionX = desktop.right;
 	resolutionY = desktop.bottom;
+
+
+
+
 
 
 	TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
@@ -371,7 +386,7 @@ void TouchPointsApp::setup()
 	success &= txRegisterConnectionStateChangedHandler(hContext, &hConnectionStateChangedTicket, OnEngineConnectionStateChanged, NULL) == TX_RESULT_OK;
 	success &= txRegisterEventHandler(hContext, &hEventHandlerTicket, HandleEvent, NULL) == TX_RESULT_OK;
 	success &= txEnableConnection(hContext) == TX_RESULT_OK;
-
+	/*
 	// let the events flow until a key is pressed.
 	if (success) {
 		printf("Initialization was successful.\n");
@@ -382,7 +397,7 @@ void TouchPointsApp::setup()
 	printf("Press any key to exit...\n");
 	_getch();
 	printf("Exiting.\n");
-
+	*/
 	/*
 
 	HOW DO WE DELETE THE CONTEXT?
@@ -590,6 +605,78 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 }
 
+//Mode change functions
+
+void TouchPointsApp::modeRectangle(){
+
+	//(*uiFbo).unbindTexture(0, 36064U);
+	//(*uiFbo).bindFramebuffer();
+
+	Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
+	gl::color(newColor);
+	//gl::lineWidth(10);
+	//gl::drawSolidCircle(vec2(0,0), 10);
+	//gl::drawSolidCircle(vec2(1920,1080), 100);
+	if (!filledShapes)
+	gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
+	else gl::drawSolidRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95));
+	//(*uiFbo).unbindFramebuffer();
+}
+
+void TouchPointsApp::modeCircle(){
+
+	//(*uiFbo).unbindTexture(0, 36064U);
+	//(*uiFbo).bindFramebuffer();
+
+	Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
+	gl::color(newColor);
+	//gl::lineWidth(10);
+	if (!filledShapes)
+		gl::drawStrokedCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05, lineSize*2.0f);
+	else
+		gl::drawSolidCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05);
+		
+	//gl::drawSolidCircle(vec2(1920,1080), 100);
+	//gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
+	//(*uiFbo).unbindFramebuffer();
+}
+
+void TouchPointsApp::modeTriangle(){
+
+	//(*uiFbo).unbindTexture(0, 36064U);
+	//(*uiFbo).bindFramebuffer();
+
+	Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
+	gl::color(newColor);
+	//gl::lineWidth(10);
+	if (!filledShapes){
+		//gl::drawStrokedCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05, lineSize*2.0f);
+		//TouchPoint uiTouchPoint(vec2(windowWidth*.85, windowHeight*.95), newColor, lineSize);
+		//uiTouchPoint.addPoint(vec2(windowWidth*.95, windowHeight*.95));
+		//uiTouchPoint.addPoint(vec2(windowWidth*.9, windowHeight*.85));
+		//uiTouchPoint.addPoint(vec2(windowWidth*.85, windowHeight*.95));
+
+		//missedPoints(windowWidth*.85, windowHeight*.95, windowWidth*.95, windowHeight*.95, uiTouchPoint);
+		//missedPoints(windowWidth*.95, windowHeight*.95, windowWidth*.9, windowHeight*.85, uiTouchPoint);
+		//missedPoints(windowWidth*.9, windowHeight*.85, windowWidth*.85, windowHeight*.95, uiTouchPoint);
+		//uiTouchPoint.draw();
+		gl::lineWidth(lineSize);
+		gl::drawLine(vec2(windowWidth*.85, windowHeight*.95), vec2(windowWidth*.95, windowHeight*.95));
+		gl::drawLine(vec2(windowWidth*.95, windowHeight*.95), vec2(windowWidth*.9, windowHeight*.85));
+		gl::drawLine(vec2(windowWidth*.9, windowHeight*.85), vec2(windowWidth*.85, windowHeight*.95));
+
+	}
+	else
+		gl::drawSolidTriangle(vec2(windowWidth*.85, windowHeight*.95), vec2(windowWidth*.95, windowHeight *.95), vec2(windowWidth*.9, windowHeight*.85));
+
+	//gl::drawSolidCircle(vec2(1920,1080), 100);
+	//gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
+	//(*uiFbo).unbindFramebuffer();
+}
+void TouchPointsApp::modeLine(){
+	return;
+}
+
 void TouchPointsApp::keyDown(KeyEvent event)
 {
 	if (event.getChar() == 'z') {
@@ -637,16 +724,19 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	}
 	else if (event.getChar() == 'c')	//Clear Screen (Broken with framebuffers).
 	{
-
-		myPoints.clear();
+		gl::color(1.0, 1.0, 1.0);
+		gl::drawSolidCircle(vec2(500,500), 100);
+		//myPoints.clear();
+		
 		(*firstFbo).bindFramebuffer();
-		gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
+		//gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
+		gl::ScopedScissor(vec2(0, windowHeight), vec2(windowWidth, windowHeight));
 		(*firstFbo).unbindFramebuffer();
 
 		(*secondFbo).bindFramebuffer();
-		gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
+		gl::ScopedScissor(vec2(0, windowHeight), vec2(windowWidth, windowHeight));
 		(*secondFbo).unbindFramebuffer();
-
+		
 		//myCircles.clear();
 		//myRectangles.clear();
 		//myTriangles.clear();
@@ -1049,12 +1139,48 @@ void TouchPointsApp::mouseDown(MouseEvent event)
 void TouchPointsApp::update(){
 }
 
+void TouchPointsApp::drawUi(){
+	//(*uiFbo).unbindTexture();
+	
+	//(*uiFbo).bindFramebuffer();
+	//gl::clear(GL_BACK);
+	//if (gazePositionX > 1500 && gazePositionY > 800)
+	{
+
+		int q, w, e, r;
+		q = windowWidth*.8;
+		w = windowHeight;
+		e = windowHeight*.8;
+		vec2 bill(q, w);
+		gl::ScopedScissor(bill, vec2(q, e));
+		gl::color(1.0, 0.9, 0.5);
+		//gl::lineWidth(10);
+		//gl::drawSolidCircle(vec2(0,0), 10);
+		//gl::drawSolidCircle(vec2(1920,1080), 100);
+		gl::drawStrokedRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight));
+		gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight));
+		if (rectDraw) modeRectangle();
+		else if (circleDraw) modeCircle();
+		else if (triangleDraw) modeTriangle();
+		else if (lineDraw) modeLine();
+		(*uiFbo).unbindFramebuffer();
+	}
+}
+
+
+
 
 void TouchPointsApp::draw()
 {
 	gl::enableAlphaBlending();
 	//Add a vector instead of the 3 ref to arrays.
 	gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
+
+
+	//drawUi();
+	//gl::draw(uiFbo->getColorTexture());
+	
 
 
 
@@ -1064,6 +1190,7 @@ void TouchPointsApp::draw()
 
 
 #ifdef EYEX
+	gl::color(1.0, 1.0, 1.0);
 	vec2 gaze1(gazePositionX - 10, gazePositionY);
 	vec2 gaze2(gazePositionX + 10, gazePositionY);
 
@@ -1155,6 +1282,8 @@ void TouchPointsApp::draw()
 		//Layer 1 is on top, second is below
 		gl::draw(secondFbo->getColorTexture());
 		gl::draw(firstFbo->getColorTexture());
+
+		//gl::draw(uiFbo->getColorTexture());
 	}
 	else if (currLayer == 1)
 	{
@@ -1162,8 +1291,11 @@ void TouchPointsApp::draw()
 		//Layer 2 is on top.
 		gl::draw(firstFbo->getColorTexture());
 		gl::draw(secondFbo->getColorTexture());
+		//gl::draw(uiFbo->getColorTexture());
 
 	}
+
+	drawUi();
 	/*
 	for (auto &activePoint : myActivePoints) {
 	activePoint.second.draw();

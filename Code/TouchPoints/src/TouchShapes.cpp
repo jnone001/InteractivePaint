@@ -221,9 +221,13 @@ struct TouchTriangle : public TouchShape
 		}
 		else
 		{
+			
 			gl::drawLine(mPoint1, mPoint2);
 			gl::drawLine(mPoint2, mPoint3);
 			gl::drawLine(mPoint3, mPoint1);
+			
+
+
 			//gl::drawSolidTriangle(mPoint1, mPoint2, mPoint3);
 		}
 
