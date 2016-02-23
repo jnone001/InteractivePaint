@@ -65,8 +65,8 @@ int resolutionY;
 #define COLOR_AMOUNT 7
 #define BACKGROUND_COLORS 8
 
-#define windowWidth  1919
-#define windowHeight 1079
+#define windowWidth  getWindowSize().x
+#define windowHeight getWindowSize().y
 #define FRAME_RATE 120
 
 //Leap map 
@@ -120,6 +120,9 @@ public:
 	bool rectDraw = false;
 	bool triangleDraw = false;
 	bool filledShapes = false;
+
+	bool uiFboFlag = false;
+	bool modeChangeFlag = true;
 
 #ifdef EYEX
 
@@ -660,84 +663,202 @@ void TouchPointsApp::modeRectangle(){
 
 	//(*uiFbo).unbindTexture(0, 36064U);
 	//(*uiFbo).bindFramebuffer();
+	if (randColor){
+		Color newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+		gl::color(newColor);
+		//gl::lineWidth(10);
+		//gl::drawSolidCircle(vec2(0,0), 10);
+		//gl::drawSolidCircle(vec2(1920,1080), 100);
+		if (!filledShapes)
+			gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
+		else gl::drawSolidRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95));
+		//(*uiFbo).unbindFramebuffer();
+	}
 
-	Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
-	gl::color(newColor);
-	//gl::lineWidth(10);
-	//gl::drawSolidCircle(vec2(0,0), 10);
-	//gl::drawSolidCircle(vec2(1920,1080), 100);
-	if (!filledShapes)
-	gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
-	else gl::drawSolidRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95));
-	//(*uiFbo).unbindFramebuffer();
+	else{
+		Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
+		gl::color(newColor);
+		//gl::lineWidth(10);
+		//gl::drawSolidCircle(vec2(0,0), 10);
+		//gl::drawSolidCircle(vec2(1920,1080), 100);
+		if (!filledShapes)
+			gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
+		else gl::drawSolidRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95));
+		//(*uiFbo).unbindFramebuffer();
+	}
 }
 
 void TouchPointsApp::modeCircle(){
 
 	//(*uiFbo).unbindTexture(0, 36064U);
 	//(*uiFbo).bindFramebuffer();
+	//CM_HSV, Rand::randFloat(), 0.5f, 1.0f
+	if (randColor){
+		Color newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+		gl::color(newColor);
+		//gl::lineWidth(10);
+		if (!filledShapes)
+			gl::drawStrokedCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05, lineSize*2.0f);
+		else
+			gl::drawSolidCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05);
 
-	Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
-	gl::color(newColor);
-	//gl::lineWidth(10);
-	if (!filledShapes)
-		gl::drawStrokedCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05, lineSize*2.0f);
-	else
-		gl::drawSolidCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05);
-		
-	//gl::drawSolidCircle(vec2(1920,1080), 100);
-	//gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
-	//(*uiFbo).unbindFramebuffer();
+		//gl::drawSolidCircle(vec2(1920,1080), 100);
+		//gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
+		//(*uiFbo).unbindFramebuffer();
+	}
+	else{
+
+		Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
+		gl::color(newColor);
+		//gl::lineWidth(10);
+		if (!filledShapes)
+			gl::drawStrokedCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05, lineSize*2.0f);
+		else
+			gl::drawSolidCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05);
+
+		//gl::drawSolidCircle(vec2(1920,1080), 100);
+		//gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
+		//(*uiFbo).unbindFramebuffer();
+	}
 }
+
 
 void TouchPointsApp::modeTriangle(){
 
 	//(*uiFbo).unbindTexture(0, 36064U);
 	//(*uiFbo).bindFramebuffer();
+	if (randColor){
+		Color newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+		gl::color(newColor);
+		//gl::lineWidth(10);
+		if (!filledShapes){
+			//gl::drawStrokedCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05, lineSize*2.0f);
+			TouchPoint uiTouchPoint(vec2(windowWidth*.85, windowHeight*.95), newColor, lineSize);
+			uiTouchPoint.addPoint(vec2(windowWidth*.95, windowHeight*.95));
+			uiTouchPoint.addPoint(vec2(windowWidth*.9, windowHeight*.85));
+			uiTouchPoint.addPoint(vec2(windowWidth*.85, windowHeight*.95));
 
-	Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
-	gl::color(newColor);
-	//gl::lineWidth(10);
-	if (!filledShapes){
-		//gl::drawStrokedCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05, lineSize*2.0f);
-		//TouchPoint uiTouchPoint(vec2(windowWidth*.85, windowHeight*.95), newColor, lineSize);
-		//uiTouchPoint.addPoint(vec2(windowWidth*.95, windowHeight*.95));
-		//uiTouchPoint.addPoint(vec2(windowWidth*.9, windowHeight*.85));
-		//uiTouchPoint.addPoint(vec2(windowWidth*.85, windowHeight*.95));
+			missedPoints(windowWidth*.85, windowHeight*.95, windowWidth*.95, windowHeight*.95, uiTouchPoint);
+			missedPoints(windowWidth*.95, windowHeight*.95, windowWidth*.9, windowHeight*.85, uiTouchPoint);
+			missedPoints(windowWidth*.9, windowHeight*.85, windowWidth*.85, windowHeight*.95, uiTouchPoint);
+			uiTouchPoint.draw();
+			/*
+			gl::lineWidth(lineSize);
+			gl::drawLine(vec2(windowWidth*.85, windowHeight*.95), vec2(windowWidth*.95, windowHeight*.95));
+			gl::drawLine(vec2(windowWidth*.95, windowHeight*.95), vec2(windowWidth*.9, windowHeight*.85));
+			gl::drawLine(vec2(windowWidth*.9, windowHeight*.85), vec2(windowWidth*.85, windowHeight*.95));
+			*/
+		}
+		else
+			gl::drawSolidTriangle(vec2(windowWidth*.85, windowHeight*.95), vec2(windowWidth*.95, windowHeight *.95), vec2(windowWidth*.9, windowHeight*.85));
 
-		//missedPoints(windowWidth*.85, windowHeight*.95, windowWidth*.95, windowHeight*.95, uiTouchPoint);
-		//missedPoints(windowWidth*.95, windowHeight*.95, windowWidth*.9, windowHeight*.85, uiTouchPoint);
-		//missedPoints(windowWidth*.9, windowHeight*.85, windowWidth*.85, windowHeight*.95, uiTouchPoint);
-		//uiTouchPoint.draw();
-		gl::lineWidth(lineSize);
-		gl::drawLine(vec2(windowWidth*.85, windowHeight*.95), vec2(windowWidth*.95, windowHeight*.95));
-		gl::drawLine(vec2(windowWidth*.95, windowHeight*.95), vec2(windowWidth*.9, windowHeight*.85));
-		gl::drawLine(vec2(windowWidth*.9, windowHeight*.85), vec2(windowWidth*.85, windowHeight*.95));
-
+		//gl::drawSolidCircle(vec2(1920,1080), 100);
+		//gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
+		//(*uiFbo).unbindFramebuffer();
 	}
-	else
-		gl::drawSolidTriangle(vec2(windowWidth*.85, windowHeight*.95), vec2(windowWidth*.95, windowHeight *.95), vec2(windowWidth*.9, windowHeight*.85));
+	else{
+		Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
+		gl::color(newColor);
+		//gl::lineWidth(10);
+		if (!filledShapes){
 
-	//gl::drawSolidCircle(vec2(1920,1080), 100);
-	//gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
-	//(*uiFbo).unbindFramebuffer();
+			//gl::drawStrokedCircle(vec2(windowWidth*.9, windowHeight*.9), windowHeight * .05, lineSize*2.0f);
+			TouchPoint uiTouchPoint(vec2(windowWidth*.85, windowHeight*.95), newColor, lineSize);
+			uiTouchPoint.addPoint(vec2(windowWidth*.95, windowHeight*.95));
+			uiTouchPoint.addPoint(vec2(windowWidth*.9, windowHeight*.85));
+			uiTouchPoint.addPoint(vec2(windowWidth*.85, windowHeight*.95));
+
+			missedPoints(windowWidth*.85, windowHeight*.95, windowWidth*.95, windowHeight*.95, uiTouchPoint);
+			missedPoints(windowWidth*.95, windowHeight*.95, windowWidth*.9, windowHeight*.85, uiTouchPoint);
+			missedPoints(windowWidth*.9, windowHeight*.85, windowWidth*.85, windowHeight*.95, uiTouchPoint);
+			uiTouchPoint.draw();
+
+			/*
+			gl::lineWidth(lineSize);
+			gl::drawLine(vec2(windowWidth*.85, windowHeight*.95), vec2(windowWidth*.95, windowHeight*.95));
+			gl::drawLine(vec2(windowWidth*.95, windowHeight*.95), vec2(windowWidth*.9, windowHeight*.85));
+			gl::drawLine(vec2(windowWidth*.9, windowHeight*.85), vec2(windowWidth*.85, windowHeight*.95));
+			*/
+		}
+		else
+			gl::drawSolidTriangle(vec2(windowWidth*.85, windowHeight*.95), vec2(windowWidth*.95, windowHeight *.95), vec2(windowWidth*.9, windowHeight*.85));
+
+		//gl::drawSolidCircle(vec2(1920,1080), 100);
+		//gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
+		//(*uiFbo).unbindFramebuffer();
+	}
 }
 
 void TouchPointsApp::modeLine(){
-	return;
-}
 
+	if (randColor){
+		//Performance Issues with drawing these 3 lines every frame!
+		Color newColor1(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+		Color newColor2(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+		Color newColor3(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+		//gl::color(newColor1);
+		TouchPoint newTouchPoints1(vec2(windowWidth*.85, windowHeight*.95), newColor1, lineSize);
+		missedPoints(windowWidth*.85, windowHeight*.95, windowWidth*.95, windowHeight*.85, newTouchPoints1);
+		TouchPoint newTouchPoints2(vec2(windowWidth*.86, windowHeight*.90), newColor2, lineSize);
+		missedPoints(windowWidth*.86, windowHeight*.90, windowWidth*.92, windowHeight*.84, newTouchPoints2);
+		TouchPoint newTouchPoints3(vec2(windowWidth*.88, windowHeight*.97), newColor3, lineSize);
+		missedPoints(windowWidth*.88, windowHeight*.97, windowWidth*.94, windowHeight*.90, newTouchPoints3);
+		newTouchPoints1.draw();
+		newTouchPoints2.draw();
+		newTouchPoints3.draw();
+
+
+		/*
+		Color newColor1(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+		Color newColor2(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+		Color newColor3(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+		gl::lineWidth(lineSize);
+		gl::color(newColor1);
+		gl::drawLine(vec2(windowWidth*.85, windowHeight*.95), vec2(windowWidth*.95, windowHeight*.85));
+		gl::color(newColor2);
+		gl::drawLine(vec2(windowWidth*.86, windowHeight*.9), vec2(windowWidth*.92, windowHeight*.84));
+		gl::color(newColor3);
+		gl::drawLine(vec2(windowWidth*.88, windowHeight*.97), vec2(windowWidth*.94, windowHeight*.90));
+		*/
+	}
+	else{
+
+		Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
+		gl::color(newColor);
+		TouchPoint newTouchPoints1(vec2(windowWidth*.85, windowHeight*.95), newColor, lineSize);
+		missedPoints(windowWidth*.85, windowHeight*.95, windowWidth*.95, windowHeight*.85, newTouchPoints1);
+		TouchPoint newTouchPoints2(vec2(windowWidth*.86, windowHeight*.90), newColor, lineSize);
+		missedPoints(windowWidth*.86, windowHeight*.90, windowWidth*.92, windowHeight*.84, newTouchPoints2);
+		TouchPoint newTouchPoints3(vec2(windowWidth*.88, windowHeight*.97), newColor, lineSize);
+		missedPoints(windowWidth*.88, windowHeight*.97, windowWidth*.94, windowHeight*.90, newTouchPoints3);
+		newTouchPoints1.draw();
+		newTouchPoints2.draw();
+		newTouchPoints3.draw();
+
+		/*
+		Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
+		gl::lineWidth(lineSize);
+		gl::color(newColor);
+		gl::drawLine(vec2(windowWidth*.85, windowHeight*.95), vec2(windowWidth*.95, windowHeight*.85));
+		gl::drawLine(vec2(windowWidth*.86, windowHeight*.9), vec2(windowWidth*.92, windowHeight*.84));
+		gl::drawLine(vec2(windowWidth*.88, windowHeight*.97), vec2(windowWidth*.94, windowHeight*.90));
+		*/
+	}
+
+}
 void TouchPointsApp::keyDown(KeyEvent event)
 {
 	if (event.getChar() == 'z') {
 		// Toggle full screen when the user presses the 'f' key.
 		if (lineSize != 1.0f)
 			lineSize--;
+		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'x') {
 		// Clear the list of points when the user presses the space bar.
 		if (lineSize != 15.0f)
 			lineSize++;
+		modeChangeFlag = true;
 
 	}
 	else if (event.getCode() == KeyEvent::KEY_ESCAPE) {
@@ -753,44 +874,62 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		if (randColor == false)
 			randColor = true;
 		else randColor = false;
+
+		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'q')	//Cycles through colors
 	{
 		if (currColor != 0)
 			currColor--;
 		else currColor = COLOR_AMOUNT - 1;
+
+		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'w')	//Cycles through colors
 	{
 		if (currColor != COLOR_AMOUNT - 1)
 			currColor++;
 		else currColor = 0;
+
+		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'e')	//Eraser mode
 	{
 		if (eraserMode == false)
 			eraserMode = true;
 		else eraserMode = false;
+
+		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'c')	//Clear Screen (Broken with framebuffers).
 	{
-		gl::color(1.0, 1.0, 1.0);
-		gl::drawSolidCircle(vec2(500,500), 100);
+		//gl::color(1.0, 1.0, 1.0);
+		//gl::drawSolidCircle(vec2(500,500), 100);
 		//myPoints.clear();
-		
+
 		(*firstFbo).bindFramebuffer();
 		//gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
-		gl::ScopedScissor(vec2(0, windowHeight), vec2(windowWidth, windowHeight));
+		//gl::ScopedScissor(vec2(0, windowHeight), vec2(windowWidth, windowHeight));
+		glClearColor(1.0, 1.0, 1.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
 		(*firstFbo).unbindFramebuffer();
 
 		(*secondFbo).bindFramebuffer();
-		gl::ScopedScissor(vec2(0, windowHeight), vec2(windowWidth, windowHeight));
+		//gl::ScopedScissor(vec2(0, windowHeight), vec2(windowWidth, windowHeight));
+		glClearColor(1.0, 1.0, 1.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
 		(*secondFbo).unbindFramebuffer();
-		
+
+		(*uiFbo).bindFramebuffer();
+		glClearColor(1.0, 1.0, 1.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		(*uiFbo).unbindFramebuffer();
+
 		//myCircles.clear();
 		//myRectangles.clear();
 		//myTriangles.clear();
 		//myPointsEraser.clear();
+		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'b')
 	{
@@ -804,6 +943,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		circleDraw = false;
 		rectDraw = false;
 		triangleDraw = false;
+		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'i')
 	{
@@ -811,6 +951,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		circleDraw = true;
 		rectDraw = false;
 		triangleDraw = false;
+		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'f')
 	{
@@ -822,6 +963,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		circleDraw = false;
 		rectDraw = true;
 		triangleDraw = false;
+		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'p')
 	{
@@ -829,6 +971,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		circleDraw = false;
 		rectDraw = false;
 		triangleDraw = true;
+		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'n'){
 		saveImage(".png");
@@ -1201,23 +1344,31 @@ void TouchPointsApp::update(){
 
 void TouchPointsApp::drawUi(){
 	//(*uiFbo).unbindTexture();
-	
-	//(*uiFbo).bindFramebuffer();
-	//gl::clear(GL_BACK);
-	//if (gazePositionX > 1500 && gazePositionY > 800)
-	{
 
-		int q, w, e, r;
-		q = windowWidth*.8;
-		w = windowHeight;
-		e = windowHeight*.8;
-		vec2 bill(q, w);
-		gl::ScopedScissor(bill, vec2(q, e));
+
+	//gl::clear(GL_BACK);
+	//if (gazePositionX > 1920 && gazePositionY > 1080)
+	if (modeChangeFlag)
+	{
+		modeChangeFlag = false;
+		(*uiFbo).bindFramebuffer();
+		uiFboFlag = true;
+		//int q, w, e, r;
+		//	q = windowWidth*.8;
+		//w = windowHeight*.8;
+		//e = windowHeight*.2;
+		//r = windowWidth*.2;
+		//vec2 bill(q, w);
+		//gl::scissor(bill, vec2(r, e));
+		//Clears the framebuffer before drawing.
+		glClearColor(0.0, 0.0, 0.0, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
 		gl::color(1.0, 0.9, 0.5);
 		//gl::lineWidth(10);
 		//gl::drawSolidCircle(vec2(0,0), 10);
 		//gl::drawSolidCircle(vec2(1920,1080), 100);
-		gl::drawStrokedRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight));
+
+		gl::drawStrokedRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight), 5);
 		gl::color(0.0, 0.0, 0.0);
 		gl::drawSolidRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight));
 		if (rectDraw) modeRectangle();
@@ -1225,6 +1376,7 @@ void TouchPointsApp::drawUi(){
 		else if (triangleDraw) modeTriangle();
 		else if (lineDraw) modeLine();
 		(*uiFbo).unbindFramebuffer();
+		uiFboFlag = false;
 	}
 }
 
@@ -1357,6 +1509,13 @@ void TouchPointsApp::draw()
 	}
 
 	drawUi();
+
+	gl::color(1.0, 1.0, 1.0);
+
+	//if (gazePositionX > 1920 && gazePositionY > 1080)
+	{
+		gl::draw(uiFbo->getColorTexture());
+	}
 	/*
 	for (auto &activePoint : myActivePoints) {
 	activePoint.second.draw();
