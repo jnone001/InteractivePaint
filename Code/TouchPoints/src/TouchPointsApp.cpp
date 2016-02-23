@@ -1,4 +1,3 @@
-
 //Cinder and OpenGL Includes
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
@@ -7,6 +6,8 @@
 #include "cinder/Rand.h"
 #include "cinder/Log.h"
 #include "cinder/gl/Fbo.h"
+#include "cinder/gl/Texture.h"
+#include "cinder/app/AppBase.h"
 
 //Leap Includes
 
@@ -17,7 +18,10 @@
 //#include "TouchShapes.h"
 #include "TouchShapes.cpp"
 
-
+//include Images
+#include "cinder/ImageIo.h"
+#include "cinder/Utilities.h"
+#include "String.h"
 
 //Standard Library Includes
 #include <vector>
@@ -27,9 +31,9 @@
 using namespace ci;
 using namespace ci::app;
 using namespace std;
+using namespace cinder;
 
-#define EYEX
-
+//#define EYEX
 #ifdef EYEX
 
 //Our Tobi EyeX Functionality. Cannot run with Tobii driver soooo...ifdef?
@@ -61,21 +65,20 @@ int resolutionY;
 #define COLOR_AMOUNT 7
 #define BACKGROUND_COLORS 8
 
-
-#define windowWidth  1920
-#define windowHeight 1080
+#define windowWidth  1919
+#define windowHeight 1079
 #define FRAME_RATE 120
-
-
 
 //Leap map 
 map<uint32_t, vec2> pointsMap;
 
+bool imageFlag = false;
+gl::TextureRef imageTexture;
+float fadeTime = 1.0;
+int imageNum;
+
 
 //Layers
-
-
-
 int currLayer = 0;
 
 float lineSize = 1.0f;
@@ -105,7 +108,9 @@ public:
 	void	modeCircle();
 	void	modeTriangle();
 	void	modeLine();
-
+	void	drawImageTexture();
+	void	loadImages(string imageName);
+	void	saveImage(string imageType);
 
 	//List of MODES
 	bool randColor = false;
@@ -160,6 +165,8 @@ private:
 	std::shared_ptr<gl::Fbo>		firstFbo;
 	std::shared_ptr<gl::Fbo>		secondFbo;
 	std::shared_ptr<gl::Fbo>		uiFbo;
+	std::shared_ptr<gl::Fbo>		imageFbo;
+
 
 };
 
@@ -167,7 +174,6 @@ private:
 Leap::Frame getLeapFrame(Leap::Controller controller){
 	return controller.frame();
 }
-
 
 void prepareSettings(TouchPointsApp::Settings *settings)
 {
@@ -354,8 +360,13 @@ void TouchPointsApp::setup()
 	firstFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	secondFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
+
 	//Set up UI
 	uiFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+	//Set up image feedback fbo 
+	imageFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+
+
 	//drawUi();
 
 	setFrameRate(FRAME_RATE);
@@ -413,9 +424,7 @@ void TouchPointsApp::setup()
 	*/
 #endif
 }
-
-
-//Bresenhams Line Algorithm for smooth lines.
+/*Bresenhams Line Algorithm for smooth lines*/
 void missedPoints(int xi, int yi, int xf, int yf, TouchPoint& points){
 	int dx, dy, x, y, d, ds, dt;
 	//Find Abs value of difference between x and y coords of two points
@@ -501,6 +510,13 @@ void missedPoints(int xi, int yi, int xf, int yf, TouchPoint& points){
 	}
 }
 
+static Area calcCenter(gl::TextureRef imageTexture){
+	Area image = imageTexture->getBounds();
+	Area window = getWindowBounds();
+	Area center = Area::proportionalFit(image, window, true, false);
+
+	return center;
+}
 
 void TouchPointsApp::leapDraw(Leap::Frame frame){
 	//Get all pointables from current leap frame
@@ -605,8 +621,41 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 }
 
-//Mode change functions
+void TouchPointsApp::drawImageTexture(){
 
+	(*imageFbo).bindFramebuffer();
+	
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	gl::color(1.0, 1.0, 1.0, fadeTime);
+
+	gl::draw(imageTexture);
+
+	if (fadeTime == 0){
+		imageFlag = false;
+		fadeTime = 1;
+	}
+
+	fadeTime -= 0.001;
+
+	(*imageFbo).unbindFramebuffer();
+
+}
+
+void TouchPointsApp::loadImages(string imageName){
+
+	imageTexture = gl::Texture::create(loadImage(loadAsset(imageName)));
+}	
+
+void TouchPointsApp::saveImage(string imageType){
+
+	writeImage(getHomeDirectory() / "cinder" / "Saved_Images" / (toString(imageNum) + imageType), copyWindowSurface());
+	imageNum++;
+	loadImages("Save" + imageType);
+	cout << "Image " << imageNum << "Saved!";
+}
+/*Mode Change Functions*/
 void TouchPointsApp::modeRectangle(){
 
 	//(*uiFbo).unbindTexture(0, 36064U);
@@ -673,6 +722,7 @@ void TouchPointsApp::modeTriangle(){
 	//gl::drawStrokedRect(Rectf(windowWidth*.85, windowHeight*.85, windowWidth*.95, windowHeight*.95), lineSize);
 	//(*uiFbo).unbindFramebuffer();
 }
+
 void TouchPointsApp::modeLine(){
 	return;
 }
@@ -780,6 +830,19 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		rectDraw = false;
 		triangleDraw = true;
 	}
+	else if (event.getChar() == 'n'){
+		saveImage(".png");
+		imageFlag = true;
+	}
+	else if (event.getChar() == 'j') {
+		saveImage(".jpeg");
+		imageFlag = true;
+
+	}
+	else if (event.getChar() == 't') {
+		saveImage(".tif");
+		imageFlag = true;
+	}
 #ifdef EYEX
 	else if (event.getChar() == ' ')
 	{
@@ -878,9 +941,6 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 	}
 }
 
-
-
-
 void TouchPointsApp::touchesMoved(TouchEvent event)
 {
 	//CI_LOG_I(event);
@@ -972,7 +1032,6 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 
 	}
 }
-
 
 void TouchPointsApp::touchesEnded(TouchEvent event)
 {
@@ -1132,6 +1191,7 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 		}
 	}
 }
+
 void TouchPointsApp::mouseDown(MouseEvent event)
 {
 }
@@ -1168,9 +1228,6 @@ void TouchPointsApp::drawUi(){
 	}
 }
 
-
-
-
 void TouchPointsApp::draw()
 {
 	gl::enableAlphaBlending();
@@ -1187,6 +1244,16 @@ void TouchPointsApp::draw()
 
 	currentFrame = getLeapFrame(leapContr);
 	leapDraw(currentFrame);
+
+	/*Draws image that provides feedback */
+	if(imageFlag){
+
+		Area center = calcCenter(imageTexture);
+
+		drawImageTexture();
+		gl::draw(imageFbo->getColorTexture(),center);
+
+	}
 
 
 #ifdef EYEX
@@ -1210,13 +1277,7 @@ void TouchPointsApp::draw()
 #endif
 	//gl::color(0.5,0.7,0.1);
 	//Frame Buffers Setup
-
-
 	//Draws the framebuffer
-
-
-
-
 	/*
 	GLuint frameBuffer;
 	glGenFramebuffers(1, &frameBuffer);
@@ -1327,6 +1388,5 @@ void TouchPointsApp::draw()
 
 
 }
-
 
 CINDER_APP(TouchPointsApp, RendererGl, prepareSettings)
