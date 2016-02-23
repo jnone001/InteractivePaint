@@ -33,7 +33,7 @@ using namespace ci::app;
 using namespace std;
 using namespace cinder;
 
-//#define EYEX
+#define EYEX
 #ifdef EYEX
 
 //Our Tobi EyeX Functionality. Cannot run with Tobii driver soooo...ifdef?
@@ -956,6 +956,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	else if (event.getChar() == 'f')
 	{
 		filledShapes = !filledShapes;
+		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'o')
 	{
@@ -1409,7 +1410,7 @@ void TouchPointsApp::draw()
 
 
 #ifdef EYEX
-	gl::color(1.0, 1.0, 1.0);
+	gl::color(1.0, 1.0, 1.0, .4);
 	vec2 gaze1(gazePositionX - 10, gazePositionY);
 	vec2 gaze2(gazePositionX + 10, gazePositionY);
 
@@ -1512,7 +1513,7 @@ void TouchPointsApp::draw()
 
 	gl::color(1.0, 1.0, 1.0);
 
-	//if (gazePositionX > 1920 && gazePositionY > 1080)
+	if (gazePositionX > 1920 && gazePositionY > 1080)
 	{
 		gl::draw(uiFbo->getColorTexture());
 	}
