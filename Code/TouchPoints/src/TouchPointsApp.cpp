@@ -67,11 +67,11 @@ int resolutionY;
 #define COLOR_AMOUNT 7
 #define BACKGROUND_COLORS 8
 
-//#define windowWidth  getWindowSize().x 
-//#define windowHeight getWindowSize().y 
+#define windowWidth  getWindowSize().x 
+#define windowHeight getWindowSize().y 
 
-#define windowWidth  1919
-#define windowHeight 1079
+//#define windowWidth  1919
+//#define windowHeight 1079
 #define FRAME_RATE 120
 
 //Leap map 
@@ -108,11 +108,25 @@ public:
 	void	touchesMoved(TouchEvent event) override;
 	void	touchesEnded(TouchEvent event) override;
 	void	keyDown(KeyEvent event) override;
-	void	drawUi();
+
+	//Shapes Enum
+	enum Shape { Line, Circle, Rectangle, Triangle };
+
+
+	//Drawing Functions for drawUi
 	void	modeRectangle();
 	void	modeCircle();
 	void	modeTriangle();
 	void	modeLine();
+	
+	//Function to change Shapes we are drawing
+	void	changeShape(Shape x);
+
+	//Ui Functions
+	void	drawUi();
+	bool	inInteractiveUi(int x, int y);
+
+
 	void	drawImageTexture();
 	void	loadImages(string imageName);
 	void	saveImage(string imageType);
@@ -134,8 +148,14 @@ public:
 	bool triangleDraw = false;
 	bool filledShapes = false;
 
+
+	//List of drawUI Flags
+	bool modeButtons = true;
+	bool colorButtons = false;
 	bool uiFboFlag = false;
 	bool modeChangeFlag = true;
+
+
 
 #ifdef EYEX
 
@@ -163,6 +183,10 @@ private:
 
 
 	list<TouchShape*>		  myShapes;
+
+
+	//
+	int activeDrawings;
 
 
 	map<uint32_t, TouchPoint>		myActivePoints;
@@ -315,16 +339,6 @@ void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 		gazePositionX = eventParams.X;
 		gazePositionY = eventParams.Y;
 
-
-
-		//printf("Gaze Data: (%.1f, %.1f) timestamp %.0f ms\n", eventParams.X, eventParams.Y, eventParams.Timestamp);
-
-		//gl::clear();
-		//Color newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
-		//gl::color(newColor);
-		//vec2 mCenter{ eventParams.X, eventParams.Y };
-		//myActiveCircles.insert(make_pair(touch.getId(), TouchCircle(touch.getPos(), 30.0f, newColor, lineSize, filledShapes)));
-		//gl::drawStrokedCircle(mCenter, 10.0f, 10.0f);
 	}
 	else {
 		//printf("Failed to interpret gaze data event packet.\n");
@@ -384,8 +398,9 @@ void TouchPointsApp::setup()
 	//Enable all Leap Gestures 
 	TouchPointsApp::enableGest(leapContr);
 
-	//drawUi();
 	setFrameRate(FRAME_RATE);
+
+	activeDrawings = 0;
 
 	//Sets up eyeX context
 #ifdef EYEX
@@ -761,8 +776,6 @@ void TouchPointsApp::saveFboImage(std::shared_ptr<gl::Fbo> myFbo){
 /*Mode Change Functions*/
 void TouchPointsApp::modeRectangle(){
 
-	//(*uiFbo).unbindTexture(0, 36064U);
-	//(*uiFbo).bindFramebuffer();
 	if (randColor){
 		Color newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
 		gl::color(newColor);
@@ -790,9 +803,6 @@ void TouchPointsApp::modeRectangle(){
 
 void TouchPointsApp::modeCircle(){
 
-	//(*uiFbo).unbindTexture(0, 36064U);
-	//(*uiFbo).bindFramebuffer();
-	//CM_HSV, Rand::randFloat(), 0.5f, 1.0f
 	if (randColor){
 		Color newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
 		gl::color(newColor);
@@ -944,6 +954,45 @@ void TouchPointsApp::modeLine(){
 		*/
 	}
 
+
+
+}
+
+void TouchPointsApp::changeShape(Shape x){
+
+	if (activeDrawings != 0)
+		return;
+	if (x == Line){
+		lineDraw = true;
+		circleDraw = false;
+		rectDraw = false;
+		triangleDraw = false;
+		modeChangeFlag = true;
+	} 
+	else if (x == Circle){
+		lineDraw = false;
+		circleDraw = true;
+		rectDraw = false;
+		triangleDraw = false;
+		modeChangeFlag = true;
+	}
+	else if (x == Rectangle)
+	{
+		lineDraw = false;
+		circleDraw = false;
+		rectDraw = true;
+		triangleDraw = false;
+		modeChangeFlag = true;
+	}
+	else if (x == Triangle){
+		lineDraw = false;
+		circleDraw = false;
+		rectDraw = false;
+		triangleDraw = true;
+		modeChangeFlag = true;
+	}
+
+	
 }
 
 void TouchPointsApp::keyDown(KeyEvent event)
@@ -962,10 +1011,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 
 	}
 	else if (event.getCode() == KeyEvent::KEY_ESCAPE) {
-		// Exit full screen, or quit the application, when the user presses the ESC key.
-		//if (isFullScreen())
-		//setFullScreen(false);
-		//else
+		//Need to find a way to clear eyeX setup...
 		quit();
 	}
 	else if (event.getChar() == 'r')	//Turns on random color mode
@@ -995,27 +1041,22 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	}
 	else if (event.getChar() == 'e')	//Eraser mode
 	{
-		if (eraserMode == false)
-			eraserMode = true;
-		else eraserMode = false;
+		if (activeDrawings != 0)
+			return;
+		eraserMode = !eraserMode;
 
 		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'c')	//Clear Screen (Broken with framebuffers).
 	{
-		//gl::color(1.0, 1.0, 1.0);
-		//gl::drawSolidCircle(vec2(500,500), 100);
-		//myPoints.clear();
+
 
 		(*firstFbo).bindFramebuffer();
-		//gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
-		//gl::ScopedScissor(vec2(0, windowHeight), vec2(windowWidth, windowHeight));
 		glClearColor(1.0, 1.0, 1.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		(*firstFbo).unbindFramebuffer();
 
 		(*secondFbo).bindFramebuffer();
-		//gl::ScopedScissor(vec2(0, windowHeight), vec2(windowWidth, windowHeight));
 		glClearColor(1.0, 1.0, 1.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		(*secondFbo).unbindFramebuffer();
@@ -1025,10 +1066,6 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		glClear(GL_COLOR_BUFFER_BIT);
 		(*uiFbo).unbindFramebuffer();
 
-		//myCircles.clear();
-		//myRectangles.clear();
-		//myTriangles.clear();
-		//myPointsEraser.clear();
 		modeChangeFlag = true;
 	}
 	else if (event.getChar() == 'b')
@@ -1039,19 +1076,11 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	}
 	else if (event.getChar() == 'u')
 	{
-		lineDraw = true;
-		circleDraw = false;
-		rectDraw = false;
-		triangleDraw = false;
-		modeChangeFlag = true;
+		changeShape(Line);
 	}
 	else if (event.getChar() == 'i')
 	{
-		lineDraw = false;
-		circleDraw = true;
-		rectDraw = false;
-		triangleDraw = false;
-		modeChangeFlag = true;
+		changeShape(Circle);
 	}
 	else if (event.getChar() == 'f')
 	{
@@ -1060,19 +1089,11 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	}
 	else if (event.getChar() == 'o')
 	{
-		lineDraw = false;
-		circleDraw = false;
-		rectDraw = true;
-		triangleDraw = false;
-		modeChangeFlag = true;
+		changeShape(Rectangle);
 	}
 	else if (event.getChar() == 'p')
 	{
-		lineDraw = false;
-		circleDraw = false;
-		rectDraw = false;
-		triangleDraw = true;
-		modeChangeFlag = true;
+		changeShape(Triangle);
 	}
 	else if (event.getChar() == 'n'){
 		saveImage(".png");
@@ -1125,28 +1146,66 @@ void TouchPointsApp::keyDown(KeyEvent event)
 
 		if (currLayer == 0){
 			currLayer = 1;
-			//gl::drawSolidCircle(getWindowCenter(), 10);
 		}
 		else if (currLayer == 1)
 		{
 			currLayer = 0;
-			//gl::drawSolidCircle(getWindowCenter(), 150);
 		}
 	}
 
 }
 
+bool TouchPointsApp::inInteractiveUi(int x, int y)
+{
+	//modeButtons UI
+	if (modeButtons){
+		//Color change button.
+		if (x < 50 && y < 50)
+		{
+			colorButtons = !colorButtons;
+			return true;
+		}
+	}
+
+	//Color buttons UI
+	if (colorButtons){
+		if (x < 50 && y < 100){
+			currColor = 1;
+			colorButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
+		if (x < 50 && y < 150){
+			currColor = 2;
+			colorButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
+		if (x < 50 && y < 200){
+			currColor = 3;
+			colorButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
+	}
+	return false;
+}
+
 void TouchPointsApp::touchesBegan(TouchEvent event)
 {
-	//CI_LOG_I(event);
-
-	//If we are in line draw mode
 	for (const auto &touch : event.getTouches()) {
-		if (eraserMode){
+
+		if (inInteractiveUi(touch.getX(), touch.getY())){
+
+		}
+
+		else if (eraserMode){
+			activeDrawings++;
 			Color newColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]);
 			myActivePointsEraser.insert(make_pair(touch.getId(), TouchPoint(touch.getPos(), newColor, lineSize * 2)));
 		}
 		else if (lineDraw){
+			activeDrawings++;
 			if (randColor){
 				Color newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
 				myActivePoints.insert(make_pair(touch.getId(), TouchPoint(touch.getPos(), newColor, lineSize)));
@@ -1158,6 +1217,7 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 
 		}
 		else if (circleDraw){
+			activeDrawings++;
 			if (randColor){
 				Color newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
 				myActiveCircles.insert(make_pair(touch.getId(), TouchCircle(touch.getPos(), 30.0f, newColor, lineSize, filledShapes)));
@@ -1169,6 +1229,7 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 
 		}
 		else if (rectDraw){
+			activeDrawings++;
 			if (randColor){
 				Color newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
 				myActiveRectangles.insert(make_pair(touch.getId(), TouchRectangle(touch.getPos().x, touch.getPos().y, touch.getPos().x, touch.getPos().y, newColor, lineSize, filledShapes)));
@@ -1179,6 +1240,7 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 			}
 		}
 		else if (triangleDraw){
+			activeDrawings++;
 			if (randColor){
 				Color newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
 				myActiveTriangles.insert(make_pair(touch.getId(), TouchTriangle(touch.getPos(), touch.getPos(), touch.getPos(), touch.getPos(), newColor, lineSize, filledShapes)));
@@ -1194,247 +1256,233 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 
 void TouchPointsApp::touchesMoved(TouchEvent event)
 {
-	//CI_LOG_I(event);
-	if (eraserMode){
-		for (const auto &touch : event.getTouches()) {
-			//myActivePointsEraser[touch.getId()].addPoint(touch.getPos());
-			missedPoints(touch.getPrevX(), touch.getPrevY(), touch.getX(), touch.getY(), myActivePointsEraser[touch.getId()]);
 
-		}
-	}
-	else if (lineDraw){
-		for (const auto &touch : event.getTouches()) {
+	for (const auto &touch : event.getTouches()) {
 
-			/*
-			float a = touch.getPrevX() - touch.getX();
-			a = a * a;
-			float b = touch.getPrevY() - touch.getY();
-			b = b * b;
-			float c = sqrt(a + b);
+		if (eraserMode){
+			if (myActivePointsEraser.find(touch.getId()) == myActivePointsEraser.end())
+				return;
 
-			if (.25 * c > myActivePoints[touch.getId()].size())
-			*/
-			missedPoints(touch.getPrevX(), touch.getPrevY(), touch.getX(), touch.getY(), myActivePoints[touch.getId()]);
-			myPoints.push_back(myActivePoints[touch.getId()]);
-			myActivePoints[touch.getId()].clearPoints();
-
-			if (currLayer == 0){
+				missedPoints(touch.getPrevX(), touch.getPrevY(), touch.getX(), touch.getY(), myActivePointsEraser[touch.getId()]);
 
 
-				(*firstFbo).bindFramebuffer();
-				//for (int i = 0; i < 5; i++){
-				for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
-					oldPoints->draw();
-					++oldPoints;
-				}
-				//}
-				(*firstFbo).unbindFramebuffer();
 			}
-			else if (currLayer == 1){
-				(*secondFbo).bindFramebuffer();
-				//Draws the points multiple times to prevent flickering.
-				//for (int i = 0; i < 5; i++){
-				for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
-					oldPoints->draw();
-					++oldPoints;
+		else if (lineDraw){
+			if (myActivePoints.find(touch.getId()) == myActivePoints.end())
+				return;
+
+
+				missedPoints(touch.getPrevX(), touch.getPrevY(), touch.getX(), touch.getY(), myActivePoints[touch.getId()]);
+				myPoints.push_back(myActivePoints[touch.getId()]);
+				myActivePoints[touch.getId()].clearPoints();
+
+				if (currLayer == 0){
+
+
+					(*firstFbo).bindFramebuffer();
+					
+					for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+						oldPoints->draw();
+						++oldPoints;
+					}
+					
+					(*firstFbo).unbindFramebuffer();
 				}
-				//}
-				(*secondFbo).unbindFramebuffer();
-			}
+				else if (currLayer == 1){
+					(*secondFbo).bindFramebuffer();
 
-			myPoints.clear();
-			//myActivePoints[touch.getId()].addPoint(touch.getPos());
+					for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+						oldPoints->draw();
+						++oldPoints;
+					}
+					
+					(*secondFbo).unbindFramebuffer();
+				}
+
+				myPoints.clear();
+
+
+			
+		}
+		else if (circleDraw){
+			
+			if (myActiveCircles.find(touch.getId()) == myActiveCircles.end())
+				return;
+				float a;
+				float b;
+				float c;
+				a = touch.getPos().x - myActiveCircles[touch.getId()].getCenterX();
+				b = touch.getPos().y - myActiveCircles[touch.getId()].getCenterY();
+				a = a*a;
+				b = b*b;
+				c = sqrt(a + b);
+				
+				myActiveCircles[touch.getId()].changeRadius(c);
+			
+		}
+		else if (rectDraw)
+		{
+			if (myActiveRectangles.find(touch.getId()) == myActiveRectangles.end())
+				return;
+				myActiveRectangles[touch.getId()].changePoint(touch.getPos().x, touch.getPos().y);
+
+			
 
 		}
-	}
-	else if (circleDraw){
-		for (const auto &touch : event.getTouches()) {
+		else if (triangleDraw)
+		{
+			if (myActiveTriangles.find(touch.getId()) == myActiveTriangles.end())
+				return;
+				myActiveTriangles[touch.getId()].changeSize(touch.getPos().x, touch.getPos().y);
 
-			float a;
-			float b;
-			float c;
-			a = touch.getPos().x - myActiveCircles[touch.getId()].getCenterX();
-			b = touch.getPos().y - myActiveCircles[touch.getId()].getCenterY();
-			a = a*a;
-			b = b*b;
-			c = sqrt(a + b);
-			myActiveCircles[touch.getId()].changeRadius(c);
-			/*
-			myActiveCircles[touch.getId()].changeRadius(sqrt(((touch.getPos().x - myActiveCircles[touch.getId()].getCenterX())^2) +
-			((touch.getPos().y - myActiveCircles[touch.getId()].getCenterY()) ^ 2)));
-			*/
-			//myActiveCircles[touch.getId()].changeRadius( TouchPointsApp::alterRadius(touch.getId(), touch.getPos()));
-		}
-	}
-	else if (rectDraw)
-	{
-		for (const auto &touch : event.getTouches()){
-			myActiveRectangles[touch.getId()].changePoint(touch.getPos().x, touch.getPos().y);
+			
 
 		}
-
-	}
-	else if (triangleDraw)
-	{
-		for (const auto &touch : event.getTouches()){
-			myActiveTriangles[touch.getId()].changeSize(touch.getPos().x, touch.getPos().y);
-
-		}
-
 	}
 }
 
 void TouchPointsApp::touchesEnded(TouchEvent event)
 {
-	//CI_LOG_I(event);
 	for (const auto &touch : event.getTouches()) {
+
 		if (eraserMode){
-			// myActivePoints[touch.getId()].startDying();
+		
+			if (myActivePointsEraser.find(touch.getId()) == myActivePointsEraser.end())
+				return;
+
+			activeDrawings--;
 			myPointsEraser.push_back(myActivePointsEraser[touch.getId()]);
 			myActivePointsEraser.erase(touch.getId());
 			if (currLayer == 0){
 
 
 				(*firstFbo).bindFramebuffer();
-				//for (int i = 0; i < 5; i++){
 				for (auto oldPoints = myPointsEraser.begin(); oldPoints != myPointsEraser.end();) {
 					oldPoints->draw();
 					++oldPoints;
 				}
-				//}
+				
 				(*firstFbo).unbindFramebuffer();
 			}
 			else if (currLayer == 1){
 				(*secondFbo).bindFramebuffer();
-				//Draws the points multiple times to prevent flickering.
-				//for (int i = 0; i < 5; i++){
+
 				for (auto oldPoints = myPointsEraser.begin(); oldPoints != myPointsEraser.end();) {
 					oldPoints->draw();
 					++oldPoints;
 				}
-				//}
+				
 				(*secondFbo).unbindFramebuffer();
 			}
 
 			myPointsEraser.clear();
 		}
 		else if (lineDraw){
+			
+			if (myActivePoints.find(touch.getId()) == myActivePoints.end())
+				return;
+
+			activeDrawings--;
 			myActivePoints.erase(touch.getId());
-			// myActivePoints[touch.getId()].startDying();
-			/*
-			myPoints.push_back(myActivePoints[touch.getId()]);
-			myActivePoints.erase(touch.getId());
 
-			if (currLayer == 0){
-
-
-			(*firstFbo).bindFramebuffer();
-			//for (int i = 0; i < 5; i++){
-			for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
-			oldPoints->draw();
-			++oldPoints;
-			}
-			//}
-			(*firstFbo).unbindFramebuffer();
-			}
-			else if (currLayer == 1){
-			(*secondFbo).bindFramebuffer();
-			//Draws the points multiple times to prevent flickering.
-			//for (int i = 0; i < 5; i++){
-			for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
-			oldPoints->draw();
-			++oldPoints;
-			}
-			//}
-			(*secondFbo).unbindFramebuffer();
-			}
-
-			myPoints.clear();
-			*/
 		}
 		else if (circleDraw){
-			myCircles.push_back(myActiveCircles[touch.getId()]);
-			myActiveCircles.erase(touch.getId());
+			
+				if (myActiveCircles.find(touch.getId()) == myActiveCircles.end())
+					return;
 
-			if (currLayer == 0){
+				activeDrawings--;
+
+				myCircles.push_back(myActiveCircles[touch.getId()]);
+				myActiveCircles.erase(touch.getId());
+
+				if (currLayer == 0){
 
 
-				(*firstFbo).bindFramebuffer();
-				//for (int i = 0; i < 5; i++){
-				for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
-					oldPoints->draw();
-					++oldPoints;
+					(*firstFbo).bindFramebuffer();
+					for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
+						oldPoints->draw();
+						++oldPoints;
+					}
+					
+					(*firstFbo).unbindFramebuffer();
 				}
-				//}
-				(*firstFbo).unbindFramebuffer();
-			}
-			else if (currLayer == 1){
-				(*secondFbo).bindFramebuffer();
-				//Draws the points multiple times to prevent flickering.
-				//for (int i = 0; i < 5; i++){
-				for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
-					oldPoints->draw();
-					++oldPoints;
-				}
-				//}
-				(*secondFbo).unbindFramebuffer();
-			}
+				else if (currLayer == 1){
+					(*secondFbo).bindFramebuffer();
 
-			myCircles.clear();
+					for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
+						oldPoints->draw();
+						++oldPoints;
+					}
+					
+					(*secondFbo).unbindFramebuffer();
+				}
+
+				myCircles.clear();
+			
 		}
 		else if (rectDraw){
+			
+			if (myActiveRectangles.find(touch.getId()) == myActiveRectangles.end())
+				return;
+
+			activeDrawings--;
+
 			myRectangles.push_back(myActiveRectangles[touch.getId()]);
 			myActiveRectangles.erase(touch.getId());
 			if (currLayer == 0){
 
 
 				(*firstFbo).bindFramebuffer();
-				//for (int i = 0; i < 5; i++){
 				for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();) {
 					oldPoints->draw();
 					++oldPoints;
 				}
-				//}
+				
 				(*firstFbo).unbindFramebuffer();
 			}
 			else if (currLayer == 1){
 				(*secondFbo).bindFramebuffer();
-				//Draws the points multiple times to prevent flickering.
-				//for (int i = 0; i < 5; i++){
+
 				for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();) {
 					oldPoints->draw();
 					++oldPoints;
 				}
-				//}
+				
 				(*secondFbo).unbindFramebuffer();
 			}
 
 			myRectangles.clear();
 		}
 		else if (triangleDraw){
+			
+			if (myActiveTriangles.find(touch.getId()) == myActiveTriangles.end())
+				return;
+
+			activeDrawings--;
+
 			myTriangles.push_back(myActiveTriangles[touch.getId()]);
 			myActiveTriangles.erase(touch.getId());
 			if (currLayer == 0){
 
 
 				(*firstFbo).bindFramebuffer();
-				//for (int i = 0; i < 5; i++){
+				
 				for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
 					oldPoints->draw();
 					++oldPoints;
 				}
-				//}
+				
 				(*firstFbo).unbindFramebuffer();
 			}
 			else if (currLayer == 1){
 				(*secondFbo).bindFramebuffer();
-				//Draws the points multiple times to prevent flickering.
-				//for (int i = 0; i < 5; i++){
+				
 				for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
 					oldPoints->draw();
 					++oldPoints;
 				}
-				//}
+				
 				(*secondFbo).unbindFramebuffer();
 			}
 
@@ -1448,6 +1496,12 @@ void TouchPointsApp::mouseDown(MouseEvent event)
 }
 
 void TouchPointsApp::update(){
+	/*
+	if (gazePositionX < 75 && gazePositionY < 120){
+		modeButtons = true;
+	}
+	else modeButtons = false;
+	*/
 }
 
 void TouchPointsApp::drawUi(){
@@ -1461,14 +1515,7 @@ void TouchPointsApp::drawUi(){
 		modeChangeFlag = false;
 		(*uiFbo).bindFramebuffer();
 		uiFboFlag = true;
-		//int q, w, e, r;
-		//	q = windowWidth*.8;
-		//w = windowHeight*.8;
-		//e = windowHeight*.2;
-		//r = windowWidth*.2;
-		//vec2 bill(q, w);
-		//gl::scissor(bill, vec2(r, e));
-		//Clears the framebuffer before drawing.
+
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		gl::color(1.0, 0.9, 0.5);
@@ -1486,6 +1533,22 @@ void TouchPointsApp::drawUi(){
 		(*uiFbo).unbindFramebuffer();
 		uiFboFlag = false;
 	}
+	if (modeButtons){
+		gl::color(1.0, 1.0, 0);
+		gl::drawSolidRect(Rectf(0, 0, 20, 50));
+		gl::color(0.0, 1.0, 0.0);
+		gl::drawSolidRect(Rectf(20, 0, 35, 50));
+		gl::color(1.0, 0.0, 1.0);
+		gl::drawSolidRect(Rectf(35, 0, 50, 50));
+	}
+	if (colorButtons){
+		gl::color(colorArray[1][0], colorArray[1][1], colorArray[1][2]);
+		gl::drawSolidRect(Rectf(0, 50, 50, 100));
+		gl::color(colorArray[2][0], colorArray[2][1], colorArray[2][2]);
+		gl::drawSolidRect(Rectf(0, 100, 50, 150));
+		gl::color(colorArray[3][0], colorArray[3][1], colorArray[3][2]);
+		gl::drawSolidRect(Rectf(0, 150, 50, 200));
+	}
 }
 
 void TouchPointsApp::draw()
@@ -1493,10 +1556,6 @@ void TouchPointsApp::draw()
 	gl::enableAlphaBlending();
 	//Add a vector instead of the 3 ref to arrays.
 	gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
-
-
-	//drawUi();
-	//gl::draw(uiFbo->getColorTexture());
 	
 	currentFrame = getLeapFrame(leapContr);
 
@@ -1512,80 +1571,12 @@ void TouchPointsApp::draw()
 	gl::drawStrokedCircle(gaze1, 10.0f, 10.0f);
 	gl::drawStrokedCircle(gaze2, 10.0f, 10.0f);
 
-	//UI Box
-	/*
-	if (gazePositionX >= windowWidth*.8 && gazePositionY <= windowHeight*.2)
-	{
-		gl::color(0.0, 0.0, 0.0);
-		gl::drawSolidRect(Rectf(windowWidth*.8, 0, windowWidth, windowHeight*.2));
-	}
-	*/
-	//gl::color(1.0, 1.0, 1.0);
-	//gl::drawSolidRect(Rectf(1400, 0, 1920, 500));
 #endif
-	//gl::color(0.5,0.7,0.1);
-	//Frame Buffers Setup
-	//Draws the framebuffer
-	/*
-	GLuint frameBuffer;
-	glGenFramebuffers(1, &frameBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	GLuint texColorBuffer;
-	glGenTextures(1, &texColorBuffer);
-	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-
-	glTexImage2D(
-	GL_TEXTURE_2D, 0, GL_RGB, 800, 600, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL
-	);
-
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	glFramebufferTexture2D(
-	GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texColorBuffer, 0
-	);
-
-	glBindFramebuffer(GL_FRAMEBUFFER, frameBuffer);
-	gl::drawStrokedRect(Rectf(0, 500, 500, 500), 10);
-	gl::drawSolidRect(Rectf(-0.5, -0.5, 500, 500));
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glBindTexture(GL_TEXTURE_2D, texColorBuffer);
-	*/
-
-	//Rectf(-0.5, -0.5, 0.5, 0.5);
-	vec2 hilary{ 100, 100 };
-	vec2 clinton{ 500, 1000 };
-	vec2 biden{ 900, 100 };
 
 
-
-	//Rect(x1,y1,x2,y2);
-	//gl::drawStrokedRect(Rectf(0,500,500,500), 10);
-	//gl::drawSolidRect(Rectf(-0.5, -0.5, 500, 500) );
-	//gl::drawSolidTriangle(hilary, clinton, biden);
-	/*
-	for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
-	oldPoints->draw();
-	++oldPoints;
-	}
-	*/
-	/*
-	for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
-	oldPoints->draw();
-	++oldPoints;
-	}
-	for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();) {
-	oldPoints->draw();
-	++oldPoints;
-	}
-	for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
-	oldPoints->draw();
-	++oldPoints;
-	}
-	*/
 
 	/*Draws the framebuffers for layer one and layer two*/
+
 	if (currLayer == 0)
 	{
 		//Must always draw framebuffers as a set color!
@@ -1618,8 +1609,10 @@ void TouchPointsApp::draw()
 		gl::draw(imageFbo->getColorTexture(), center);
 	}
 
-	drawUi();
 
+
+
+	drawUi();
 	gl::color(1.0, 1.0, 1.0);
 	
 	/*Draws the frame buffer for UI*/
@@ -1628,11 +1621,7 @@ void TouchPointsApp::draw()
 		gl::draw(uiFbo->getColorTexture());
 	}
 	
-	/*
-	for (auto &activePoint : myActivePoints) {
-	activePoint.second.draw();
-	}
-	*/
+
 
 	for (auto &activePoint : myActiveCircles) {
 		activePoint.second.draw();
@@ -1647,12 +1636,6 @@ void TouchPointsApp::draw()
 		activePoint.second.draw();
 	}
 
-	/*
-	for (auto oldPoints = myPointsEraser.begin(); oldPoints != myPointsEraser.end();) {
-	oldPoints->draw();
-	++oldPoints;
-	}
-	*/
 
 }
 
