@@ -8,6 +8,8 @@
 #include "cinder/gl/Fbo.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/app/AppBase.h"
+#include <math.h>
+#include <chrono>
 
 //Leap Includes
 
@@ -65,14 +67,18 @@ int resolutionY;
 #define COLOR_AMOUNT 7
 #define BACKGROUND_COLORS 8
 
-#define windowWidth  getWindowSize().x
-#define windowHeight getWindowSize().y
+//#define windowWidth  getWindowSize().x 
+//#define windowHeight getWindowSize().y 
+
+#define windowWidth  1919
+#define windowHeight 1079
 #define FRAME_RATE 120
 
 //Leap map 
 map<uint32_t, vec2> pointsMap;
 
 bool imageFlag = false;
+bool leapDrawFlag = true;
 gl::TextureRef imageTexture;
 float fadeTime = 1.0;
 int imageNum;
@@ -102,7 +108,6 @@ public:
 	void	touchesMoved(TouchEvent event) override;
 	void	touchesEnded(TouchEvent event) override;
 	void	keyDown(KeyEvent event) override;
-	void	leapDraw(Leap::Frame frame);
 	void	drawUi();
 	void	modeRectangle();
 	void	modeCircle();
@@ -111,6 +116,14 @@ public:
 	void	drawImageTexture();
 	void	loadImages(string imageName);
 	void	saveImage(string imageType);
+	void	saveFboImage(std::shared_ptr<gl::Fbo> myFbo);
+
+
+	/*Leap related functions*/
+	void	enableGest(Leap::Controller controller);
+	void	leapSave(int gestureType);
+	void	leapDraw(Leap::Frame frame);
+	int 	gestRecognition(Leap::Frame frame , Leap::Controller controller);
 
 	//List of MODES
 	bool randColor = false;
@@ -138,6 +151,7 @@ private:
 	//Leap Motion Controller
 	Leap::Controller leapContr;
 	Leap::Frame currentFrame;
+	Leap::GestureList gestList;
 
 
 	//Need to redo this area. We should have a list for active points, this list will contain ALL shapes.
@@ -169,8 +183,6 @@ private:
 	std::shared_ptr<gl::Fbo>		secondFbo;
 	std::shared_ptr<gl::Fbo>		uiFbo;
 	std::shared_ptr<gl::Fbo>		imageFbo;
-
-
 };
 
 /*Retrieves frames from leap motion Service*/
@@ -369,9 +381,10 @@ void TouchPointsApp::setup()
 	//Set up image feedback fbo 
 	imageFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
+	//Enable all Leap Gestures 
+	TouchPointsApp::enableGest(leapContr);
 
 	//drawUi();
-
 	setFrameRate(FRAME_RATE);
 
 	//Sets up eyeX context
@@ -521,6 +534,87 @@ static Area calcCenter(gl::TextureRef imageTexture){
 	return center;
 }
 
+void TouchPointsApp::enableGest(Leap::Controller controller){
+
+	controller.enableGesture(Leap::Gesture::TYPE_SWIPE);
+	controller.enableGesture(Leap::Gesture::TYPE_CIRCLE);
+	controller.enableGesture(Leap::Gesture::TYPE_SCREEN_TAP);
+	controller.enableGesture(Leap::Gesture::TYPE_KEY_TAP);
+
+}
+
+int TouchPointsApp::gestRecognition(Leap::Frame frame , Leap::Controller controller){
+	//List of all gestures 
+	gestList = frame.gestures();
+	//for (int g = 0; g < gestures.count(); ++g)
+	for (Leap::Gesture gesture : gestList) {
+		//Gesture gesture = gestList[g];
+
+		switch (gesture.type()) {
+		case Leap::Gesture::TYPE_CIRCLE:
+		{
+			Leap::CircleGesture circle = gesture;
+			std::string clockwiseness;
+
+			if (circle.pointable().direction().angleTo(circle.normal()) <= M_PI / 2) {
+				return 4;
+				clockwiseness = "clockwise";
+				std::cout << "Circle Gesture Found - Clockwise" << std::endl;
+			}
+			else {
+				clockwiseness = "counterclockwise";
+				return 4;
+				std::cout << "Circle Gesture Found - Counter_Clockwise" << std::endl;
+			}
+
+			// Calculate angle swept since last frame
+
+			float sweptAngle = 0;
+			if (circle.state() != Leap::Gesture::STATE_START) {
+				Leap::CircleGesture previousUpdate = Leap::CircleGesture(controller.frame(1).gesture(circle.id()));
+				sweptAngle = (circle.progress() - previousUpdate.progress()) * 2 * M_PI;
+			}
+
+			break;
+		}
+		case Leap::Gesture::TYPE_SWIPE:
+		{
+			Leap::SwipeGesture swipe = gesture;
+			return 1;
+			std::cout << "Swipe Gesture Found" << std::endl;
+			break;
+		}
+		case Leap::Gesture::TYPE_KEY_TAP:
+		{
+			Leap::KeyTapGesture tap = gesture;
+			return 6;
+			std::cout << "Tap Gesture Found" << std::endl;
+			break;
+
+		}
+		case Leap::Gesture::TYPE_SCREEN_TAP:
+		{
+			Leap::ScreenTapGesture screentap = gesture;
+			return 5;
+			std::cout << "Screen Tap Gesture Found" << std::endl;
+			break;
+		}
+		default:
+			std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
+			break;
+		}
+	}
+}
+
+void TouchPointsApp::leapSave(int gestureType){
+	if (gestureType == Leap::Gesture::TYPE_KEY_TAP){
+
+		saveImage(".png");
+		imageFlag = true;
+	}
+
+}
+
 void TouchPointsApp::leapDraw(Leap::Frame frame){
 	//Get all pointables from current leap frame
 	Leap::PointableList pointables = frame.pointables();
@@ -658,6 +752,12 @@ void TouchPointsApp::saveImage(string imageType){
 	loadImages("Save" + imageType);
 	cout << "Image " << imageNum << "Saved!";
 }
+
+void TouchPointsApp::saveFboImage(std::shared_ptr<gl::Fbo> myFbo){
+
+	writeImage(getHomeDirectory() / "cinder" / "Saved_Images" / (toString(imageNum) + "myPixels.png"), (myFbo->getColorTexture())->createSource());
+}
+
 /*Mode Change Functions*/
 void TouchPointsApp::modeRectangle(){
 
@@ -721,7 +821,6 @@ void TouchPointsApp::modeCircle(){
 		//(*uiFbo).unbindFramebuffer();
 	}
 }
-
 
 void TouchPointsApp::modeTriangle(){
 
@@ -846,6 +945,7 @@ void TouchPointsApp::modeLine(){
 	}
 
 }
+
 void TouchPointsApp::keyDown(KeyEvent event)
 {
 	if (event.getChar() == 'z') {
@@ -976,6 +1076,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	}
 	else if (event.getChar() == 'n'){
 		saveImage(".png");
+		//saveFboImage(firstFbo);
 		imageFlag = true;
 	}
 	else if (event.getChar() == 'j') {
@@ -986,6 +1087,12 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	else if (event.getChar() == 't') {
 		saveImage(".tif");
 		imageFlag = true;
+	}
+	else if (event.getChar() == 'v'){
+		leapDrawFlag = false;
+	}
+	else if (event.getChar() == 'g'){
+		leapDrawFlag = true;
 	}
 #ifdef EYEX
 	else if (event.getChar() == ' ')
@@ -1391,23 +1498,11 @@ void TouchPointsApp::draw()
 	//drawUi();
 	//gl::draw(uiFbo->getColorTexture());
 	
-
-
-
-
 	currentFrame = getLeapFrame(leapContr);
-	leapDraw(currentFrame);
 
-	/*Draws image that provides feedback */
-	if(imageFlag){
-
-		Area center = calcCenter(imageTexture);
-
-		drawImageTexture();
-		gl::draw(imageFbo->getColorTexture(),center);
-
+	if (leapDrawFlag){
+		leapDraw(currentFrame);
 	}
-
 
 #ifdef EYEX
 	gl::color(1.0, 1.0, 1.0, .4);
@@ -1489,6 +1584,8 @@ void TouchPointsApp::draw()
 	++oldPoints;
 	}
 	*/
+
+	/*Draws the framebuffers for layer one and layer two*/
 	if (currLayer == 0)
 	{
 		//Must always draw framebuffers as a set color!
@@ -1509,14 +1606,28 @@ void TouchPointsApp::draw()
 
 	}
 
+
+	/*Draws the image Fbo which is used to show feedback when file saved*/
+	leapSave(gestRecognition(currentFrame, leapContr));
+
+	/*Draws image that provides feedback */
+	if (imageFlag){
+		Area center = calcCenter(imageTexture);
+
+		drawImageTexture();
+		gl::draw(imageFbo->getColorTexture(), center);
+	}
+
 	drawUi();
 
 	gl::color(1.0, 1.0, 1.0);
-
-	if (gazePositionX > 1920 && gazePositionY > 1080)
+	
+	/*Draws the frame buffer for UI*/
+	//if (gazePositionX > 1920 && gazePositionY > 1080)
 	{
 		gl::draw(uiFbo->getColorTexture());
 	}
+	
 	/*
 	for (auto &activePoint : myActivePoints) {
 	activePoint.second.draw();
@@ -1542,10 +1653,6 @@ void TouchPointsApp::draw()
 	++oldPoints;
 	}
 	*/
-
-
-
-
 
 }
 
