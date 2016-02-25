@@ -35,6 +35,10 @@ using namespace ci::app;
 using namespace std;
 using namespace cinder;
 
+//Device connection status
+bool eyeXRunning = false;
+bool leapRunning = true;
+
 #define EYEX
 #ifdef EYEX
 
@@ -61,6 +65,8 @@ static TX_HANDLE g_hGlobalInteractorSnapshot = TX_EMPTY_HANDLE;
 //Stored Desktop resolution variables.
 int resolutionX;
 int resolutionY;
+
+
 
 #endif
 
@@ -172,6 +178,18 @@ private:
 	Leap::Controller leapContr;
 	Leap::Frame currentFrame;
 	Leap::GestureList gestList;
+
+	//EyeX 
+
+	TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
+	TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
+	TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
+	BOOL success;
+
+
+
+
+
 
 
 	//Need to redo this area. We should have a list for active points, this list will contain ALL shapes.
@@ -373,11 +391,38 @@ void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userP
 
 }
 
+
+/* 'Checking whether if the eye tracker is connected'
+void TouchPointsApp::HandleNotification(InteractionNotification notification)
+{
+	if (NotificationType.SettingsChanged == notification.NotificationType)
+	{
+		OnSettingsReceived((SettingsBag)notification.Data);
+	}
+}
+
+void TouchPointsApp::OnSettingsReceived(SettingsBag data)
+{
+	EyeTrackingDeviceStatus deviceStatus;
+	var success = data.TryGetSettingValue(out deviceStatus, "eyetracking.state");
+
+	if (success)
+	{
+		Console.WriteLine("Eye Tracking Device Status is: " + deviceStatus);
+
+	}
+}
+*/
+
 #endif
+
+
 
 void TouchPointsApp::setup()
 {
 	//Sets max mulitouch points
+	auto testvar1 = System::hasMultiTouch();
+	auto testvar2 = System::getMaxMultiTouchPoints();
 	CI_LOG_I("MT: " << System::hasMultiTouch() << " Max points: " << System::getMaxMultiTouchPoints());
 	glEnable(GL_LINE_SMOOTH);
 	//setWindowSize(windowWidth, windowHeight);
@@ -413,13 +458,10 @@ void TouchPointsApp::setup()
 
 
 
+//	hcontext.RegisterNotificationHandler(HandleNotification);
+//	hcontext.RegisterSettingObserver(SettingsPaths.EyeTracking);
 
 
-
-	TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
-	TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
-	TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
-	BOOL success;
 
 	// initialize and enable the context that is our link to the EyeX Engine.
 	success = txInitializeEyeX(TX_EYEXCOMPONENTOVERRIDEFLAG_NONE, NULL, NULL, NULL, NULL) == TX_RESULT_OK;
@@ -428,6 +470,10 @@ void TouchPointsApp::setup()
 	success &= txRegisterConnectionStateChangedHandler(hContext, &hConnectionStateChangedTicket, OnEngineConnectionStateChanged, NULL) == TX_RESULT_OK;
 	success &= txRegisterEventHandler(hContext, &hEventHandlerTicket, HandleEvent, NULL) == TX_RESULT_OK;
 	success &= txEnableConnection(hContext) == TX_RESULT_OK;
+
+	if (success){
+		eyeXRunning = true;
+	}
 	/*
 	// let the events flow until a key is pressed.
 	if (success) {
@@ -1011,7 +1057,14 @@ void TouchPointsApp::keyDown(KeyEvent event)
 
 	}
 	else if (event.getCode() == KeyEvent::KEY_ESCAPE) {
-		//Need to find a way to clear eyeX setup...
+		//Clears EyeX context then quits the program.
+#ifdef EYEX
+		txDisableConnection(hContext);
+		txReleaseObject(&g_hGlobalInteractorSnapshot);
+		success = txShutdownContext(hContext, TX_CLEANUPTIMEOUT_DEFAULT, TX_FALSE) == TX_RESULT_OK;
+		success &= txReleaseContext(&hContext) == TX_RESULT_OK;
+		success &= txUninitializeEyeX() == TX_RESULT_OK;
+#endif
 		quit();
 	}
 	else if (event.getChar() == 'r')	//Turns on random color mode
@@ -1635,6 +1688,8 @@ void TouchPointsApp::draw()
 	for (auto &activePoint : myActivePointsEraser) {
 		activePoint.second.draw();
 	}
+
+
 
 
 }
