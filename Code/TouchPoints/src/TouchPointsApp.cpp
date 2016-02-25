@@ -73,11 +73,20 @@ int resolutionY;
 #define COLOR_AMOUNT 7
 #define BACKGROUND_COLORS 8
 
-#define windowWidth  getWindowSize().x 
-#define windowHeight getWindowSize().y 
+#define COLOR_ZERO "White.png"
+#define COLOR_ONE "Red.png"
+#define COLOR_TWO "Yellow.png"
+#define COLOR_THREE "Green.png"
+#define COLOR_FOUR "Torquise.png"
+#define COLOR_FIVE "Blue.png"
+#define COLOR_SIX "Purple.png"
 
-//#define windowWidth  1919
-//#define windowHeight 1079
+#define SWIPE_GESTURE 8
+//#define windowWidth  getWindowSize().x 
+//#define windowHeight getWindowSize().y 
+
+#define windowWidth  1919
+#define windowHeight 1079
 #define FRAME_RATE 120
 
 //Leap map 
@@ -142,6 +151,7 @@ public:
 	/*Leap related functions*/
 	void	enableGest(Leap::Controller controller);
 	void	leapSave(int gestureType);
+	void	leapColorChange(int gestureType);
 	void	leapDraw(Leap::Frame frame);
 	int 	gestRecognition(Leap::Frame frame , Leap::Controller controller);
 
@@ -641,7 +651,7 @@ int TouchPointsApp::gestRecognition(Leap::Frame frame , Leap::Controller control
 		case Leap::Gesture::TYPE_SWIPE:
 		{
 			Leap::SwipeGesture swipe = gesture;
-			return 1;
+			return 7 + 1;
 			std::cout << "Swipe Gesture Found" << std::endl;
 			break;
 		}
@@ -669,11 +679,9 @@ int TouchPointsApp::gestRecognition(Leap::Frame frame , Leap::Controller control
 
 void TouchPointsApp::leapSave(int gestureType){
 	if (gestureType == Leap::Gesture::TYPE_KEY_TAP){
-
 		saveImage(".png");
 		imageFlag = true;
 	}
-
 }
 
 void TouchPointsApp::leapDraw(Leap::Frame frame){
@@ -779,6 +787,70 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 }
 
+void TouchPointsApp::leapColorChange(int gestureType){
+
+	if (gestureType == Leap::Gesture::TYPE_SCREEN_TAP){ //SWIPE_GESTURE){
+
+		if (currColor != COLOR_AMOUNT - 1){
+			currColor++;
+		}
+		else {
+			currColor = 0;
+		}
+
+		//Provides correct image to provide feedback 
+		switch (currColor){
+		case 0:{
+			loadImages(COLOR_ZERO);
+			imageFlag = true;
+			modeChangeFlag = true;
+			break;
+		}
+		case 1:{
+			loadImages(COLOR_ONE);
+			imageFlag = true;
+			modeChangeFlag = true;
+			break;
+		}
+		case 2:{
+			loadImages(COLOR_TWO);
+			imageFlag = true;
+			modeChangeFlag = true;
+			break;
+		}
+		case 3:{
+			loadImages(COLOR_THREE);
+			imageFlag = true;
+			modeChangeFlag = true;
+			break;
+		}
+		case 4:{
+			loadImages(COLOR_FOUR);
+			imageFlag = true;
+			modeChangeFlag = true;
+			break;
+		}
+		case 5:{
+			loadImages(COLOR_FIVE);
+			imageFlag = true;
+			modeChangeFlag = true;
+			break;
+		}
+		case 6:{
+			loadImages(COLOR_SIX);
+			imageFlag = true;
+			modeChangeFlag = true;
+			break;
+		}
+		default:{
+			//std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
+			break;
+		}
+
+		}
+	}
+}
+
 void TouchPointsApp::drawImageTexture(){
 
 	(*imageFbo).bindFramebuffer();
@@ -790,12 +862,12 @@ void TouchPointsApp::drawImageTexture(){
 
 	gl::draw(imageTexture);
 
-	if (fadeTime == 0){
+	if (fadeTime <= 0.1){
 		imageFlag = false;
 		fadeTime = 1;
 	}
 
-	fadeTime -= 0.001;
+	fadeTime -= 0.01;
 
 	(*imageFbo).unbindFramebuffer();
 
@@ -1651,11 +1723,16 @@ void TouchPointsApp::draw()
 	}
 
 
+
+
 	/*Draws the image Fbo which is used to show feedback when file saved*/
 	leapSave(gestRecognition(currentFrame, leapContr));
+	leapColorChange(gestRecognition(currentFrame, leapContr));
+
 
 	/*Draws image that provides feedback */
 	if (imageFlag){
+
 		Area center = calcCenter(imageTexture);
 
 		drawImageTexture();
