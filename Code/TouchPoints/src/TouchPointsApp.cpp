@@ -93,11 +93,11 @@ int resolutionY;
 #define SHAPE_Filled_Triangle "FilledTriangle.png"
 
 #define SWIPE_GESTURE 8
-#define windowWidth  getWindowSize().x
-#define windowHeight getWindowSize().y
+//#define windowWidth  getWindowSize().x
+//#define windowHeight getWindowSize().y
 
-//#define windowWidth  1919
-//#define windowHeight 1079
+#define windowWidth  1919
+#define windowHeight 1079
 #define FRAME_RATE 120
 
 //Leap map
@@ -716,10 +716,11 @@ void missedPoints(int xi, int yi, int xf, int yf, TouchPoint& points){
 }
 
 static Area calcCenter(gl::TextureRef imageTexture){
+
 	Area image = imageTexture->getBounds();
 	Area window = getWindowBounds();
-	Area center = Area::proportionalFit(window, image, true, false);
-
+	//Area center = Area::proportionalFit(window, image, true, false);
+	Area center(vec2(800, 800), vec2(1100, 1100));
 	return center;
 }
 
