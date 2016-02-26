@@ -70,7 +70,7 @@ int resolutionY;
 
 #endif
 
-#define COLOR_AMOUNT 7
+#define COLOR_AMOUNT 8
 #define BACKGROUND_COLORS 8
 
 #define COLOR_ZERO "White.png"
@@ -112,7 +112,7 @@ int currColor = 0;
 int currBackground = 0;
 
 float backgroundArray[BACKGROUND_COLORS][3] = { { 0.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f } };
-float colorArray[COLOR_AMOUNT][3] = { { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f } };
+float colorArray[COLOR_AMOUNT][3] = { { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f }, { 1.0f, 0.3f, 0.0 } };
 
 
 //Global EyeX Handler
@@ -1390,10 +1390,28 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 			shapeButtons = !shapeButtons;
 			return true;
 		}
+		else if (x < 150 && y < 50){
+			filledShapes = !filledShapes;
+			modeChangeFlag = true;
+			return true;
+		}
+		else if (x < 200 && y < 50){
+			if (lineSize != 15.0f)
+				lineSize++;
+			//else lineSize = 1;
+			modeChangeFlag = true;
+		}
+		else if (x < 250 && y < 50){
+			if (lineSize != 1.0f)
+				lineSize--;
+			//else lineSize = 15;
+			modeChangeFlag = true;
+		}
 	}
 
 	//Color buttons UI
 	if (colorButtons){
+		/*
 		if (x < 50 && y < 100){
 			currColor = 1;
 			colorButtons = false;
@@ -1412,8 +1430,18 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 			modeChangeFlag = true;
 			return true;
 		}
+		*/
+		for (int i = 0; i < COLOR_AMOUNT; i++){
+			if (x < 50 && y < (50 * i + 100))
+			{
+				currColor = i;
+				colorButtons = false;
+				modeChangeFlag = true;
+				return true;
+			}
+		}
 	}
-	else if (shapeButtons){
+	if (shapeButtons){
 		if (x > 50 && x < 100 && y < 100){
 			changeShape(Line);
 			shapeButtons = false;
@@ -1442,10 +1470,35 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 	return false;
 }
 
+double lastTouch = 0;
+float lastX = 0;
+float lastY = 0;
+
 void TouchPointsApp::touchesBegan(TouchEvent event)
 {
 	for (const auto &touch : event.getTouches()) {
+		/*Tests for double tap....
+		if (0.5 > touch.getTime() - lastTouch )
+		{
+			if (lastX < touch.getX() + 10 && lastX > touch.getX() - 10)
+			{
+				if (lastY < touch.getY() + 10 && lastY > touch.getY() - 10){
 
+
+					(*firstFbo).bindFramebuffer();
+					gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+					gl::drawSolidCircle(vec2(500, 500), 30, 10);
+					(*firstFbo).unbindFramebuffer();
+					continue;
+				}
+			}
+		}
+
+		lastTouch = touch.getTime();
+		lastX = touch.getX();
+		lastY = touch.getY();
+		*/
+		
 		if (inInteractiveUi(touch.getX(), touch.getY())){
 
 		}
@@ -1453,7 +1506,9 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 		else if (eraserMode){
 			activeDrawings++;
 			Color newColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]);
-			myActivePointsEraser.insert(make_pair(touch.getId(), TouchPoint(touch.getPos(), newColor, lineSize * 2)));
+			myActivePoints.insert(make_pair(touch.getId(), TouchPoint(touch.getPos(), newColor, lineSize * 2)));
+			bool tempBool = false;
+			myActiveCircles.insert(make_pair(touch.getId(), TouchCircle(touch.getPos(), lineSize*2,Color(1.0,1.0,1.0), 1, tempBool)));
 		}
 		else if (lineDraw){
 			activeDrawings++;
@@ -1511,11 +1566,40 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 	for (const auto &touch : event.getTouches()) {
 
 		if (eraserMode){
-			if (myActivePointsEraser.find(touch.getId()) == myActivePointsEraser.end())
+			if (myActivePoints.find(touch.getId()) == myActivePoints.end())
 				return;
 
-				missedPoints(touch.getPrevX(), touch.getPrevY(), touch.getX(), touch.getY(), myActivePointsEraser[touch.getId()]);
 
+			missedPoints(touch.getPrevX(), touch.getPrevY(), touch.getX(), touch.getY(), myActivePoints[touch.getId()]);
+			myPoints.push_back(myActivePoints[touch.getId()]);
+			myActivePoints[touch.getId()].clearPoints();
+
+			myActiveCircles[touch.getId()].changePosition(touch.getPos());
+
+			if (currLayer == 0){
+
+
+				(*firstFbo).bindFramebuffer();
+
+				for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+					oldPoints->draw();
+					++oldPoints;
+				}
+
+				(*firstFbo).unbindFramebuffer();
+			}
+			else if (currLayer == 1){
+				(*secondFbo).bindFramebuffer();
+
+				for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+					oldPoints->draw();
+					++oldPoints;
+				}
+
+				(*secondFbo).unbindFramebuffer();
+			}
+
+			myPoints.clear();
 
 			}
 		else if (lineDraw){
@@ -1598,35 +1682,12 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 
 		if (eraserMode){
 		
-			if (myActivePointsEraser.find(touch.getId()) == myActivePointsEraser.end())
+			if (myActivePoints.find(touch.getId()) == myActivePoints.end())
 				return;
 
 			activeDrawings--;
-			myPointsEraser.push_back(myActivePointsEraser[touch.getId()]);
-			myActivePointsEraser.erase(touch.getId());
-			if (currLayer == 0){
-
-
-				(*firstFbo).bindFramebuffer();
-				for (auto oldPoints = myPointsEraser.begin(); oldPoints != myPointsEraser.end();) {
-					oldPoints->draw();
-					++oldPoints;
-				}
-				
-				(*firstFbo).unbindFramebuffer();
-			}
-			else if (currLayer == 1){
-				(*secondFbo).bindFramebuffer();
-
-				for (auto oldPoints = myPointsEraser.begin(); oldPoints != myPointsEraser.end();) {
-					oldPoints->draw();
-					++oldPoints;
-				}
-				
-				(*secondFbo).unbindFramebuffer();
-			}
-
-			myPointsEraser.clear();
+			myActivePoints.erase(touch.getId());
+			myActiveCircles.erase(touch.getId());
 		}
 		else if (lineDraw){
 			
@@ -1777,7 +1838,11 @@ void TouchPointsApp::drawUi(){
 		gl::drawStrokedRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight), 5);
 		gl::color(0.0, 0.0, 0.0);
 		gl::drawSolidRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight));
-		if (rectDraw) modeRectangle();
+		if (eraserMode){
+			bool tempBool = false;
+			TouchCircle(vec2(windowWidth*.9, windowHeight *.9), lineSize * 2, Color(1.0, 1.0, 1.0), 1, tempBool).draw();
+		}
+		else if (rectDraw) modeRectangle();
 		else if (circleDraw) modeCircle();
 		else if (triangleDraw) modeTriangle();
 		else if (lineDraw) modeLine();
@@ -1813,16 +1878,91 @@ void TouchPointsApp::drawUi(){
 		gl::drawStrokedRect(Rectf(50, 2, 100, 50), 10);
 		gl::color(0.0, 1.0, 1.0);
 		gl::drawSolidRect(Rectf(50, 0, 100, 50));
+
+		//FilledShapes button
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(100, 2, 150, 50), 10);
+		gl::color(1.0, 1.0, 1.0);
+		gl::drawSolidRect(Rectf(100, 0, 150, 50));
+
+		//Line Size
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(150, 2, 200, 50), 10);
+		gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(150, 0, 200, 50));
+
+		gl::color(1.0, 1.0, 1.0);
+		gl::lineWidth(5);
+		gl::drawLine(vec2(160, 25), vec2(190, 25));
+		gl::drawLine(vec2(175, 10), vec2(175, 40));
+		
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(200, 2, 250, 50), 10);
+		gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(200, 0, 250, 50));
+
+		gl::color(1.0, 1.0, 1.0);
+		//gl::lineWidth(lineSize);
+		gl::drawLine(vec2(210, 25), vec2(240, 25));
+		//gl::drawLine(vec2(225, 10), vec2(225, 40));
+
 	}
 	if (colorButtons){
+		/*
 		gl::color(colorArray[1][0], colorArray[1][1], colorArray[1][2]);
 		gl::drawSolidRect(Rectf(0, 50, 50, 100));
 		gl::color(colorArray[2][0], colorArray[2][1], colorArray[2][2]);
 		gl::drawSolidRect(Rectf(0, 100, 50, 150));
 		gl::color(colorArray[3][0], colorArray[3][1], colorArray[3][2]);
 		gl::drawSolidRect(Rectf(0, 150, 50, 200));
+		gl::color(colorArray[4][0], colorArray[4][1], colorArray[4][2]);
+		gl::drawSolidRect(Rectf(0, 150, 50, 200));
+		gl::color(colorArray[5][0], colorArray[5][1], colorArray[5][2]);
+		gl::drawSolidRect(Rectf(0, 150, 50, 200));
+		gl::color(colorArray[6][0], colorArray[6][1], colorArray[6][2]);
+		gl::drawSolidRect(Rectf(0, 150, 50, 200));
+		*/
+
+		for (int i = 0; i < COLOR_AMOUNT; i++)
+		{
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(0, 50*(i) + 50 , 50, 50 * i + 100), 10);
+			gl::color(colorArray[i][0], colorArray[i][1], colorArray[i][2]);
+			gl::drawSolidRect(Rectf(0, 50 * (i)+50, 50, 50 * (i)+100));
+		}
 	}
 	if (shapeButtons){
+
+		for (int i = 0; i < 4; i++){
+
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(50, 50 * (i)+50, 100, 50 * i + 100), 10);
+			gl::color(0.0,0.0,0.0);
+			gl::drawSolidRect(Rectf(50, 50 * i + 50, 100, 50 * i + 100));	
+		}
+
+		gl::color(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
+		gl::lineWidth(2);
+		gl::drawLine(vec2(55, 95), vec2(95, 55));
+
+		if (filledShapes)
+			gl::drawSolidCircle(vec2(75, 125), 15);
+		else gl::drawStrokedCircle(vec2(75, 125), 15);
+
+		if (filledShapes)
+			gl::drawSolidRect(Rectf(60, 188, 90, 160));
+		else gl::drawStrokedRect(Rectf(60, 188, 90, 160));
+
+
+		if (filledShapes)
+			gl::drawSolidTriangle(vec2(55, 245), vec2(95, 245), vec2(73, 205));
+		else {
+			
+			gl::drawLine(vec2(55, 245), vec2(95, 245));
+			gl::drawLine(vec2(95, 245), vec2(73, 205));
+			gl::drawLine(vec2(73, 205), vec2(55, 245));
+		}
+		/*
 		gl::color(colorArray[1][0], colorArray[1][1], colorArray[1][2]);
 		gl::drawSolidRect(Rectf(50, 50, 100, 100));
 		gl::color(colorArray[2][0], colorArray[2][1], colorArray[2][2]);
@@ -1831,6 +1971,7 @@ void TouchPointsApp::drawUi(){
 		gl::drawSolidRect(Rectf(50, 150, 100, 200));
 		gl::color(colorArray[4][0], colorArray[4][1], colorArray[5][2]);
 		gl::drawSolidRect(Rectf(50, 200, 100, 250));
+		*/
 	}
 }
 
