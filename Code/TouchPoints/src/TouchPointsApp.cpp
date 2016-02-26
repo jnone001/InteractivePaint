@@ -1751,7 +1751,7 @@ void TouchPointsApp::update(){
 	//if (gazePositionX < 75 && gazePositionY < 120){
 		modeButtons = true;
 	//}
-	else modeButtons = false;
+	//else modeButtons = false;
 	
 }
 
