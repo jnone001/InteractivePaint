@@ -36,6 +36,10 @@ using namespace ci::app;
 using namespace std;
 using namespace cinder;
 
+//Device connection status
+bool eyeXRunning = false;
+bool leapRunning = false;
+
 #define EYEX
 #ifdef EYEX
 
@@ -63,9 +67,11 @@ static TX_HANDLE g_hGlobalInteractorSnapshot = TX_EMPTY_HANDLE;
 int resolutionX;
 int resolutionY;
 
+
+
 #endif
 
-#define COLOR_AMOUNT 7
+#define COLOR_AMOUNT 8
 #define BACKGROUND_COLORS 8
 #define TOTAL_SYMBOLS 7
 #define TOTAL_SHAPES 7
@@ -87,14 +93,14 @@ int resolutionY;
 #define SHAPE_Filled_Triangle "FilledTriangle.png"
 
 #define SWIPE_GESTURE 8
-//#define windowWidth  getWindowSize().x 
-//#define windowHeight getWindowSize().y 
+#define windowWidth  getWindowSize().x
+#define windowHeight getWindowSize().y
 
-#define windowWidth  1919
-#define windowHeight 1079
+//#define windowWidth  1919
+//#define windowHeight 1079
 #define FRAME_RATE 120
 
-//Leap map 
+//Leap map
 map<uint32_t, vec2> pointsMap;
 
 bool imageFlag = false;
@@ -104,6 +110,8 @@ gl::TextureRef imageTexture;
 int imageNum;
 float fadeTime = 1;
 
+
+bool modeChangeFlag = true;
 
 //Layers
 int currLayer = 0;
@@ -117,8 +125,22 @@ int currShape = 0;
 int currBackground = 0;
 
 float backgroundArray[BACKGROUND_COLORS][3] = { { 0.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f } };
-float colorArray[COLOR_AMOUNT][3] = { { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f } };
+float colorArray[COLOR_AMOUNT][3] = { { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f }, { 1.0f, 0.3f, 0.0 } };
+
 string symbolArray[TOTAL_SYMBOLS];
+
+
+
+//Global EyeX Handler
+TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
+
+class LeapListener : public Leap::Listener{
+public:
+	virtual void onConnect(const Leap::Controller&);
+	//virtual void onFrame(const Leap::Controller&);
+	virtual void onDisconnect(const Leap::Controller&);
+};
+
 
 //TouchPointsApp, our libcinder app!
 class TouchPointsApp : public App {
@@ -141,7 +163,7 @@ public:
 	void	modeCircle();
 	void	modeTriangle();
 	void	modeLine();
-	
+
 	//Function to change Shapes we are drawing
 	void	changeShape(Shape x);
 
@@ -164,6 +186,7 @@ public:
 	void	leapDraw(Leap::Frame frame);
 	void 	gestRecognition(Leap::Frame frame , Leap::Controller controller);
 
+
 	//List of MODES
 	bool randColor = false;
 	bool eraserMode = false;
@@ -177,8 +200,11 @@ public:
 	//List of drawUI Flags
 	bool modeButtons = true;
 	bool colorButtons = false;
+	bool shapeButtons = false;
 	bool uiFboFlag = false;
-	bool modeChangeFlag = true;
+
+
+	void modeChangeFlagTrue();
 
 
 
@@ -197,14 +223,32 @@ private:
 	Leap::Controller leapContr;
 	Leap::Frame currentFrame;
 	Leap::GestureList gestList;
+	LeapListener	myLeapListener;
+
+	//EyeX
+
+
+	TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
+	TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
+	TX_TICKET hGazeTrackingStateChangedTicket = TX_INVALID_TICKET;
+	TX_EYEXAVAILABILITY availability;
+	BOOL success;
+	TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
+
+
+
+
+
+
+
 
 
 	//Need to redo this area. We should have a list for active points, this list will contain ALL shapes.
-	//Perhaps Templates? Need to attend C++ Workshop for this. 
+	//Perhaps Templates? Need to attend C++ Workshop for this.
 	//The touchPoint should have a variable 'shape' which just tells it if it is a square, circle, triangle, line, etc.
 	//Keep the 'eraser' points though because they need to be drawn separately last!
-	//Might need a new function for the eraser mode so it can ALWAYS have the correct background color. 
-	//Future playback feature may want eraser points in the same list as the other shapes as well. 
+	//Might need a new function for the eraser mode so it can ALWAYS have the correct background color.
+	//Future playback feature may want eraser points in the same list as the other shapes as well.
 
 
 	list<TouchShape*>		  myShapes;
@@ -239,6 +283,20 @@ Leap::Frame getLeapFrame(Leap::Controller controller){
 	return controller.frame();
 }
 
+
+void TouchPointsApp::modeChangeFlagTrue(){
+	modeChangeFlag = true;
+}
+
+//Leapmotion listeners
+void LeapListener::onConnect(const Leap::Controller& controller){
+	leapRunning = true;
+
+}
+void LeapListener::onDisconnect(const Leap::Controller& controller){
+	leapRunning = false;
+}
+
 void prepareSettings(TouchPointsApp::Settings *settings)
 {
 	// By default, multi-touch is disabled on desktop and enabled on mobile platforms.
@@ -252,6 +310,58 @@ void prepareSettings(TouchPointsApp::Settings *settings)
 #ifdef EYEX
 //eyeX Functions.
 
+void OnStateReceived(TX_HANDLE hStateBag)
+{
+	TX_BOOL success;
+	TX_INTEGER eyeTrackingState;
+	TX_SIZE2 displaySize;
+	TX_SIZE2 screenBounds;
+	TX_SIZE stringSize = 0;
+	TX_STRING currentProfileName;
+	TX_INTEGER presenceData;
+	TX_INTEGER gazeTracking;
+
+
+	success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_EYETRACKINGSTATE, &eyeTrackingState) == TX_RESULT_OK);
+	if (success) {
+		switch (eyeTrackingState) {
+		case TX_EYETRACKINGDEVICESTATUS_TRACKING:
+			eyeXRunning = true;
+			modeChangeFlag = true;
+			break;
+
+		case TX_EYETRACKINGDEVICESTATUS_DEVICENOTCONNECTED:
+			eyeXRunning = false;
+			modeChangeFlag = true;
+			break;
+
+		default:
+			printf(":DDD");
+		}
+	}
+
+	/*
+
+	success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_GAZETRACKING, &gazeTracking) == TX_RESULT_OK);
+	if (success) {
+		(gazeTracking == TX_GAZETRACKING_GAZETRACKED) ? eyeXRunning = true : eyeXRunning = false;
+		modeChangeFlag = true;
+	}
+	*/
+
+
+}
+void TX_CALLCONVENTION OnEngineStateChanged(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userParam)
+{
+	TX_RESULT result = TX_RESULT_UNKNOWN;
+	TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
+
+	if (txGetAsyncDataResultCode(hAsyncData, &result) == TX_RESULT_OK &&
+		txGetAsyncDataContent(hAsyncData, &hStateBag) == TX_RESULT_OK) {
+		OnStateReceived(hStateBag);
+		txReleaseObject(&hStateBag);
+	}
+}
 
 /*
 * Initializes g_hGlobalInteractorSnapshot with an interactor that has the Gaze Point behavior.
@@ -295,13 +405,16 @@ void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connect
 {
 	switch (connectionState) {
 	case TX_CONNECTIONSTATE_CONNECTED: {
+
 		BOOL success;
+		//eyeXRunning = true;
 		//printf("The connection state is now CONNECTED (We are connected to the EyeX Engine)\n");
 		// commit the snapshot with the global interactor as soon as the connection to the engine is established.
 		// (it cannot be done earlier because committing means "send to the engine".)
 		success = txCommitSnapshotAsync(g_hGlobalInteractorSnapshot, OnSnapshotCommitted, NULL) == TX_RESULT_OK;
+		txGetStateAsync(hContext, TX_STATEPATH_EYETRACKING, OnEngineStateChanged, NULL);
 		if (!success) {
-			//printf("Failed to initialize the data stream.\n");
+
 		}
 		else {
 			//printf("Waiting for gaze data to start streaming...\n");
@@ -311,6 +424,7 @@ void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connect
 
 	case TX_CONNECTIONSTATE_DISCONNECTED:
 		//printf("The connection state is now DISCONNECTED (We are disconnected from the EyeX Engine)\n");
+		eyeXRunning = false;
 		break;
 
 	case TX_CONNECTIONSTATE_TRYINGTOCONNECT:
@@ -390,19 +504,46 @@ void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userP
 	}
 
 
-	// NOTE since this is a very simple application with a single interactor and a single data stream, 
-	// our event handling code can be very simple too. A more complex application would typically have to 
+	// NOTE since this is a very simple application with a single interactor and a single data stream,
+	// our event handling code can be very simple too. A more complex application would typically have to
 	// check for multiple behaviors and route events based on interactor IDs.
 
 	txReleaseObject(&hEvent);
 
 }
 
+
+/* 'Checking whether if the eye tracker is connected'
+void TouchPointsApp::HandleNotification(InteractionNotification notification)
+{
+	if (NotificationType.SettingsChanged == notification.NotificationType)
+	{
+		OnSettingsReceived((SettingsBag)notification.Data);
+	}
+}
+
+void TouchPointsApp::OnSettingsReceived(SettingsBag data)
+{
+	EyeTrackingDeviceStatus deviceStatus;
+	var success = data.TryGetSettingValue(out deviceStatus, "eyetracking.state");
+
+	if (success)
+	{
+		Console.WriteLine("Eye Tracking Device Status is: " + deviceStatus);
+
+	}
+}
+*/
+
 #endif
+
+
 
 void TouchPointsApp::setup()
 {
 	//Sets max mulitouch points
+	auto testvar1 = System::hasMultiTouch();
+	auto testvar2 = System::getMaxMultiTouchPoints();
 	CI_LOG_I("MT: " << System::hasMultiTouch() << " Max points: " << System::getMaxMultiTouchPoints());
 	glEnable(GL_LINE_SMOOTH);
 	//setWindowSize(windowWidth, windowHeight);
@@ -417,14 +558,17 @@ void TouchPointsApp::setup()
 
 	//Set up UI
 	uiFbo = gl::Fbo::create(windowWidth, windowHeight, format);
-	//Set up image feedback fbo 
+	//Set up image feedback fbo
 	imageFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
-	//Enable all Leap Gestures 
+	//Enable all Leap Gestures
 	TouchPointsApp::enableGest(leapContr);
+
 	leapContr.config().setFloat("Gesture.Swipe.MinLength", 150.0);
 	leapContr.config().setFloat("Gesture.Swipe.MinVelocity", 500.0);
 	leapContr.config().save();
+
+	leapContr.addListener(myLeapListener);
 
 	setFrameRate(FRAME_RATE);
 
@@ -441,13 +585,10 @@ void TouchPointsApp::setup()
 
 
 
+//	hcontext.RegisterNotificationHandler(HandleNotification);
+//	hcontext.RegisterSettingObserver(SettingsPaths.EyeTracking);
 
 
-
-	TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
-	TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
-	TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
-	BOOL success;
 
 	// initialize and enable the context that is our link to the EyeX Engine.
 	success = txInitializeEyeX(TX_EYEXCOMPONENTOVERRIDEFLAG_NONE, NULL, NULL, NULL, NULL) == TX_RESULT_OK;
@@ -456,6 +597,11 @@ void TouchPointsApp::setup()
 	success &= txRegisterConnectionStateChangedHandler(hContext, &hConnectionStateChangedTicket, OnEngineConnectionStateChanged, NULL) == TX_RESULT_OK;
 	success &= txRegisterEventHandler(hContext, &hEventHandlerTicket, HandleEvent, NULL) == TX_RESULT_OK;
 	success &= txEnableConnection(hContext) == TX_RESULT_OK;
+	success &= txRegisterStateChangedHandler(hContext, &hGazeTrackingStateChangedTicket, TX_STATEPATH_GAZETRACKING, OnEngineStateChanged, NULL) == TX_RESULT_OK;
+
+	if (success){
+		//eyeXRunning = true;
+	}
 	/*
 	// let the events flow until a key is pressed.
 	if (success) {
@@ -489,7 +635,7 @@ void missedPoints(int xi, int yi, int xf, int yf, TouchPoint& points){
 	//Find Abs value of difference between x and y coords of two points
 	dx = abs(xi - xf);
 	dy = abs(yi - yf);
-	//Ceck which coordinates have bigger range x or y 
+	//Ceck which coordinates have bigger range x or y
 	if (dx >= dy){
 		d = 2 * dy - dx;
 		ds = 2 * dy;
@@ -572,7 +718,7 @@ void missedPoints(int xi, int yi, int xf, int yf, TouchPoint& points){
 static Area calcCenter(gl::TextureRef imageTexture){
 	Area image = imageTexture->getBounds();
 	Area window = getWindowBounds();
-	Area center = Area::proportionalFit(image, window, true, false);
+	Area center = Area::proportionalFit(window, image, true, false);
 
 	return center;
 }
@@ -587,7 +733,7 @@ void TouchPointsApp::enableGest(Leap::Controller controller){
 }
 
 void TouchPointsApp::gestRecognition(Leap::Frame frame , Leap::Controller controller){
-	//List of all gestures 
+	//List of all gestures
 	gestList = frame.gestures();
 		//Process gestures...
 	if (!processing){
@@ -658,16 +804,16 @@ void TouchPointsApp::leapSave(){
 void TouchPointsApp::leapDraw(Leap::Frame frame){
 	//Get all pointables from current leap frame
 	Leap::PointableList pointables = frame.pointables();
-	//Gets a virtual rectangular prism which is within the field of vie of Leap 
+	//Gets a virtual rectangular prism which is within the field of vie of Leap
 	Leap::InteractionBox iBox = frame.interactionBox();
 
 	//Temporary TouchPoint
 
-	//Traverse all pointables 
+	//Traverse all pointables
 	for (auto& points : pointables){
 		//Normalize points from iBox
 		Leap::Vector normalizedPosition = iBox.normalizePoint(points.stabilizedTipPosition());
-		//Get x and y coordinate value form normalized value within given window 
+		//Get x and y coordinate value form normalized value within given window
 		float leapXCoordinate = normalizedPosition.x * windowWidth;
 		float leapYCoordinate = windowHeight - normalizedPosition.y * windowHeight;
 
@@ -703,7 +849,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 			}
 			else{
-				//New poitable is not drawing need to add new point 
+				//New poitable is not drawing need to add new point
 				//prevPoint = result->second;
 				//gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
 				missedPoints(leapXCoordinate, leapYCoordinate, myActivePoints[points.id()].getFirstPoint().x, myActivePoints[points.id()].getFirstPoint().y, myActivePoints[points.id()]);
@@ -766,13 +912,13 @@ void TouchPointsApp::leapShapeChange(){
 	else{
 		currShape = 0;
 	}
-	
+
 	switch (currShape){
 	case 0:{
 		changeShape(Line);
 		loadImages(SHAPE_LINE);
 		imageFlag = true;
-		//Might not need this since changeShape has it 
+		//Might not need this since changeShape has it
 		modeChangeFlag = true;
 		break;
 	}
@@ -840,7 +986,7 @@ void TouchPointsApp::leapColorChange(){
 			currColor = 0;
 		}
 
-		//Provides correct image to provide feedback 
+		//Provides correct image to provide feedback
 		switch (currColor){
 		case 0:{
 			loadImages(COLOR_ZERO);
@@ -919,7 +1065,7 @@ void TouchPointsApp::drawImageTexture(){
 void TouchPointsApp::loadImages(string imageName){
 
 	imageTexture = gl::Texture::create(loadImage(loadAsset(imageName)));
-}	
+}
 
 void TouchPointsApp::saveImage(string imageType){
 
@@ -1128,7 +1274,7 @@ void TouchPointsApp::changeShape(Shape x){
 		rectDraw = false;
 		triangleDraw = false;
 		modeChangeFlag = true;
-	} 
+	}
 	else if (x == Circle){
 		lineDraw = false;
 		circleDraw = true;
@@ -1152,7 +1298,7 @@ void TouchPointsApp::changeShape(Shape x){
 		modeChangeFlag = true;
 	}
 
-	
+
 }
 
 void TouchPointsApp::keyDown(KeyEvent event)
@@ -1171,7 +1317,14 @@ void TouchPointsApp::keyDown(KeyEvent event)
 
 	}
 	else if (event.getCode() == KeyEvent::KEY_ESCAPE) {
-		//Need to find a way to clear eyeX setup...
+		//Clears EyeX context then quits the program.
+#ifdef EYEX
+		txDisableConnection(hContext);
+		txReleaseObject(&g_hGlobalInteractorSnapshot);
+		success = txShutdownContext(hContext, TX_CLEANUPTIMEOUT_DEFAULT, TX_FALSE) == TX_RESULT_OK;
+		success &= txReleaseContext(&hContext) == TX_RESULT_OK;
+		success &= txUninitializeEyeX() == TX_RESULT_OK;
+#endif
 		quit();
 	}
 	else if (event.getChar() == 'r')	//Turns on random color mode
@@ -1325,10 +1478,32 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 			colorButtons = !colorButtons;
 			return true;
 		}
+		else if (x < 100 && y < 50){
+			shapeButtons = !shapeButtons;
+			return true;
+		}
+		else if (x < 150 && y < 50){
+			filledShapes = !filledShapes;
+			modeChangeFlag = true;
+			return true;
+		}
+		else if (x < 200 && y < 50){
+			if (lineSize != 15.0f)
+				lineSize++;
+			//else lineSize = 1;
+			modeChangeFlag = true;
+		}
+		else if (x < 250 && y < 50){
+			if (lineSize != 1.0f)
+				lineSize--;
+			//else lineSize = 15;
+			modeChangeFlag = true;
+		}
 	}
 
 	//Color buttons UI
 	if (colorButtons){
+		/*
 		if (x < 50 && y < 100){
 			currColor = 1;
 			colorButtons = false;
@@ -1347,13 +1522,74 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 			modeChangeFlag = true;
 			return true;
 		}
+		*/
+		for (int i = 0; i < COLOR_AMOUNT; i++){
+			if (x < 50 && y < (50 * i + 100))
+			{
+				currColor = i;
+				colorButtons = false;
+				modeChangeFlag = true;
+				return true;
+			}
+		}
+	}
+	if (shapeButtons){
+		if (x > 50 && x < 100 && y < 100){
+			changeShape(Line);
+			shapeButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
+		if (x > 50 && x < 100 && y < 150){
+			changeShape(Circle);
+			shapeButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
+		if (x > 50 && x < 100 &&y < 200){
+			changeShape(Rectangle);
+			shapeButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
+		if (x > 50 && x < 100 && y < 250){
+			changeShape(Triangle);
+			shapeButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
 	}
 	return false;
 }
 
+double lastTouch = 0;
+float lastX = 0;
+float lastY = 0;
+
 void TouchPointsApp::touchesBegan(TouchEvent event)
 {
 	for (const auto &touch : event.getTouches()) {
+		/*Tests for double tap....
+		if (0.5 > touch.getTime() - lastTouch )
+		{
+			if (lastX < touch.getX() + 10 && lastX > touch.getX() - 10)
+			{
+				if (lastY < touch.getY() + 10 && lastY > touch.getY() - 10){
+
+
+					(*firstFbo).bindFramebuffer();
+					gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+					gl::drawSolidCircle(vec2(500, 500), 30, 10);
+					(*firstFbo).unbindFramebuffer();
+					continue;
+				}
+			}
+		}
+
+		lastTouch = touch.getTime();
+		lastX = touch.getX();
+		lastY = touch.getY();
+		*/
 
 		if (inInteractiveUi(touch.getX(), touch.getY())){
 
@@ -1362,7 +1598,9 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 		else if (eraserMode){
 			activeDrawings++;
 			Color newColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]);
-			myActivePointsEraser.insert(make_pair(touch.getId(), TouchPoint(touch.getPos(), newColor, lineSize * 2)));
+			myActivePoints.insert(make_pair(touch.getId(), TouchPoint(touch.getPos(), newColor, lineSize * 2)));
+			bool tempBool = false;
+			myActiveCircles.insert(make_pair(touch.getId(), TouchCircle(touch.getPos(), lineSize*2,Color(1.0,1.0,1.0), 1, tempBool)));
 		}
 		else if (lineDraw){
 			activeDrawings++;
@@ -1420,11 +1658,40 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 	for (const auto &touch : event.getTouches()) {
 
 		if (eraserMode){
-			if (myActivePointsEraser.find(touch.getId()) == myActivePointsEraser.end())
+			if (myActivePoints.find(touch.getId()) == myActivePoints.end())
 				return;
 
-				missedPoints(touch.getPrevX(), touch.getPrevY(), touch.getX(), touch.getY(), myActivePointsEraser[touch.getId()]);
 
+			missedPoints(touch.getPrevX(), touch.getPrevY(), touch.getX(), touch.getY(), myActivePoints[touch.getId()]);
+			myPoints.push_back(myActivePoints[touch.getId()]);
+			myActivePoints[touch.getId()].clearPoints();
+
+			myActiveCircles[touch.getId()].changePosition(touch.getPos());
+
+			if (currLayer == 0){
+
+
+				(*firstFbo).bindFramebuffer();
+
+				for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+					oldPoints->draw();
+					++oldPoints;
+				}
+
+				(*firstFbo).unbindFramebuffer();
+			}
+			else if (currLayer == 1){
+				(*secondFbo).bindFramebuffer();
+
+				for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+					oldPoints->draw();
+					++oldPoints;
+				}
+
+				(*secondFbo).unbindFramebuffer();
+			}
+
+			myPoints.clear();
 
 			}
 		else if (lineDraw){
@@ -1440,12 +1707,12 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 
 
 					(*firstFbo).bindFramebuffer();
-					
+
 					for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
 						oldPoints->draw();
 						++oldPoints;
 					}
-					
+
 					(*firstFbo).unbindFramebuffer();
 				}
 				else if (currLayer == 1){
@@ -1455,17 +1722,17 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 						oldPoints->draw();
 						++oldPoints;
 					}
-					
+
 					(*secondFbo).unbindFramebuffer();
 				}
 
 				myPoints.clear();
 
 
-			
+
 		}
 		else if (circleDraw){
-			
+
 			if (myActiveCircles.find(touch.getId()) == myActiveCircles.end())
 				return;
 				float a;
@@ -1476,9 +1743,9 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 				a = a*a;
 				b = b*b;
 				c = sqrt(a + b);
-				
+
 				myActiveCircles[touch.getId()].changeRadius(c);
-			
+
 		}
 		else if (rectDraw)
 		{
@@ -1486,7 +1753,7 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 				return;
 				myActiveRectangles[touch.getId()].changePoint(touch.getPos().x, touch.getPos().y);
 
-			
+
 
 		}
 		else if (triangleDraw)
@@ -1495,7 +1762,7 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 				return;
 				myActiveTriangles[touch.getId()].changeSize(touch.getPos().x, touch.getPos().y);
 
-			
+
 
 		}
 	}
@@ -1506,39 +1773,16 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 	for (const auto &touch : event.getTouches()) {
 
 		if (eraserMode){
-		
-			if (myActivePointsEraser.find(touch.getId()) == myActivePointsEraser.end())
+
+			if (myActivePoints.find(touch.getId()) == myActivePoints.end())
 				return;
 
 			activeDrawings--;
-			myPointsEraser.push_back(myActivePointsEraser[touch.getId()]);
-			myActivePointsEraser.erase(touch.getId());
-			if (currLayer == 0){
-
-
-				(*firstFbo).bindFramebuffer();
-				for (auto oldPoints = myPointsEraser.begin(); oldPoints != myPointsEraser.end();) {
-					oldPoints->draw();
-					++oldPoints;
-				}
-				
-				(*firstFbo).unbindFramebuffer();
-			}
-			else if (currLayer == 1){
-				(*secondFbo).bindFramebuffer();
-
-				for (auto oldPoints = myPointsEraser.begin(); oldPoints != myPointsEraser.end();) {
-					oldPoints->draw();
-					++oldPoints;
-				}
-				
-				(*secondFbo).unbindFramebuffer();
-			}
-
-			myPointsEraser.clear();
+			myActivePoints.erase(touch.getId());
+			myActiveCircles.erase(touch.getId());
 		}
 		else if (lineDraw){
-			
+
 			if (myActivePoints.find(touch.getId()) == myActivePoints.end())
 				return;
 
@@ -1547,7 +1791,7 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 
 		}
 		else if (circleDraw){
-			
+
 				if (myActiveCircles.find(touch.getId()) == myActiveCircles.end())
 					return;
 
@@ -1564,7 +1808,7 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 						oldPoints->draw();
 						++oldPoints;
 					}
-					
+
 					(*firstFbo).unbindFramebuffer();
 				}
 				else if (currLayer == 1){
@@ -1574,15 +1818,15 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 						oldPoints->draw();
 						++oldPoints;
 					}
-					
+
 					(*secondFbo).unbindFramebuffer();
 				}
 
 				myCircles.clear();
-			
+
 		}
 		else if (rectDraw){
-			
+
 			if (myActiveRectangles.find(touch.getId()) == myActiveRectangles.end())
 				return;
 
@@ -1598,7 +1842,7 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 					oldPoints->draw();
 					++oldPoints;
 				}
-				
+
 				(*firstFbo).unbindFramebuffer();
 			}
 			else if (currLayer == 1){
@@ -1608,14 +1852,14 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 					oldPoints->draw();
 					++oldPoints;
 				}
-				
+
 				(*secondFbo).unbindFramebuffer();
 			}
 
 			myRectangles.clear();
 		}
 		else if (triangleDraw){
-			
+
 			if (myActiveTriangles.find(touch.getId()) == myActiveTriangles.end())
 				return;
 
@@ -1627,22 +1871,22 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 
 
 				(*firstFbo).bindFramebuffer();
-				
+
 				for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
 					oldPoints->draw();
 					++oldPoints;
 				}
-				
+
 				(*firstFbo).unbindFramebuffer();
 			}
 			else if (currLayer == 1){
 				(*secondFbo).bindFramebuffer();
-				
+
 				for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
 					oldPoints->draw();
 					++oldPoints;
 				}
-				
+
 				(*secondFbo).unbindFramebuffer();
 			}
 
@@ -1656,12 +1900,12 @@ void TouchPointsApp::mouseDown(MouseEvent event)
 }
 
 void TouchPointsApp::update(){
-	/*
-	if (gazePositionX < 75 && gazePositionY < 120){
+
+	//if (gazePositionX < 75 && gazePositionY < 120){
 		modeButtons = true;
-	}
-	else modeButtons = false;
-	*/
+	//}
+	//else modeButtons = false;
+
 }
 
 void TouchPointsApp::drawUi(){
@@ -1686,28 +1930,140 @@ void TouchPointsApp::drawUi(){
 		gl::drawStrokedRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight), 5);
 		gl::color(0.0, 0.0, 0.0);
 		gl::drawSolidRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight));
-		if (rectDraw) modeRectangle();
+		if (eraserMode){
+			bool tempBool = false;
+			TouchCircle(vec2(windowWidth*.9, windowHeight *.9), lineSize * 2, Color(1.0, 1.0, 1.0), 1, tempBool).draw();
+		}
+		else if (rectDraw) modeRectangle();
 		else if (circleDraw) modeCircle();
 		else if (triangleDraw) modeTriangle();
 		else if (lineDraw) modeLine();
+
+		if (System::hasMultiTouch()){
+			gl::color(0.0, 0.0, 1.0);
+			gl::drawSolidRect(Rectf(windowWidth*.81, windowHeight * .81, windowWidth*.83, windowHeight *.83));
+		}
+		if (leapRunning){
+			gl::color(0.0, 1.0, 0.0);
+			gl::drawSolidRect(Rectf(windowWidth*.84, windowHeight * .81, windowWidth*.86, windowHeight *.83));
+		}
+		if (eyeXRunning){
+			gl::color(1.0, 0.0, 0.0);
+			gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight * .81, windowWidth*.89, windowHeight *.83));
+		}
 		(*uiFbo).unbindFramebuffer();
 		uiFboFlag = false;
 	}
 	if (modeButtons){
+		//Color Button
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(0, 2, 100, 50), 10);
 		gl::color(1.0, 1.0, 0);
 		gl::drawSolidRect(Rectf(0, 0, 20, 50));
 		gl::color(0.0, 1.0, 0.0);
 		gl::drawSolidRect(Rectf(20, 0, 35, 50));
 		gl::color(1.0, 0.0, 1.0);
 		gl::drawSolidRect(Rectf(35, 0, 50, 50));
+
+		//Shapes button
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(50, 2, 100, 50), 10);
+		gl::color(0.0, 1.0, 1.0);
+		gl::drawSolidRect(Rectf(50, 0, 100, 50));
+
+		//FilledShapes button
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(100, 2, 150, 50), 10);
+		gl::color(1.0, 1.0, 1.0);
+		gl::drawSolidRect(Rectf(100, 0, 150, 50));
+
+		//Line Size
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(150, 2, 200, 50), 10);
+		gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(150, 0, 200, 50));
+
+		gl::color(1.0, 1.0, 1.0);
+		gl::lineWidth(5);
+		gl::drawLine(vec2(160, 25), vec2(190, 25));
+		gl::drawLine(vec2(175, 10), vec2(175, 40));
+
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(200, 2, 250, 50), 10);
+		gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(200, 0, 250, 50));
+
+		gl::color(1.0, 1.0, 1.0);
+		//gl::lineWidth(lineSize);
+		gl::drawLine(vec2(210, 25), vec2(240, 25));
+		//gl::drawLine(vec2(225, 10), vec2(225, 40));
+
 	}
 	if (colorButtons){
+		/*
 		gl::color(colorArray[1][0], colorArray[1][1], colorArray[1][2]);
 		gl::drawSolidRect(Rectf(0, 50, 50, 100));
 		gl::color(colorArray[2][0], colorArray[2][1], colorArray[2][2]);
 		gl::drawSolidRect(Rectf(0, 100, 50, 150));
 		gl::color(colorArray[3][0], colorArray[3][1], colorArray[3][2]);
 		gl::drawSolidRect(Rectf(0, 150, 50, 200));
+		gl::color(colorArray[4][0], colorArray[4][1], colorArray[4][2]);
+		gl::drawSolidRect(Rectf(0, 150, 50, 200));
+		gl::color(colorArray[5][0], colorArray[5][1], colorArray[5][2]);
+		gl::drawSolidRect(Rectf(0, 150, 50, 200));
+		gl::color(colorArray[6][0], colorArray[6][1], colorArray[6][2]);
+		gl::drawSolidRect(Rectf(0, 150, 50, 200));
+		*/
+
+		for (int i = 0; i < COLOR_AMOUNT; i++)
+		{
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(0, 50*(i) + 50 , 50, 50 * i + 100), 10);
+			gl::color(colorArray[i][0], colorArray[i][1], colorArray[i][2]);
+			gl::drawSolidRect(Rectf(0, 50 * (i)+50, 50, 50 * (i)+100));
+		}
+	}
+	if (shapeButtons){
+
+		for (int i = 0; i < 4; i++){
+
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(50, 50 * (i)+50, 100, 50 * i + 100), 10);
+			gl::color(0.0,0.0,0.0);
+			gl::drawSolidRect(Rectf(50, 50 * i + 50, 100, 50 * i + 100));
+		}
+
+		gl::color(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
+		gl::lineWidth(2);
+		gl::drawLine(vec2(55, 95), vec2(95, 55));
+
+		if (filledShapes)
+			gl::drawSolidCircle(vec2(75, 125), 15);
+		else gl::drawStrokedCircle(vec2(75, 125), 15);
+
+		if (filledShapes)
+			gl::drawSolidRect(Rectf(60, 188, 90, 160));
+		else gl::drawStrokedRect(Rectf(60, 188, 90, 160));
+
+
+		if (filledShapes)
+			gl::drawSolidTriangle(vec2(55, 245), vec2(95, 245), vec2(73, 205));
+		else {
+
+			gl::drawLine(vec2(55, 245), vec2(95, 245));
+			gl::drawLine(vec2(95, 245), vec2(73, 205));
+			gl::drawLine(vec2(73, 205), vec2(55, 245));
+		}
+		/*
+		gl::color(colorArray[1][0], colorArray[1][1], colorArray[1][2]);
+		gl::drawSolidRect(Rectf(50, 50, 100, 100));
+		gl::color(colorArray[2][0], colorArray[2][1], colorArray[2][2]);
+		gl::drawSolidRect(Rectf(50, 100, 100, 150));
+		gl::color(colorArray[3][0], colorArray[3][1], colorArray[3][2]);
+		gl::drawSolidRect(Rectf(50, 150, 100, 200));
+		gl::color(colorArray[4][0], colorArray[4][1], colorArray[5][2]);
+		gl::drawSolidRect(Rectf(50, 200, 100, 250));
+		*/
 	}
 }
 
@@ -1716,7 +2072,7 @@ void TouchPointsApp::draw()
 	gl::enableAlphaBlending();
 	//Add a vector instead of the 3 ref to arrays.
 	gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
-	
+
 	currentFrame = getLeapFrame(leapContr);
 
 	if (leapDrawFlag){
@@ -1753,8 +2109,8 @@ void TouchPointsApp::draw()
 		//gl::draw(uiFbo->getColorTexture());
 
 	}
-	
-	//Calls specified action from gesture recgonized 
+
+	//Calls specified action from gesture recgonized
 	gestRecognition(currentFrame, leapContr);
 
 	/*Draws image that provides feedback */
@@ -1766,13 +2122,13 @@ void TouchPointsApp::draw()
 
 	drawUi();
 	gl::color(1.0, 1.0, 1.0);
-	
+
 	/*Draws the frame buffer for UI*/
 	//if (gazePositionX > 1920 && gazePositionY > 1080)
 	{
 		gl::draw(uiFbo->getColorTexture());
 	}
-	
+
 	for (auto &activePoint : myActiveCircles) {
 		activePoint.second.draw();
 	}
@@ -1785,6 +2141,7 @@ void TouchPointsApp::draw()
 	for (auto &activePoint : myActivePointsEraser) {
 		activePoint.second.draw();
 	}
+
 
 }
 
