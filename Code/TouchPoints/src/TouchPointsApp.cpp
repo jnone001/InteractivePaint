@@ -920,7 +920,7 @@ void TouchPointsApp::leapShapeChange(){
 		loadImages(SHAPE_LINE);
 		imageFlag = true;
 		//Might not need this since changeShape has it
-		modeChangeFlag = true;
+		//modeChangeFlag = true;
 		break;
 	}
 	case 1:{
@@ -928,7 +928,7 @@ void TouchPointsApp::leapShapeChange(){
 		changeShape(Circle);
 		loadImages(SHAPE_Circle);
 		imageFlag = true;
-		modeChangeFlag = true;
+		//modeChangeFlag = true;
 		break;
 	}
 	case 2:{
@@ -936,7 +936,7 @@ void TouchPointsApp::leapShapeChange(){
 		changeShape(Rectangle);
 		loadImages(SHAPE_Rectangle);
 		imageFlag = true;
-		modeChangeFlag = true;
+		//modeChangeFlag = true;
 		break;
 	}
 	case 3:{
@@ -944,14 +944,14 @@ void TouchPointsApp::leapShapeChange(){
 		changeShape(Triangle);
 		loadImages(SHAPE_Triangle);
 		imageFlag = true;
-		modeChangeFlag = true;
+		//modeChangeFlag = true;
 		break;
 	}case 4:{
 		filledShapes = true;
 		changeShape(Circle);
 		loadImages(SHAPE_Filled_Circle);
 		imageFlag = true;
-		modeChangeFlag = true;
+		//modeChangeFlag = true;
 		break;
 	}
 	case 5:{
@@ -959,7 +959,7 @@ void TouchPointsApp::leapShapeChange(){
 		changeShape(Rectangle);
 		loadImages(SHAPE_Filled_Rectangle);
 		imageFlag = true;
-		modeChangeFlag = true;
+		//modeChangeFlag = true;
 		break;
 	}
 	case 6:{
@@ -967,7 +967,7 @@ void TouchPointsApp::leapShapeChange(){
 		changeShape(Triangle);
 		loadImages(SHAPE_Filled_Triangle);
 		imageFlag = true;
-		modeChangeFlag = true;
+		//modeChangeFlag = true;
 		break;
 	}
 	default:{
@@ -1030,6 +1030,12 @@ void TouchPointsApp::leapColorChange(){
 			imageFlag = true;
 			modeChangeFlag = true;
 			break;
+		}
+		case 7:{
+				   loadImages(COLOR_SIX);
+				   imageFlag = true;
+				   modeChangeFlag = true;
+				   break;
 		}
 		default:{
 			//std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
@@ -1424,7 +1430,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		imageFlag = true;
 	}
 	else if (event.getChar() == 'v'){
-		leapDrawFlag = false;
+		leapDrawFlag = !leapDrawFlag;
 	}
 	else if (event.getChar() == 'g'){
 		leapDrawFlag = true;
