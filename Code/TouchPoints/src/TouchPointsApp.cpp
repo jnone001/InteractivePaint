@@ -37,7 +37,7 @@ using namespace cinder;
 
 //Device connection status
 bool eyeXRunning = false;
-bool leapRunning = true;
+bool leapRunning = false;
 
 #define EYEX
 #ifdef EYEX
@@ -82,11 +82,11 @@ int resolutionY;
 #define COLOR_SIX "Purple.png"
 
 #define SWIPE_GESTURE 8
-//#define windowWidth  getWindowSize().x 
-//#define windowHeight getWindowSize().y 
+#define windowWidth  getWindowSize().x 
+#define windowHeight getWindowSize().y 
 
-#define windowWidth  1919
-#define windowHeight 1079
+//#define windowWidth  1919
+//#define windowHeight 1079
 #define FRAME_RATE 120
 
 //Leap map 
@@ -98,6 +98,8 @@ gl::TextureRef imageTexture;
 float fadeTime = 1.0;
 int imageNum;
 
+
+bool modeChangeFlag = true;
 
 //Layers
 int currLayer = 0;
@@ -111,6 +113,18 @@ int currBackground = 0;
 
 float backgroundArray[BACKGROUND_COLORS][3] = { { 0.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f } };
 float colorArray[COLOR_AMOUNT][3] = { { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f } };
+
+
+//Global EyeX Handler
+TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
+
+class LeapListener : public Leap::Listener{
+public:
+	virtual void onConnect(const Leap::Controller&);
+	//virtual void onFrame(const Leap::Controller&);
+	virtual void onDisconnect(const Leap::Controller&);
+};
+
 
 //TouchPointsApp, our libcinder app!
 class TouchPointsApp : public App {
@@ -155,6 +169,7 @@ public:
 	void	leapDraw(Leap::Frame frame);
 	int 	gestRecognition(Leap::Frame frame , Leap::Controller controller);
 
+
 	//List of MODES
 	bool randColor = false;
 	bool eraserMode = false;
@@ -168,8 +183,11 @@ public:
 	//List of drawUI Flags
 	bool modeButtons = true;
 	bool colorButtons = false;
+	bool shapeButtons = false;
 	bool uiFboFlag = false;
-	bool modeChangeFlag = true;
+	
+
+	void modeChangeFlagTrue();
 
 
 
@@ -188,13 +206,19 @@ private:
 	Leap::Controller leapContr;
 	Leap::Frame currentFrame;
 	Leap::GestureList gestList;
+	LeapListener	myLeapListener;
 
 	//EyeX 
 
-	TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
+	
 	TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
 	TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
+	TX_TICKET hGazeTrackingStateChangedTicket = TX_INVALID_TICKET;
+	TX_EYEXAVAILABILITY availability;
 	BOOL success;
+	TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
+
+
 
 
 
@@ -242,6 +266,20 @@ Leap::Frame getLeapFrame(Leap::Controller controller){
 	return controller.frame();
 }
 
+
+void TouchPointsApp::modeChangeFlagTrue(){
+	modeChangeFlag = true;
+}
+
+//Leapmotion listeners
+void LeapListener::onConnect(const Leap::Controller& controller){
+	leapRunning = true;
+
+}
+void LeapListener::onDisconnect(const Leap::Controller& controller){
+	leapRunning = false;
+}
+
 void prepareSettings(TouchPointsApp::Settings *settings)
 {
 	// By default, multi-touch is disabled on desktop and enabled on mobile platforms.
@@ -255,6 +293,58 @@ void prepareSettings(TouchPointsApp::Settings *settings)
 #ifdef EYEX
 //eyeX Functions.
 
+void OnStateReceived(TX_HANDLE hStateBag)
+{
+	TX_BOOL success;
+	TX_INTEGER eyeTrackingState;
+	TX_SIZE2 displaySize;
+	TX_SIZE2 screenBounds;
+	TX_SIZE stringSize = 0;
+	TX_STRING currentProfileName;
+	TX_INTEGER presenceData;
+	TX_INTEGER gazeTracking;
+
+
+	success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_EYETRACKINGSTATE, &eyeTrackingState) == TX_RESULT_OK);
+	if (success) {
+		switch (eyeTrackingState) {
+		case TX_EYETRACKINGDEVICESTATUS_TRACKING:
+			eyeXRunning = true;
+			modeChangeFlag = true;
+			break;
+
+		case TX_EYETRACKINGDEVICESTATUS_DEVICENOTCONNECTED:
+			eyeXRunning = false;
+			modeChangeFlag = true;
+			break;
+
+		default:
+			printf(":DDD");
+		}
+	}
+
+	/*
+
+	success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_GAZETRACKING, &gazeTracking) == TX_RESULT_OK);
+	if (success) {
+		(gazeTracking == TX_GAZETRACKING_GAZETRACKED) ? eyeXRunning = true : eyeXRunning = false;
+		modeChangeFlag = true;
+	}
+	*/
+
+
+}
+void TX_CALLCONVENTION OnEngineStateChanged(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userParam)
+{
+	TX_RESULT result = TX_RESULT_UNKNOWN;
+	TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
+
+	if (txGetAsyncDataResultCode(hAsyncData, &result) == TX_RESULT_OK &&
+		txGetAsyncDataContent(hAsyncData, &hStateBag) == TX_RESULT_OK) {
+		OnStateReceived(hStateBag);
+		txReleaseObject(&hStateBag);
+	}
+}
 
 /*
 * Initializes g_hGlobalInteractorSnapshot with an interactor that has the Gaze Point behavior.
@@ -298,13 +388,16 @@ void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connect
 {
 	switch (connectionState) {
 	case TX_CONNECTIONSTATE_CONNECTED: {
+
 		BOOL success;
+		//eyeXRunning = true;
 		//printf("The connection state is now CONNECTED (We are connected to the EyeX Engine)\n");
 		// commit the snapshot with the global interactor as soon as the connection to the engine is established.
 		// (it cannot be done earlier because committing means "send to the engine".)
 		success = txCommitSnapshotAsync(g_hGlobalInteractorSnapshot, OnSnapshotCommitted, NULL) == TX_RESULT_OK;
+		txGetStateAsync(hContext, TX_STATEPATH_EYETRACKING, OnEngineStateChanged, NULL);
 		if (!success) {
-			//printf("Failed to initialize the data stream.\n");
+			
 		}
 		else {
 			//printf("Waiting for gaze data to start streaming...\n");
@@ -314,6 +407,7 @@ void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connect
 
 	case TX_CONNECTIONSTATE_DISCONNECTED:
 		//printf("The connection state is now DISCONNECTED (We are disconnected from the EyeX Engine)\n");
+		eyeXRunning = false;
 		break;
 
 	case TX_CONNECTIONSTATE_TRYINGTOCONNECT:
@@ -452,6 +546,7 @@ void TouchPointsApp::setup()
 
 	//Enable all Leap Gestures 
 	TouchPointsApp::enableGest(leapContr);
+	leapContr.addListener(myLeapListener);
 
 	setFrameRate(FRAME_RATE);
 
@@ -480,9 +575,10 @@ void TouchPointsApp::setup()
 	success &= txRegisterConnectionStateChangedHandler(hContext, &hConnectionStateChangedTicket, OnEngineConnectionStateChanged, NULL) == TX_RESULT_OK;
 	success &= txRegisterEventHandler(hContext, &hEventHandlerTicket, HandleEvent, NULL) == TX_RESULT_OK;
 	success &= txEnableConnection(hContext) == TX_RESULT_OK;
+	success &= txRegisterStateChangedHandler(hContext, &hGazeTrackingStateChangedTicket, TX_STATEPATH_GAZETRACKING, OnEngineStateChanged, NULL) == TX_RESULT_OK;
 
 	if (success){
-		eyeXRunning = true;
+		//eyeXRunning = true;
 	}
 	/*
 	// let the events flow until a key is pressed.
@@ -600,7 +696,7 @@ void missedPoints(int xi, int yi, int xf, int yf, TouchPoint& points){
 static Area calcCenter(gl::TextureRef imageTexture){
 	Area image = imageTexture->getBounds();
 	Area window = getWindowBounds();
-	Area center = Area::proportionalFit(image, window, true, false);
+	Area center = Area::proportionalFit(window, image, true, false);
 
 	return center;
 }
@@ -1290,6 +1386,10 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 			colorButtons = !colorButtons;
 			return true;
 		}
+		else if (x < 100 && y < 50){
+			shapeButtons = !shapeButtons;
+			return true;
+		}
 	}
 
 	//Color buttons UI
@@ -1309,6 +1409,32 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 		if (x < 50 && y < 200){
 			currColor = 3;
 			colorButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
+	}
+	else if (shapeButtons){
+		if (x > 50 && x < 100 && y < 100){
+			changeShape(Line);
+			shapeButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
+		if (x > 50 && x < 100 && y < 150){
+			changeShape(Circle);
+			shapeButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
+		if (x > 50 && x < 100 &&y < 200){
+			changeShape(Rectangle);
+			shapeButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
+		if (x > 50 && x < 100 && y < 250){
+			changeShape(Triangle);
+			shapeButtons = false;
 			modeChangeFlag = true;
 			return true;
 		}
@@ -1621,12 +1747,12 @@ void TouchPointsApp::mouseDown(MouseEvent event)
 }
 
 void TouchPointsApp::update(){
-	/*
-	if (gazePositionX < 75 && gazePositionY < 120){
+	
+	//if (gazePositionX < 75 && gazePositionY < 120){
 		modeButtons = true;
-	}
+	//}
 	else modeButtons = false;
-	*/
+	
 }
 
 void TouchPointsApp::drawUi(){
@@ -1655,16 +1781,38 @@ void TouchPointsApp::drawUi(){
 		else if (circleDraw) modeCircle();
 		else if (triangleDraw) modeTriangle();
 		else if (lineDraw) modeLine();
+
+		if (System::hasMultiTouch()){
+			gl::color(0.0, 0.0, 1.0);
+			gl::drawSolidRect(Rectf(windowWidth*.81, windowHeight * .81, windowWidth*.83, windowHeight *.83));
+		}
+		if (leapRunning){
+			gl::color(0.0, 1.0, 0.0);
+			gl::drawSolidRect(Rectf(windowWidth*.84, windowHeight * .81, windowWidth*.86, windowHeight *.83));
+		}
+		if (eyeXRunning){
+			gl::color(1.0, 0.0, 0.0);
+			gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight * .81, windowWidth*.89, windowHeight *.83));
+		}
 		(*uiFbo).unbindFramebuffer();
 		uiFboFlag = false;
 	}
 	if (modeButtons){
+		//Color Button
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(0, 2, 100, 50), 10);
 		gl::color(1.0, 1.0, 0);
 		gl::drawSolidRect(Rectf(0, 0, 20, 50));
 		gl::color(0.0, 1.0, 0.0);
 		gl::drawSolidRect(Rectf(20, 0, 35, 50));
 		gl::color(1.0, 0.0, 1.0);
 		gl::drawSolidRect(Rectf(35, 0, 50, 50));
+
+		//Shapes button
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(50, 2, 100, 50), 10);
+		gl::color(0.0, 1.0, 1.0);
+		gl::drawSolidRect(Rectf(50, 0, 100, 50));
 	}
 	if (colorButtons){
 		gl::color(colorArray[1][0], colorArray[1][1], colorArray[1][2]);
@@ -1673,6 +1821,16 @@ void TouchPointsApp::drawUi(){
 		gl::drawSolidRect(Rectf(0, 100, 50, 150));
 		gl::color(colorArray[3][0], colorArray[3][1], colorArray[3][2]);
 		gl::drawSolidRect(Rectf(0, 150, 50, 200));
+	}
+	if (shapeButtons){
+		gl::color(colorArray[1][0], colorArray[1][1], colorArray[1][2]);
+		gl::drawSolidRect(Rectf(50, 50, 100, 100));
+		gl::color(colorArray[2][0], colorArray[2][1], colorArray[2][2]);
+		gl::drawSolidRect(Rectf(50, 100, 100, 150));
+		gl::color(colorArray[3][0], colorArray[3][1], colorArray[3][2]);
+		gl::drawSolidRect(Rectf(50, 150, 100, 200));
+		gl::color(colorArray[4][0], colorArray[4][1], colorArray[5][2]);
+		gl::drawSolidRect(Rectf(50, 200, 100, 250));
 	}
 }
 
