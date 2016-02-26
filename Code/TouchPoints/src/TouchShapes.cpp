@@ -117,6 +117,11 @@ struct TouchCircle : public TouchShape
 	void changeRadius(float &radius){
 		mRadius = radius;
 	}
+	
+	void changePosition(vec2 newCenter)
+	{
+		mCenter = newCenter;
+	}
 
 	float getCenterX(){
 		return mCenter.x;
@@ -202,6 +207,8 @@ struct TouchTriangle : public TouchShape
 		mBaseCenter = baseCenter;
 		mColor = color;
 		mSize = size;
+		if (mSize == 1)
+			mSize = 2;
 		mFilledShapes = filledShapes;
 	}
 
@@ -214,6 +221,7 @@ struct TouchTriangle : public TouchShape
 
 	void draw() override
 	{
+		
 		gl::lineWidth(mSize);
 		gl::color(mColor);
 		if (mFilledShapes){
@@ -225,6 +233,17 @@ struct TouchTriangle : public TouchShape
 			gl::drawLine(mPoint1, mPoint2);
 			gl::drawLine(mPoint2, mPoint3);
 			gl::drawLine(mPoint3, mPoint1);
+			/*
+			TouchPoint uiTouchPoint(mPoint1, mColor, mSize);
+			uiTouchPoint.addPoint(mPoint2);
+			uiTouchPoint.addPoint(mPoint3);
+			uiTouchPoint.addPoint(mPoint1);
+
+			missedPoints123(mPoint1.x, mPoint1.y, mPoint2.x, mPoint2.y, uiTouchPoint);
+			missedPoints123(mPoint1.x, mPoint1.y, mPoint2.x, mPoint2.y, uiTouchPoint);
+			missedPoints123(mPoint1.x, mPoint1.y, mPoint2.x, mPoint2.y, uiTouchPoint);
+			uiTouchPoint.draw();
+			*/
 			
 
 
