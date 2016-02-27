@@ -1575,7 +1575,8 @@ float lastY = 0;
 void TouchPointsApp::touchesBegan(TouchEvent event)
 {
 	for (const auto &touch : event.getTouches()) {
-		/*Tests for double tap....
+		//Tests for double tap....
+		
 		if (0.5 > touch.getTime() - lastTouch )
 		{
 			if (lastX < touch.getX() + 10 && lastX > touch.getX() - 10)
@@ -1595,7 +1596,7 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 		lastTouch = touch.getTime();
 		lastX = touch.getX();
 		lastY = touch.getY();
-		*/
+		
 
 		if (inInteractiveUi(touch.getX(), touch.getY())){
 
@@ -1906,12 +1907,14 @@ void TouchPointsApp::mouseDown(MouseEvent event)
 }
 
 void TouchPointsApp::update(){
+	
 
-	//if (gazePositionX < 75 && gazePositionY < 120){
-		modeButtons = true;
-	//}
-	//else modeButtons = false;
-
+	if (eyeXRunning){
+		if (gazePositionX < 400 && gazePositionY < 150){
+			modeButtons = true;
+		}
+		else modeButtons = false;
+	}
 }
 
 void TouchPointsApp::drawUi(){
@@ -2130,10 +2133,17 @@ void TouchPointsApp::draw()
 	gl::color(1.0, 1.0, 1.0);
 
 	/*Draws the frame buffer for UI*/
-	//if (gazePositionX > 1920 && gazePositionY > 1080)
-	{
-		gl::draw(uiFbo->getColorTexture());
+	if (eyeXRunning){
+
+
+		if (gazePositionX > windowWidth*.8 && gazePositionY > windowHeight*.8)
+		{
+			gl::draw(uiFbo->getColorTexture());
+		}
 	}
+	else gl::draw(uiFbo->getColorTexture());
+
+
 
 	for (auto &activePoint : myActiveCircles) {
 		activePoint.second.draw();
