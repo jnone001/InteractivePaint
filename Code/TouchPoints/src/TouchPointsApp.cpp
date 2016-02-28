@@ -1558,7 +1558,7 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 {
 	for (const auto &touch : event.getTouches()) {
 		//Tests for double tap....
-		
+		/*
 		if (0.5 > touch.getTime() - lastTouch )
 		{
 			if (lastX < touch.getX() + 10 && lastX > touch.getX() - 10)
@@ -1578,7 +1578,7 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 		lastTouch = touch.getTime();
 		lastX = touch.getX();
 		lastY = touch.getY();
-		
+		*/
 
 		if (inInteractiveUi(touch.getX(), touch.getY())){
 
