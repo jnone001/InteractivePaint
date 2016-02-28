@@ -1498,37 +1498,19 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 				lineSize++;
 			//else lineSize = 1;
 			modeChangeFlag = true;
+			return true;
 		}
 		else if (x < 250 && y < 50){
 			if (lineSize != 1.0f)
 				lineSize--;
 			//else lineSize = 15;
 			modeChangeFlag = true;
+			return true;
 		}
 	}
 
 	//Color buttons UI
 	if (colorButtons){
-		/*
-		if (x < 50 && y < 100){
-			currColor = 1;
-			colorButtons = false;
-			modeChangeFlag = true;
-			return true;
-		}
-		if (x < 50 && y < 150){
-			currColor = 2;
-			colorButtons = false;
-			modeChangeFlag = true;
-			return true;
-		}
-		if (x < 50 && y < 200){
-			currColor = 3;
-			colorButtons = false;
-			modeChangeFlag = true;
-			return true;
-		}
-		*/
 		for (int i = 0; i < COLOR_AMOUNT; i++){
 			if (x < 50 && y < (50 * i + 100))
 			{
@@ -2009,20 +1991,6 @@ void TouchPointsApp::drawUi(){
 
 	}
 	if (colorButtons){
-		/*
-		gl::color(colorArray[1][0], colorArray[1][1], colorArray[1][2]);
-		gl::drawSolidRect(Rectf(0, 50, 50, 100));
-		gl::color(colorArray[2][0], colorArray[2][1], colorArray[2][2]);
-		gl::drawSolidRect(Rectf(0, 100, 50, 150));
-		gl::color(colorArray[3][0], colorArray[3][1], colorArray[3][2]);
-		gl::drawSolidRect(Rectf(0, 150, 50, 200));
-		gl::color(colorArray[4][0], colorArray[4][1], colorArray[4][2]);
-		gl::drawSolidRect(Rectf(0, 150, 50, 200));
-		gl::color(colorArray[5][0], colorArray[5][1], colorArray[5][2]);
-		gl::drawSolidRect(Rectf(0, 150, 50, 200));
-		gl::color(colorArray[6][0], colorArray[6][1], colorArray[6][2]);
-		gl::drawSolidRect(Rectf(0, 150, 50, 200));
-		*/
 
 		for (int i = 0; i < COLOR_AMOUNT; i++)
 		{
@@ -2063,16 +2031,6 @@ void TouchPointsApp::drawUi(){
 			gl::drawLine(vec2(95, 245), vec2(73, 205));
 			gl::drawLine(vec2(73, 205), vec2(55, 245));
 		}
-		/*
-		gl::color(colorArray[1][0], colorArray[1][1], colorArray[1][2]);
-		gl::drawSolidRect(Rectf(50, 50, 100, 100));
-		gl::color(colorArray[2][0], colorArray[2][1], colorArray[2][2]);
-		gl::drawSolidRect(Rectf(50, 100, 100, 150));
-		gl::color(colorArray[3][0], colorArray[3][1], colorArray[3][2]);
-		gl::drawSolidRect(Rectf(50, 150, 100, 200));
-		gl::color(colorArray[4][0], colorArray[4][1], colorArray[5][2]);
-		gl::drawSolidRect(Rectf(50, 200, 100, 250));
-		*/
 	}
 }
 
