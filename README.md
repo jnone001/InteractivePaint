@@ -8,6 +8,8 @@ Multitouch Read Me
 If you are currently using the Tobii EyeX you must have your 'gaze' in the vicinity of the UI to have it display as well as work properly.
 
 Top Left Buttons - From left to right
+
+
 	Color Change Button
 		Toggling this button opens up another menu of all the colors that you can change to. Colors correspond to the color inside the boxes.
 
