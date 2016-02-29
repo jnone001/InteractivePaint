@@ -65,3 +65,24 @@ Keyboard Shortcuts
 	'f' - toggles filled shapes on and off
 	'l' - Changes between the two layers. 
 		The application currently has two layers. There is no UI Representation for which layer is currently on top at the moment. 
+		
+		
+Drawing - 
+
+	Lines
+	
+		When in line mode simply drag your finger across the touch screen to draw lines. 
+		The Program supports as many fingers as your multitouch display does.
+	
+	Circles 
+		When in circle mode simply put your finger where you want the center of the circle to be.
+		Drag your finger until the desired size of the circle is created
+		
+	Rectangles 
+		When in rectangle mode place your finger at the location where you want one of the corners.
+		Drag your finger until you get your desired rectangle size, then lift.
+		
+	Triangles
+		When in triangle mode, the touch of your finger represents the center of the base.
+		Drag your finger to change the height as well as width of the triangle.
+		Release your finger when the desired height and width is created.
