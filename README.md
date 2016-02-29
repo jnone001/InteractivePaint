@@ -86,3 +86,101 @@ Drawing -
 		When in triangle mode, the touch of your finger represents the center of the base.
 		Drag your finger to change the height as well as width of the triangle.
 		Release your finger when the desired height and width is created.
+		
+
+
+Leap Motion Read Me
+
+	Leap motion device allows a user to draw by using his or her fingers. 
+	Also provides gestures that allows the user to change the current color being used
+	to draw and the current shape chosen for drawing. The final gesture a keyboard tap gesture 
+	allows user to save current canvas.
+
+Leap Motion Drawing
+	
+	Leap Motion Drawing capabilities
+		The leap motion enables a user to draw lines on the screen by using his or her fingers as the drawing tool.
+		Currently only line drawing is allowed and the shapes can only be drawn using the multi touch screen. The Interaction 
+		UI will show three lines that tells the user the current mode is in line drawing mode.
+
+	Instructions for drawing a line with Leap Motion
+		The leap motion allows all ten of a persons fingers to be using to create lines on the canvas. 
+		When a person would like to draw he or she should first uses his or her index finger and slowly approach the leap
+		motion from the front side of the device. As a person finger enters the leap motions interaction zone a green circle
+		will appear when the device reads the finger. 
+		A green circle signals to the user that he or she is hovering over a virtual touch screen created by the leap 
+		motion device. The green circle will fade away as the person continues to move their finger towards the screen. 
+		Once the green circle disappears the person has entered the drawing zone and will be able to draw by moving their
+		fingers around the screen. 
+		
+		When a person wants to finish a line drawn he or she must remove their hand from the leap motion device's 
+		interaction zone.
+
+	Leap Motion Gestures
+		Leap motion device has three different gestures that allows a user to change a current setting of the 
+		program or save an image. 
+		
+		Since the leap motion device is always running a person may draw and accidently perform a gesture.
+		In order to avoid a gesture being read accidently the user can toggle off and on the drawing mode 
+		for the leap motion. 
+		
+		By pressing KeyBoard shortcut 'v' as stated previously the drawing capabilities will be disabled 
+		allowing a user to not have to worry about drawing while performing or gesture.
+		
+	
+	Swipe Gesture
+		When a user performs a swipe gesture the current color the program is set on will be incremented to the
+		next predefined color. 
+		
+		A successful gesture reading will provide feedback in the form of the new color appearing on the screen 
+		and eventually fades out. 
+		
+		How to Perform a swipe gesture:
+		- The swipe gesture can be performed horizontally or vertically
+		- The user may start on the left or right side of the leap motion or start at the top or bottom
+		- When the user decides to perform the swipe he or she must move from one side of the leap to the opposite side
+		- For example: left to right , right to left , top to bottom , bottom to top
+		- 
+		-The gesture should be one  fluid motion and best down with a single finger pointing toward the screen.
+		The gesture is read best by the device when the user keeps their wrist and hand rigid and moves their arm. 
+		User should imagine your finger,hand,wrist and arm as one solid object.
+
+	Circle Gesture
+		When a user performs a circle gesture the current shape, for drawing , the program is set on will be 
+		incremented to next predefined shape. 
+		
+		A successful gesture reading will provide feedback as a shape image appearing on the screen 
+		and eventually fades out. 
+		
+		How to Perform a circle gesture:
+		- The circle gesture can be performed using either the left or right index finger.
+		- The user begins the gesture by using their index finger and pointing towards the screen with his 
+		- or her hand over the leap motion device.To begin the gesture the user either goes in a clock 
+		- or counterclock direction.The user should continue moving only his or her index finger and complete 
+		- a 360 degree rotation which will be read by the leap motion as a single circle gesture. 
+		- Again it is suggested for the user to keep hand and wrist still and only rotate index finger in 
+		- a circle.
+		
+		User Note:
+		Unlike the multi touch in order to have filled shapes the user must continue traverse the possible 
+		shapes until the filled shape they desire has been dispalyed.
+
+		Also user should note that shapes can only be drawn with the touch screen.
+
+	
+	Keyboard Tap Gesture
+		When a user performs a keyboard tap gesture the current canvas is saved to the users computer.
+		
+		A successful gesture reading will provide feedback in the form a saved file image. 
+		
+		How to Perform a keyboard tap gesture:
+		- The keyboard tap gesture can be performed using either the left or right index finger.
+		- The user begins the gesture by using their index finger and pointing towards the screen 
+		- with his or her hand over the leap motion device. To perform the gesture the user keeps his 
+		- or her wrist and hand still and points the index finger towards the keyboard in a single fluid 
+		- motion while keep hand and wrist still. The motion simulates a person taping a keyboard key.
+ 
+	Troublshooting:
+	Make sure the leap motion service is running on the machine perform starting the Interactive Paint Program.
+
+
