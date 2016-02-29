@@ -5,7 +5,7 @@ User Read Me
 Multitouch Read Me
 
 	 Without using the Tobii EyeX these UI Boxes should always be showing. 
-	If you are currently using the Tobii EyeX you must have your 'gaze' in the vicinity of the UI to have it display as well as 	work properly.
+	If you are currently using the Tobii EyeX you must have your 'gaze' in the vicinity of the UI to have it display as well as work properly.
 
 Top Left Buttons - From left to right
 
