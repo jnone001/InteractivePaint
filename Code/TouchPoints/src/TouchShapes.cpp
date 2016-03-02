@@ -33,7 +33,7 @@ struct TouchShape {
 
 protected:
 	bool			mFilledShapes;
-	Color			mColor;
+	ColorA			mColor;
 	float			mSize;
 
 };
@@ -42,7 +42,7 @@ protected:
 struct TouchPoint : public TouchShape
 {
 	TouchPoint(){}
-	TouchPoint(const vec2 &initialPt, const Color &color, const float &size)
+	TouchPoint(const vec2 &initialPt, const ColorA &color, const float &size)
 	{
 		//mLine.push_back(initialPt);
 		pointList.emplace_back(initialPt);
@@ -73,11 +73,21 @@ struct TouchPoint : public TouchShape
 		gl::lineWidth(mSize);
 		//auto allPoints = mLine.getPoints();
 		gl::color(mColor);
-
+		
 		for (auto points : pointList){
 			gl::drawSolidCircle(points, mSize);
 		}
 
+		
+		
+
+		/*
+		gl::begin(GL_LINE_STRIP);
+		for (const vec2 &point : pointList) {
+			gl::vertex(point);
+		}
+		gl::end();
+		*/
 
 		//gl::draw(mLine);
 
@@ -102,7 +112,7 @@ private:
 struct TouchCircle : public TouchShape
 {
 	TouchCircle(){}
-	TouchCircle(const vec2 &center, const float &radius, const Color &color, const float &size, bool &filledShapes)
+	TouchCircle(const vec2 &center, const float &radius, const ColorA &color, const float &size, bool &filledShapes)
 		//:  mRadius(radius), mCenter(center)
 	{
 		//mLine.push_back(initialPt);
@@ -137,6 +147,9 @@ struct TouchCircle : public TouchShape
 			gl::drawSolidCircle(mCenter, mRadius);
 		}
 		else gl::drawStrokedCircle(mCenter, mRadius, mSize*2.0f);
+		
+
+		gl::color(1.0, 1.0, 1.0, 1.0);
 
 	}
 
@@ -149,7 +162,7 @@ private:
 struct TouchRectangle : public TouchShape
 {
 	TouchRectangle(){}
-	TouchRectangle(const int &x1, const int &y1, const int &x2, const int &y2, const Color &color, const float &size, bool &filledShapes)
+	TouchRectangle(const int &x1, const int &y1, const int &x2, const int &y2, const ColorA &color, const float &size, bool &filledShapes)
 		//: mUpperLeftX(x1), mUpperLeftY(y1), mLowerRightX(x2), mLowerRightY(y2)
 	{
 		//mLine.push_back(initialPt);
@@ -185,6 +198,8 @@ struct TouchRectangle : public TouchShape
 		}
 		else gl::drawStrokedRect(Rectf(mUpperLeftX, mUpperLeftY, mLowerRightX, mLowerRightY), mSize);
 
+
+		gl::color(1.0, 1.0, 1.0, 1.0);
 	}
 private:
 	int mUpperLeftX;
@@ -197,7 +212,7 @@ private:
 struct TouchTriangle : public TouchShape
 {
 	TouchTriangle(){}
-	TouchTriangle(const vec2 &point1, const vec2 &point2, const vec2 &point3, const vec2 &baseCenter, const Color &color, const float &size, bool &filledShapes)
+	TouchTriangle(const vec2 &point1, const vec2 &point2, const vec2 &point3, const vec2 &baseCenter, const ColorA &color, const float &size, bool &filledShapes)
 		//: mPoint1(point1), mPoint2(point2), mPoint3(point3), mBaseCenter(baseCenter)
 	{
 		//mLine.push_back(initialPt);
@@ -233,6 +248,10 @@ struct TouchTriangle : public TouchShape
 			gl::drawLine(mPoint1, mPoint2);
 			gl::drawLine(mPoint2, mPoint3);
 			gl::drawLine(mPoint3, mPoint1);
+
+
+
+			gl::color(1.0, 1.0, 1.0, 1.0);
 			/*
 			TouchPoint uiTouchPoint(mPoint1, mColor, mSize);
 			uiTouchPoint.addPoint(mPoint2);
