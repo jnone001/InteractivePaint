@@ -719,8 +719,8 @@ static Area calcCenter(gl::TextureRef imageTexture){
 
 	Area image = imageTexture->getBounds();
 	Area window = getWindowBounds();
-	//Area center = Area::proportionalFit(window, image, true, false);
-	Area center(vec2(800, 800), vec2(1100, 1100));
+	Area center = Area::proportionalFit(window, image, true, false);
+	//Area center(vec2(800, 800), vec2(1100, 1100));
 	return center;
 }
 
