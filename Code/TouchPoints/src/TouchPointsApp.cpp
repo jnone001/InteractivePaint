@@ -860,6 +860,13 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 		{
 			gl::color(0, 1, 0, 1 - points.touchDistance());
 			gl::drawSolidCircle(vec2(leapXCoordinate, leapYCoordinate), 40);
+			/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION
+			if(pointsMap.find(points.id()) != pointsMap.end()){
+				pointsMap.erase(points.id());
+				myActivePoints[points.id()].clearPoints();
+				endTouchShapes(points.id());
+			}
+			*/
 		}
 		else if (points.touchDistance() <= 0)
 		{
@@ -879,7 +886,8 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 					ColorA newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2], currentAlpha);
 					myActivePoints.insert(make_pair(points.id(), TouchPoint(vec2(leapXCoordinate, leapYCoordinate), newColor, lineSize)));
 				}
-				/*LEAP TOUCHES. Temp Unavailable. Need to find a way to 'endTouchShapes()' or else we can't clear active and draw shapes...
+				
+				/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION
 				beginTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate));
 				*/
 				pointsMap.emplace(points.id(), vec2(leapXCoordinate, leapYCoordinate));
@@ -933,18 +941,20 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 				myPoints.clear();
 				
-				/*LEAP SHAPES! Temp unworking. Need an 'End' drawing phase for each ID.
+				/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION
 				movingTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate), vec2(myActivePoints[points.id()].getFirstPoint()));
 				myActivePoints[points.id()].addPoint(vec2(leapXCoordinate, leapYCoordinate));
 				*/
+				
 			}
 		}
 		else
 		{
-			/*
-			for (auto& point : line){
-			//gl::color(1, 1, 0, 0);
-			//gl::drawSolidCircle(point, 10);
+			/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION
+			if (pointsMap.find(points.id()) != pointsMap.end()){
+				pointsMap.erase(points.id());
+				myActivePoints[points.id()].clearPoints();
+				endTouchShapes(points.id());
 			}
 			*/
 
