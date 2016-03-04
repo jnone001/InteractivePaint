@@ -1,8 +1,5 @@
-#define HIYAA
-#ifndef HIYAA
-
-#ifndef TOUCHSHAPES_CPP
-#define TOUCHSHAPES_CPP
+#ifndef TOUCHSHAPES_H
+#define TOUCHSHAPES_H
 //Cinder and OpenGL Includes
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
@@ -92,18 +89,18 @@ struct TouchPoint : public TouchShape
 		gl::lineWidth(mSize);
 		//auto allPoints = mLine.getPoints();
 		gl::color(mColor);
-		
+
 		for (auto points : pointList){
 			gl::drawSolidCircle(points, mSize);
 		}
 
-		
-		
+
+
 
 		/*
 		gl::begin(GL_LINE_STRIP);
 		for (const vec2 &point : pointList) {
-			gl::vertex(point);
+		gl::vertex(point);
 		}
 		gl::end();
 		*/
@@ -149,7 +146,7 @@ struct TouchCircle : public TouchShape
 	float getRadius(){
 		return mRadius;
 	}
-	
+
 	void changePosition(vec2 newCenter)
 	{
 		mCenter = newCenter;
@@ -172,7 +169,7 @@ struct TouchCircle : public TouchShape
 			gl::drawSolidCircle(mCenter, mRadius);
 		}
 		else gl::drawStrokedCircle(mCenter, mRadius, mSize*2.0f);
-		
+
 
 		gl::color(1.0, 1.0, 1.0, 1.0);
 
@@ -268,7 +265,7 @@ struct TouchTriangle : public TouchShape
 
 	void draw() override
 	{
-		
+
 		gl::lineWidth(mSize);
 		gl::color(mColor);
 		if (mFilledShapes){
@@ -276,7 +273,7 @@ struct TouchTriangle : public TouchShape
 		}
 		else
 		{
-			
+
 			gl::drawLine(mPoint1, mPoint2);
 			gl::drawLine(mPoint2, mPoint3);
 			gl::drawLine(mPoint3, mPoint1);
@@ -295,7 +292,7 @@ struct TouchTriangle : public TouchShape
 			missedPoints123(mPoint1.x, mPoint1.y, mPoint2.x, mPoint2.y, uiTouchPoint);
 			uiTouchPoint.draw();
 			*/
-			
+
 
 
 			//gl::drawSolidTriangle(mPoint1, mPoint2, mPoint3);
@@ -322,5 +319,4 @@ private:
 	vec2 mBaseCenter;
 };
 
-#endif
 #endif
