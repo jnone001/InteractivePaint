@@ -1,3 +1,5 @@
+
+
 //Cinder and OpenGL Includes
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
@@ -12,24 +14,30 @@
 #include <chrono>
 #include <ctime>
 
-//Leap Includes
 
-#include "Leap.h"
-#include "LeapMath.h"
+//Standard Library Includes
+#include <vector>
+#include <map>
+#include <list>
+
 
 //Our own includes
 //#include "TouchShapes.h"
-#include "TouchShapes.cpp"
+#include "symmetryLine.h"
+#include "TouchShapes.h"
+
+
+
+//Leap Includes
+#include "Leap.h"
+#include "LeapMath.h"
+
 
 //include Images
 #include "cinder/ImageIo.h"
 #include "cinder/Utilities.h"
 #include "String.h"
 
-//Standard Library Includes
-#include <vector>
-#include <map>
-#include <list>
 
 using namespace ci;
 using namespace ci::app;
@@ -134,6 +142,7 @@ string symbolArray[TOTAL_SYMBOLS];
 
 //Global EyeX Handler
 TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
+
 
 class LeapListener : public Leap::Listener{
 public:
@@ -240,6 +249,9 @@ private:
 	BOOL success;
 	TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
 
+	//Symmetry lines
+	SymmetryLine mySymmetry;
+	bool symmetryOn = false;
 
 
 
@@ -267,6 +279,8 @@ private:
 	list<TouchPoint>				myPoints;
 	map<uint32_t, TouchPoint>		myActivePointsEraser;
 	list<TouchPoint>				myPointsEraser;
+	map<uint32_t, TouchCircle>		myActiveCirclesEraser;
+	list<TouchCircle>				myCirclesEraser;
 	map<uint32_t, TouchCircle>		myActiveCircles;
 	list<TouchCircle>				myCircles;
 	map<uint32_t, TouchRectangle>	myActiveRectangles;
@@ -298,10 +312,12 @@ void TouchPointsApp::modeChangeFlagTrue(){
 //Leapmotion listeners
 void LeapListener::onConnect(const Leap::Controller& controller){
 	leapRunning = true;
+	modeChangeFlag = true;
 
 }
 void LeapListener::onDisconnect(const Leap::Controller& controller){
 	leapRunning = false;
+	modeChangeFlag = true;
 }
 
 void prepareSettings(TouchPointsApp::Settings *settings)
@@ -550,7 +566,9 @@ void TouchPointsApp::setup()
 {
 	//Sets max mulitouch points
 	auto testvar1 = System::hasMultiTouch();
-	auto testvar2 = System::getMaxMultiTouchPoints();
+	int32_t testvar2 = System::getMaxMultiTouchPoints();
+
+
 	CI_LOG_I("MT: " << System::hasMultiTouch() << " Max points: " << System::getMaxMultiTouchPoints());
 	glEnable(GL_LINE_SMOOTH);
 	//setWindowSize(windowWidth, windowHeight);
@@ -581,6 +599,10 @@ void TouchPointsApp::setup()
 	setFrameRate(FRAME_RATE);
 
 	activeDrawings = 0;
+
+	//Set up symmetry line
+	
+	mySymmetry = SymmetryLine(windowWidth/2,true);
 
 	//Sets up eyeX context
 #ifdef EYEX
@@ -1468,6 +1490,12 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	else if (event.getChar() == 'v'){
 		leapDrawFlag = !leapDrawFlag;
 	}
+	else if (event.getChar() == 's'){
+		symmetryOn = !symmetryOn;
+	}
+	else if (event.getChar() == 'a'){
+		
+	}
 	else if (event.getChar() == 'g'){
 		leapDrawFlag = true;
 	}
@@ -1631,10 +1659,12 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 
 		else if (eraserMode){
 			activeDrawings++;
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 			ColorA newColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 1);
 			myActivePoints.insert(make_pair(touch.getId(), TouchPoint(touch.getPos(), newColor, lineSize * 2)));
 			bool tempBool = false;
-			myActiveCircles.insert(make_pair(touch.getId(), TouchCircle(touch.getPos(), lineSize*2,Color(1.0,1.0,1.0), 1, tempBool)));
+			myActiveCirclesEraser.insert(make_pair(touch.getId(), TouchCircle(touch.getPos(), lineSize*2,Color(1.0,1.0,1.0), 1, tempBool)));
 		}
 		else if (lineDraw){
 			activeDrawings++;
@@ -1700,8 +1730,7 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 			myPoints.push_back(myActivePoints[touch.getId()]);
 			myActivePoints[touch.getId()].clearPoints();
 
-			myActiveCircles[touch.getId()].changePosition(touch.getPos());
-
+			myActiveCirclesEraser[touch.getId()].changePosition(touch.getPos());
 			if (currLayer == 0){
 
 
@@ -1744,6 +1773,8 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 
 					for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
 						oldPoints->draw();
+						if (symmetryOn)
+							mySymmetry.symmetricLine(*oldPoints).draw();
 						++oldPoints;
 					}
 
@@ -1754,6 +1785,8 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 
 					for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
 						oldPoints->draw();
+						if (symmetryOn)
+							mySymmetry.symmetricLine(*oldPoints).draw();
 						++oldPoints;
 					}
 
@@ -1813,7 +1846,7 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 
 			activeDrawings--;
 			myActivePoints.erase(touch.getId());
-			myActiveCircles.erase(touch.getId());
+			myActiveCirclesEraser.erase(touch.getId());
 		}
 		else if (lineDraw){
 
@@ -1841,6 +1874,8 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 					for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
 						gl::color(1.0, 1.0, 1.0, 1.0);
 						oldPoints->draw();
+						if (symmetryOn)
+							mySymmetry.symmetricCircle(*oldPoints).draw();
 						++oldPoints;
 					}
 
@@ -1852,6 +1887,8 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 					for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
 						gl::color(1.0, 1.0, 1.0, 1.0);
 						oldPoints->draw();
+						if (symmetryOn)
+							mySymmetry.symmetricCircle(*oldPoints).draw();
 						++oldPoints;
 					}
 
@@ -1876,6 +1913,8 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 				(*firstFbo).bindFramebuffer();
 				for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();) {
 					oldPoints->draw();
+					if (symmetryOn)
+						mySymmetry.symmetricRectangle(*oldPoints).draw();
 					++oldPoints;
 				}
 
@@ -1886,6 +1925,8 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 
 				for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();) {
 					oldPoints->draw();
+					if (symmetryOn)
+						mySymmetry.symmetricRectangle(*oldPoints).draw();
 					++oldPoints;
 				}
 
@@ -1910,6 +1951,8 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 
 				for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
 					oldPoints->draw();
+					if (symmetryOn)
+						mySymmetry.symmetricTriangle(*oldPoints).draw();
 					++oldPoints;
 				}
 
@@ -1920,6 +1963,8 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 
 				for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
 					oldPoints->draw();
+					if (symmetryOn)
+						mySymmetry.symmetricTriangle(*oldPoints).draw();
 					++oldPoints;
 				}
 
@@ -1938,8 +1983,11 @@ void TouchPointsApp::mouseDown(MouseEvent event)
 void TouchPointsApp::update(){
 	
 
+	bool testvar2 = System::hasMultiTouch();
+	auto testvar3 = System::getMaxMultiTouchPoints();
+
 	if (eyeXRunning){
-		if (gazePositionX < 400 && gazePositionY < 150){
+		if (gazePositionX < 400 && gazePositionY < 100){
 			modeButtons = true;
 		}
 		else modeButtons = false;
@@ -2097,6 +2145,7 @@ void TouchPointsApp::drawUi(){
 void TouchPointsApp::draw()
 {
 	gl::enableAlphaBlending();
+
 	//Add a vector instead of the 3 ref to arrays.
 	gl::clear(ColorA(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0));
 	//glClearColor(1.0, 1.0, 1.0, 0.0);
@@ -2170,15 +2219,27 @@ void TouchPointsApp::draw()
 	glClear(GL_COLOR_BUFFER_BIT);
 	for (auto &activePoint : myActiveCircles) {
 		activePoint.second.draw();
+		if (symmetryOn)
+			mySymmetry.symmetricCircle(activePoint.second).draw();
 	}
 	for (auto &activePoint : myActiveRectangles) {
 		activePoint.second.draw();
+		if (symmetryOn)
+			mySymmetry.symmetricRectangle(activePoint.second).draw();
 	}
 	for (auto &activePoint : myActiveTriangles) {
 		activePoint.second.draw();
+		if (symmetryOn)
+			mySymmetry.symmetricTriangle(activePoint.second).draw();
 	}
 	for (auto &activePoint : myActivePointsEraser) {
 		activePoint.second.draw();
+	}
+
+	for (auto &activePoint : myActiveCirclesEraser) {
+		activePoint.second.draw();
+		//if (symmetryOn)
+			//mySymmetry.symmetricCircle(activePoint.second).draw();
 	}
 	(*activeFbo).unbindFramebuffer();
 
