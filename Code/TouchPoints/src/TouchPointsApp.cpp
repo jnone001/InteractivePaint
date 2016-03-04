@@ -254,6 +254,10 @@ private:
 	bool symmetryOn = false;
 
 
+	//
+	void beginTouchShapes(uint32_t myId, vec2 myPos);
+	void movingTouchShapes(uint32_t myId, vec2 myPos, vec2 prevPos);
+	void endTouchShapes(uint32_t myId);
 
 
 
@@ -866,7 +870,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 				//myPrevX = leapXCoordinate;
 				//myPrevY = leapYCoordinate;
-
+				
 				if (randColor){
 					ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, currentAlpha);
 					myActivePoints.insert(make_pair(points.id(), TouchPoint(vec2(leapXCoordinate, leapYCoordinate), newColor, lineSize)));
@@ -875,15 +879,19 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 					ColorA newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2], currentAlpha);
 					myActivePoints.insert(make_pair(points.id(), TouchPoint(vec2(leapXCoordinate, leapYCoordinate), newColor, lineSize)));
 				}
-
+				/*LEAP TOUCHES. Temp Unavailable. Need to find a way to 'endTouchShapes()' or else we can't clear active and draw shapes...
+				beginTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate));
+				*/
 				pointsMap.emplace(points.id(), vec2(leapXCoordinate, leapYCoordinate));
 				myActivePoints[points.id()].addPoint(vec2(leapXCoordinate, leapYCoordinate));
+
 
 			}
 			else{
 				//New poitable is not drawing need to add new point
 				//prevPoint = result->second;
 				//gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
+				
 				missedPoints(leapXCoordinate, leapYCoordinate, myActivePoints[points.id()].getFirstPoint().x, myActivePoints[points.id()].getFirstPoint().y, myActivePoints[points.id()]);
 
 				//myPrevX = leapXCoordinate;
@@ -902,6 +910,8 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 					//for (int i = 0; i < 5; i++){
 					for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
 						oldPoints->draw();
+						if (symmetryOn)
+							mySymmetry.symmetricLine(*oldPoints).draw();
 						++oldPoints;
 					}
 					//}
@@ -913,6 +923,8 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 					//for (int i = 0; i < 5; i++){
 					for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
 						oldPoints->draw();
+						if (symmetryOn)
+							mySymmetry.symmetricLine(*oldPoints).draw();
 						++oldPoints;
 					}
 					//}
@@ -920,6 +932,11 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 				}
 
 				myPoints.clear();
+				
+				/*LEAP SHAPES! Temp unworking. Need an 'End' drawing phase for each ID.
+				movingTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate), vec2(myActivePoints[points.id()].getFirstPoint()));
+				myActivePoints[points.id()].addPoint(vec2(leapXCoordinate, leapYCoordinate));
+				*/
 			}
 		}
 		else
@@ -1627,6 +1644,314 @@ double lastTouch = 0;
 float lastX = 0;
 float lastY = 0;
 
+void TouchPointsApp::beginTouchShapes( uint32_t myId, vec2 myPos)
+{
+	if (eraserMode){
+		activeDrawings++;
+		ColorA newColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 1);
+		myActivePoints.insert(make_pair(myId, TouchPoint(myPos, newColor, lineSize * 2)));
+		bool tempBool = false;
+		myActiveCirclesEraser.insert(make_pair(myId, TouchCircle(myPos, lineSize * 2, Color(1.0, 1.0, 1.0), 1, tempBool)));
+	}
+	else if (lineDraw){
+		activeDrawings++;
+		if (randColor){
+			ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, currentAlpha);
+			myActivePoints.insert(make_pair(myId, TouchPoint(myPos, newColor, lineSize)));
+		}
+		else {
+			ColorA newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2], currentAlpha);
+			myActivePoints.insert(make_pair(myId, TouchPoint(myPos, newColor, lineSize)));
+		}
+
+	}
+	else if (circleDraw){
+		activeDrawings++;
+		if (randColor){
+			ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, currentAlpha);
+			myActiveCircles.insert(make_pair(myId, TouchCircle(myPos, 30.0f, newColor, lineSize, filledShapes)));
+		}
+		else {
+			ColorA newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2], currentAlpha);
+			myActiveCircles.insert(make_pair(myId, TouchCircle(myPos, 30.0f, newColor, lineSize, filledShapes)));
+		}
+
+	}
+	else if (rectDraw){
+		activeDrawings++;
+		if (randColor){
+			ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, currentAlpha);
+			myActiveRectangles.insert(make_pair(myId, TouchRectangle(myPos.x, myPos.y, myPos.x, myPos.y, newColor, lineSize, filledShapes)));
+		}
+		else {
+			ColorA newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2], currentAlpha);
+			myActiveRectangles.insert(make_pair(myId, TouchRectangle(myPos.x, myPos.y, myPos.x, myPos.y, newColor, lineSize, filledShapes)));
+		}
+	}
+	else if (triangleDraw){
+		activeDrawings++;
+		if (randColor){
+			ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, currentAlpha);
+			myActiveTriangles.insert(make_pair(myId, TouchTriangle(myPos, myPos, myPos, myPos, newColor, lineSize, filledShapes)));
+		}
+		else {
+			ColorA newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2], currentAlpha);
+			myActiveTriangles.insert(make_pair(myId, TouchTriangle(myPos, myPos, myPos, myPos, newColor, lineSize, filledShapes)));
+		}
+	}
+}
+void TouchPointsApp::movingTouchShapes( uint32_t myId, vec2 myPos, vec2 prevPos)
+{
+	if (eraserMode){
+		if (myActivePoints.find(myId) == myActivePoints.end())
+			return;
+
+
+		missedPoints(prevPos.x, prevPos.y, myPos.x, myPos.y, myActivePoints[myId]);
+		myPoints.push_back(myActivePoints[myId]);
+		myActivePoints[myId].clearPoints();
+
+		myActiveCirclesEraser[myId].changePosition(myPos);
+		if (currLayer == 0){
+
+
+			(*firstFbo).bindFramebuffer();
+
+			for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+				oldPoints->draw();
+				++oldPoints;
+			}
+
+			(*firstFbo).unbindFramebuffer();
+		}
+		else if (currLayer == 1){
+			(*secondFbo).bindFramebuffer();
+
+			for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+				oldPoints->draw();
+				++oldPoints;
+			}
+
+			(*secondFbo).unbindFramebuffer();
+		}
+
+		myPoints.clear();
+
+	}
+	else if (lineDraw){
+		if (myActivePoints.find(myId) == myActivePoints.end())
+			return;
+
+
+		missedPoints(prevPos.x, prevPos.y, myPos.x, myPos.y, myActivePoints[myId]);
+		myPoints.push_back(myActivePoints[myId]);
+		myActivePoints[myId].clearPoints();
+
+		if (currLayer == 0){
+
+
+			(*firstFbo).bindFramebuffer();
+
+			for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+				oldPoints->draw();
+				if (symmetryOn)
+					mySymmetry.symmetricLine(*oldPoints).draw();
+				++oldPoints;
+			}
+
+			(*firstFbo).unbindFramebuffer();
+		}
+		else if (currLayer == 1){
+			(*secondFbo).bindFramebuffer();
+
+			for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+				oldPoints->draw();
+				if (symmetryOn)
+					mySymmetry.symmetricLine(*oldPoints).draw();
+				++oldPoints;
+			}
+
+			(*secondFbo).unbindFramebuffer();
+		}
+
+		myPoints.clear();
+
+
+
+	}
+	else if (circleDraw){
+
+		if (myActiveCircles.find(myId) == myActiveCircles.end())
+			return;
+		float a;
+		float b;
+		float c;
+		a = myPos.x - myActiveCircles[myId].getCenterX();
+		b = myPos.y - myActiveCircles[myId].getCenterY();
+		a = a*a;
+		b = b*b;
+		c = sqrt(a + b);
+
+		myActiveCircles[myId].changeRadius(c);
+
+	}
+	else if (rectDraw)
+	{
+		if (myActiveRectangles.find(myId) == myActiveRectangles.end())
+			return;
+		myActiveRectangles[myId].changePoint(myPos.x, myPos.y);
+
+
+
+	}
+	else if (triangleDraw)
+	{
+		if (myActiveTriangles.find(myId) == myActiveTriangles.end())
+			return;
+		myActiveTriangles[myId].changeSize(myPos.x, myPos.y);
+
+
+
+	}
+}
+void TouchPointsApp::endTouchShapes(uint32_t myId)
+{
+	if (eraserMode){
+
+		if (myActivePoints.find(myId) == myActivePoints.end())
+			return;
+
+		activeDrawings--;
+		myActivePoints.erase(myId);
+		myActiveCirclesEraser.erase(myId);
+	}
+	else if (lineDraw){
+
+		if (myActivePoints.find(myId) == myActivePoints.end())
+			return;
+
+		activeDrawings--;
+		myActivePoints.erase(myId);
+
+	}
+	else if (circleDraw){
+
+		if (myActiveCircles.find(myId) == myActiveCircles.end())
+			return;
+
+		activeDrawings--;
+
+		myCircles.push_back(myActiveCircles[myId]);
+		myActiveCircles.erase(myId);
+
+		if (currLayer == 0){
+
+
+			(*firstFbo).bindFramebuffer();
+			for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
+				gl::color(1.0, 1.0, 1.0, 1.0);
+				oldPoints->draw();
+				if (symmetryOn)
+					mySymmetry.symmetricCircle(*oldPoints).draw();
+				++oldPoints;
+			}
+
+			(*firstFbo).unbindFramebuffer();
+		}
+		else if (currLayer == 1){
+			(*secondFbo).bindFramebuffer();
+
+			for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
+				gl::color(1.0, 1.0, 1.0, 1.0);
+				oldPoints->draw();
+				if (symmetryOn)
+					mySymmetry.symmetricCircle(*oldPoints).draw();
+				++oldPoints;
+			}
+
+			(*secondFbo).unbindFramebuffer();
+		}
+
+		myCircles.clear();
+
+	}
+	else if (rectDraw){
+
+		if (myActiveRectangles.find(myId) == myActiveRectangles.end())
+			return;
+
+		activeDrawings--;
+
+		myRectangles.push_back(myActiveRectangles[myId]);
+		myActiveRectangles.erase(myId);
+		if (currLayer == 0){
+
+
+			(*firstFbo).bindFramebuffer();
+			for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();) {
+				oldPoints->draw();
+				if (symmetryOn)
+					mySymmetry.symmetricRectangle(*oldPoints).draw();
+				++oldPoints;
+			}
+
+			(*firstFbo).unbindFramebuffer();
+		}
+		else if (currLayer == 1){
+			(*secondFbo).bindFramebuffer();
+
+			for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();) {
+				oldPoints->draw();
+				if (symmetryOn)
+					mySymmetry.symmetricRectangle(*oldPoints).draw();
+				++oldPoints;
+			}
+
+			(*secondFbo).unbindFramebuffer();
+		}
+
+		myRectangles.clear();
+	}
+	else if (triangleDraw){
+
+		if (myActiveTriangles.find(myId) == myActiveTriangles.end())
+			return;
+
+		activeDrawings--;
+
+		myTriangles.push_back(myActiveTriangles[myId]);
+		myActiveTriangles.erase(myId);
+		if (currLayer == 0){
+
+
+			(*firstFbo).bindFramebuffer();
+
+			for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
+				oldPoints->draw();
+				if (symmetryOn)
+					mySymmetry.symmetricTriangle(*oldPoints).draw();
+				++oldPoints;
+			}
+
+			(*firstFbo).unbindFramebuffer();
+		}
+		else if (currLayer == 1){
+			(*secondFbo).bindFramebuffer();
+
+			for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
+				oldPoints->draw();
+				if (symmetryOn)
+					mySymmetry.symmetricTriangle(*oldPoints).draw();
+				++oldPoints;
+			}
+
+			(*secondFbo).unbindFramebuffer();
+		}
+
+		myTriangles.clear();
+	}
+}
+
 void TouchPointsApp::touchesBegan(TouchEvent event)
 {
 	for (const auto &touch : event.getTouches()) {
@@ -1652,66 +1977,13 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 		lastX = touch.getX();
 		lastY = touch.getY();
 		*/
+		//beginTouchShapes(touch);
 
 		if (inInteractiveUi(touch.getX(), touch.getY())){
 
 		}
-
-		else if (eraserMode){
-			activeDrawings++;
-			glEnable(GL_BLEND);
-			glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
-			ColorA newColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 1);
-			myActivePoints.insert(make_pair(touch.getId(), TouchPoint(touch.getPos(), newColor, lineSize * 2)));
-			bool tempBool = false;
-			myActiveCirclesEraser.insert(make_pair(touch.getId(), TouchCircle(touch.getPos(), lineSize*2,Color(1.0,1.0,1.0), 1, tempBool)));
-		}
-		else if (lineDraw){
-			activeDrawings++;
-			if (randColor){
-				ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, currentAlpha);
-				myActivePoints.insert(make_pair(touch.getId(), TouchPoint(touch.getPos(), newColor, lineSize)));
-			}
-			else {
-				ColorA newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2], currentAlpha);
-				myActivePoints.insert(make_pair(touch.getId(), TouchPoint(touch.getPos(), newColor, lineSize)));
-			}
-
-		}
-		else if (circleDraw){
-			activeDrawings++;
-			if (randColor){
-				ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, currentAlpha);
-				myActiveCircles.insert(make_pair(touch.getId(), TouchCircle(touch.getPos(), 30.0f, newColor, lineSize, filledShapes)));
-			}
-			else {
-				ColorA newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2], currentAlpha);
-				myActiveCircles.insert(make_pair(touch.getId(), TouchCircle(touch.getPos(), 30.0f, newColor, lineSize, filledShapes)));
-			}
-
-		}
-		else if (rectDraw){
-			activeDrawings++;
-			if (randColor){
-				ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, currentAlpha);
-				myActiveRectangles.insert(make_pair(touch.getId(), TouchRectangle(touch.getPos().x, touch.getPos().y, touch.getPos().x, touch.getPos().y, newColor, lineSize, filledShapes)));
-			}
-			else {
-				ColorA newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2], currentAlpha);
-				myActiveRectangles.insert(make_pair(touch.getId(), TouchRectangle(touch.getPos().x, touch.getPos().y, touch.getPos().x, touch.getPos().y, newColor, lineSize, filledShapes)));
-			}
-		}
-		else if (triangleDraw){
-			activeDrawings++;
-			if (randColor){
-				ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, currentAlpha);
-				myActiveTriangles.insert(make_pair(touch.getId(), TouchTriangle(touch.getPos(), touch.getPos(), touch.getPos(), touch.getPos(), newColor, lineSize, filledShapes)));
-			}
-			else {
-				ColorA newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2], currentAlpha);
-				myActiveTriangles.insert(make_pair(touch.getId(), TouchTriangle(touch.getPos(), touch.getPos(), touch.getPos(), touch.getPos(), newColor, lineSize, filledShapes)));
-			}
-		}
+		else beginTouchShapes(touch.getId(), touch.getPos());
+		
 
 	}
 }
@@ -1721,117 +1993,7 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 
 	for (const auto &touch : event.getTouches()) {
 
-		if (eraserMode){
-			if (myActivePoints.find(touch.getId()) == myActivePoints.end())
-				return;
-
-
-			missedPoints(touch.getPrevX(), touch.getPrevY(), touch.getX(), touch.getY(), myActivePoints[touch.getId()]);
-			myPoints.push_back(myActivePoints[touch.getId()]);
-			myActivePoints[touch.getId()].clearPoints();
-
-			myActiveCirclesEraser[touch.getId()].changePosition(touch.getPos());
-			if (currLayer == 0){
-
-
-				(*firstFbo).bindFramebuffer();
-
-				for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
-					oldPoints->draw();
-					++oldPoints;
-				}
-
-				(*firstFbo).unbindFramebuffer();
-			}
-			else if (currLayer == 1){
-				(*secondFbo).bindFramebuffer();
-
-				for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
-					oldPoints->draw();
-					++oldPoints;
-				}
-
-				(*secondFbo).unbindFramebuffer();
-			}
-
-			myPoints.clear();
-
-			}
-		else if (lineDraw){
-			if (myActivePoints.find(touch.getId()) == myActivePoints.end())
-				return;
-
-
-				missedPoints(touch.getPrevX(), touch.getPrevY(), touch.getX(), touch.getY(), myActivePoints[touch.getId()]);
-				myPoints.push_back(myActivePoints[touch.getId()]);
-				myActivePoints[touch.getId()].clearPoints();
-
-				if (currLayer == 0){
-
-
-					(*firstFbo).bindFramebuffer();
-
-					for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
-						oldPoints->draw();
-						if (symmetryOn)
-							mySymmetry.symmetricLine(*oldPoints).draw();
-						++oldPoints;
-					}
-
-					(*firstFbo).unbindFramebuffer();
-				}
-				else if (currLayer == 1){
-					(*secondFbo).bindFramebuffer();
-
-					for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
-						oldPoints->draw();
-						if (symmetryOn)
-							mySymmetry.symmetricLine(*oldPoints).draw();
-						++oldPoints;
-					}
-
-					(*secondFbo).unbindFramebuffer();
-				}
-
-				myPoints.clear();
-
-
-
-		}
-		else if (circleDraw){
-
-			if (myActiveCircles.find(touch.getId()) == myActiveCircles.end())
-				return;
-				float a;
-				float b;
-				float c;
-				a = touch.getPos().x - myActiveCircles[touch.getId()].getCenterX();
-				b = touch.getPos().y - myActiveCircles[touch.getId()].getCenterY();
-				a = a*a;
-				b = b*b;
-				c = sqrt(a + b);
-
-				myActiveCircles[touch.getId()].changeRadius(c);
-
-		}
-		else if (rectDraw)
-		{
-			if (myActiveRectangles.find(touch.getId()) == myActiveRectangles.end())
-				return;
-				myActiveRectangles[touch.getId()].changePoint(touch.getPos().x, touch.getPos().y);
-
-
-
-		}
-		else if (triangleDraw)
-		{
-			if (myActiveTriangles.find(touch.getId()) == myActiveTriangles.end())
-				return;
-				myActiveTriangles[touch.getId()].changeSize(touch.getPos().x, touch.getPos().y);
-
-
-
-		}
+		movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
 	}
 }
 
@@ -1839,140 +2001,7 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 {
 	for (const auto &touch : event.getTouches()) {
 
-		if (eraserMode){
-
-			if (myActivePoints.find(touch.getId()) == myActivePoints.end())
-				return;
-
-			activeDrawings--;
-			myActivePoints.erase(touch.getId());
-			myActiveCirclesEraser.erase(touch.getId());
-		}
-		else if (lineDraw){
-
-			if (myActivePoints.find(touch.getId()) == myActivePoints.end())
-				return;
-
-			activeDrawings--;
-			myActivePoints.erase(touch.getId());
-
-		}
-		else if (circleDraw){
-
-				if (myActiveCircles.find(touch.getId()) == myActiveCircles.end())
-					return;
-
-				activeDrawings--;
-
-				myCircles.push_back(myActiveCircles[touch.getId()]);
-				myActiveCircles.erase(touch.getId());
-
-				if (currLayer == 0){
-
-
-					(*firstFbo).bindFramebuffer();
-					for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
-						gl::color(1.0, 1.0, 1.0, 1.0);
-						oldPoints->draw();
-						if (symmetryOn)
-							mySymmetry.symmetricCircle(*oldPoints).draw();
-						++oldPoints;
-					}
-
-					(*firstFbo).unbindFramebuffer();
-				}
-				else if (currLayer == 1){
-					(*secondFbo).bindFramebuffer();
-
-					for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
-						gl::color(1.0, 1.0, 1.0, 1.0);
-						oldPoints->draw();
-						if (symmetryOn)
-							mySymmetry.symmetricCircle(*oldPoints).draw();
-						++oldPoints;
-					}
-
-					(*secondFbo).unbindFramebuffer();
-				}
-
-				myCircles.clear();
-
-		}
-		else if (rectDraw){
-
-			if (myActiveRectangles.find(touch.getId()) == myActiveRectangles.end())
-				return;
-
-			activeDrawings--;
-
-			myRectangles.push_back(myActiveRectangles[touch.getId()]);
-			myActiveRectangles.erase(touch.getId());
-			if (currLayer == 0){
-
-
-				(*firstFbo).bindFramebuffer();
-				for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();) {
-					oldPoints->draw();
-					if (symmetryOn)
-						mySymmetry.symmetricRectangle(*oldPoints).draw();
-					++oldPoints;
-				}
-
-				(*firstFbo).unbindFramebuffer();
-			}
-			else if (currLayer == 1){
-				(*secondFbo).bindFramebuffer();
-
-				for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();) {
-					oldPoints->draw();
-					if (symmetryOn)
-						mySymmetry.symmetricRectangle(*oldPoints).draw();
-					++oldPoints;
-				}
-
-				(*secondFbo).unbindFramebuffer();
-			}
-
-			myRectangles.clear();
-		}
-		else if (triangleDraw){
-
-			if (myActiveTriangles.find(touch.getId()) == myActiveTriangles.end())
-				return;
-
-			activeDrawings--;
-
-			myTriangles.push_back(myActiveTriangles[touch.getId()]);
-			myActiveTriangles.erase(touch.getId());
-			if (currLayer == 0){
-
-
-				(*firstFbo).bindFramebuffer();
-
-				for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
-					oldPoints->draw();
-					if (symmetryOn)
-						mySymmetry.symmetricTriangle(*oldPoints).draw();
-					++oldPoints;
-				}
-
-				(*firstFbo).unbindFramebuffer();
-			}
-			else if (currLayer == 1){
-				(*secondFbo).bindFramebuffer();
-
-				for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
-					oldPoints->draw();
-					if (symmetryOn)
-						mySymmetry.symmetricTriangle(*oldPoints).draw();
-					++oldPoints;
-				}
-
-				(*secondFbo).unbindFramebuffer();
-			}
-
-			myTriangles.clear();
-		}
+		endTouchShapes(touch.getId());
 	}
 }
 
@@ -2138,6 +2167,13 @@ void TouchPointsApp::drawUi(){
 			gl::drawLine(vec2(55, 245), vec2(95, 245));
 			gl::drawLine(vec2(95, 245), vec2(73, 205));
 			gl::drawLine(vec2(73, 205), vec2(55, 245));
+		}
+	}
+	if (symmetryOn){
+		for (int i = 0; i < 50; i = i + 2){
+			gl::lineWidth(3);
+			gl::color(1.0, 1.0, 1.0);
+			gl::drawLine(vec2(windowWidth / 2, windowHeight - i * 50), vec2(windowWidth/ 2 , windowHeight - (i+1) * 50)) ;
 		}
 	}
 }
