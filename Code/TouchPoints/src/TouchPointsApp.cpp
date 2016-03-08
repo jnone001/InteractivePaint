@@ -254,10 +254,18 @@ private:
 	bool symmetryOn = false;
 
 
-	//
+	//Functions to draw touch shapes with leap and multitouch
 	void beginTouchShapes(uint32_t myId, vec2 myPos);
 	void movingTouchShapes(uint32_t myId, vec2 myPos, vec2 prevPos);
 	void endTouchShapes(uint32_t myId);
+
+	//Gesture functions for multitouch
+
+	bool findMultiTouchGestures(TouchEvent::Touch previousPoint, TouchEvent::Touch currentPoint);
+
+	//Variables for point buffering
+	map<uint32_t, list<TouchEvent::Touch>> bufferTouches;
+	TouchEvent::Touch previousTouch;
 
 
 
@@ -1571,41 +1579,48 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 	//modeButtons UI
 	if (modeButtons){
 		//Color change button.
-		if (x < 50 && y < 50)
-		{
-			colorButtons = !colorButtons;
-			return true;
-		}
-		else if (x < 100 && y < 50){
-			shapeButtons = !shapeButtons;
-			return true;
-		}
-		else if (x < 150 && y < 50){
-			filledShapes = !filledShapes;
-			modeChangeFlag = true;
-			return true;
-		}
-		else if (x < 200 && y < 50){
-			if (lineSize != 15.0f)
-				lineSize++;
-			//else lineSize = 1;
-			modeChangeFlag = true;
-			return true;
-		}
-		else if (x < 250 && y < 50){
-			if (lineSize != 1.0f)
-				lineSize--;
-			//else lineSize = 15;
-			modeChangeFlag = true;
-			return true;
-		}
-		else if (x < 300 && y < 50){
-			decreaseAlpha();
-			return true;
-		}
-		else if (x < 350 && y < 50){
-			increaseAlpha();
-			return true;
+		if (uiFboFlag){
+
+			if (x < 50 && y < 50)
+			{
+				colorButtons = !colorButtons;
+				return true;
+			}
+			else if (x < 100 && y < 50){
+				shapeButtons = !shapeButtons;
+				return true;
+			}
+			else if (x < 150 && y < 50){
+				filledShapes = !filledShapes;
+				modeChangeFlag = true;
+				return true;
+			}
+			else if (x < 200 && y < 50){
+				if (lineSize != 15.0f)
+					lineSize++;
+				//else lineSize = 1;
+				modeChangeFlag = true;
+				return true;
+			}
+			else if (x < 250 && y < 50){
+				if (lineSize != 1.0f)
+					lineSize--;
+				//else lineSize = 15;
+				modeChangeFlag = true;
+				return true;
+			}
+			else if (x < 300 && y < 50){
+				decreaseAlpha();
+				return true;
+			}
+			else if (x < 350 && y < 50){
+				increaseAlpha();
+				return true;
+			}
+			else if (x < 400 && y < 50){
+				symmetryOn = !symmetryOn;
+				return true;
+			}
 		}
 	}
 
@@ -1962,37 +1977,85 @@ void TouchPointsApp::endTouchShapes(uint32_t myId)
 	}
 }
 
+
+
+bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, TouchEvent::Touch currentPoint){
+	
+	//Checks for double tap
+	//TouchEvent::Touch currentPoint = pointList[pointList.size() - 1];
+	//TouchEvent::Touch previousPoint = pointList[pointList.size() - 2];
+	//Detects double tap.
+	if (0.25 >   currentPoint.getTime() - previousPoint.getTime())
+	{
+		if (previousPoint.getX() < currentPoint.getX() + 20 && previousPoint.getX() > currentPoint.getX() - 20)
+		{
+			if (previousPoint.getY() < currentPoint.getY() + 20 && previousPoint.getY() > currentPoint.getY() - 20){
+
+
+				//(*firstFbo).bindFramebuffer();
+				//gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+				//gl::drawSolidCircle(vec2(500, 500), 30, 10);
+				//(*firstFbo).unbindFramebuffer();
+				uiFboFlag = !uiFboFlag;
+				bufferTouches.erase(previousPoint.getId());
+				bufferTouches.erase(currentPoint.getId());
+				return true;
+
+			}
+		}
+	}
+	else return false;
+	
+}
+
+
 void TouchPointsApp::touchesBegan(TouchEvent event)
 {
 	for (const auto &touch : event.getTouches()) {
-		//Tests for double tap....
-		/*
-		if (0.5 > touch.getTime() - lastTouch )
-		{
-			if (lastX < touch.getX() + 10 && lastX > touch.getX() - 10)
-			{
-				if (lastY < touch.getY() + 10 && lastY > touch.getY() - 10){
-					
-
-					(*firstFbo).bindFramebuffer();
-					gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
-					gl::drawSolidCircle(vec2(500, 500), 30, 10);
-					(*firstFbo).unbindFramebuffer();
-					continue;
-				}
-			}
-		}
-
-		lastTouch = touch.getTime();
-		lastX = touch.getX();
-		lastY = touch.getY();
-		*/
-		//beginTouchShapes(touch);
-
 		if (inInteractiveUi(touch.getX(), touch.getY())){
 
 		}
-		else beginTouchShapes(touch.getId(), touch.getPos());
+		else {
+			list<TouchEvent::Touch> tempList;
+			tempList.push_back(touch);
+			bufferTouches.emplace(touch.getId(), tempList);
+			
+			if (!findMultiTouchGestures(previousTouch, touch)) {
+				//If we didn't find a gesture this time, save the point incase.
+				previousTouch = touch;
+			}
+			else {
+				//Clears the previous touch if we found a multitouch gesture.
+				previousTouch.setPos(vec2(-100, -100));
+			}
+			//Tests for double tap....
+			/*
+			if (0.5 > touch.getTime() - lastTouch )
+			{
+			if (lastX < touch.getX() + 10 && lastX > touch.getX() - 10)
+			{
+			if (lastY < touch.getY() + 10 && lastY > touch.getY() - 10){
+
+
+			(*firstFbo).bindFramebuffer();
+			gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+			gl::drawSolidCircle(vec2(500, 500), 30, 10);
+			(*firstFbo).unbindFramebuffer();
+			continue;
+			}
+			}
+			}
+
+			lastTouch = touch.getTime();
+			lastX = touch.getX();
+			lastY = touch.getY();
+			*/
+			//beginTouchShapes(touch);
+		}
+		//if (inInteractiveUi(touch.getX(), touch.getY())){
+
+		//}
+		//else beginTouchShapes(touch.getId(), touch.getPos());
 		
 
 	}
@@ -2002,8 +2065,24 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 {
 
 	for (const auto &touch : event.getTouches()) {
+		if (bufferTouches.find(touch.getId()) != bufferTouches.end() && touch.getPos() != touch.getPrevPos())
+		{
+			//bufferTouches[touch.getId()].push_back(touch);
+			//list<TouchEvent::Touch> touchPoints = bufferTouches[touch.getId()];
+			//if (touchPoints.back().getTime() - touchPoints.front().getTime() > .25){
+				//beginTouchShapes(touchPoints.front().getId(), touchPoints.front().getPos());
+				//for (auto points : touchPoints){
+					//movingTouchShapes(points.getId(), points.getPos(), points.getPos());
+				//}
+				//bufferTouches.erase(touch.getId());
+			//}
+			//continue;
+			beginTouchShapes(touch.getId(), bufferTouches[touch.getId()].front().getPos());
+			movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
+			bufferTouches.erase(touch.getId());
 
-		movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
+		}
+		else movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
 	}
 }
 
@@ -2039,11 +2118,11 @@ void TouchPointsApp::drawUi(){
 
 	//gl::clear(GL_BACK);
 	//if (gazePositionX > 1920 && gazePositionY > 1080)
-	if (modeChangeFlag)
+	if (modeChangeFlag)//Draws to the UI FBO. Currently only houses 'modebox' in the fbo.
 	{
 		modeChangeFlag = false;
 		(*uiFbo).bindFramebuffer();
-		uiFboFlag = true;
+		//uiFboFlag = true;
 
 		glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -2079,111 +2158,123 @@ void TouchPointsApp::drawUi(){
 			gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight * .81, windowWidth*.89, windowHeight *.83));
 		}
 		(*uiFbo).unbindFramebuffer();
-		uiFboFlag = false;
+		//uiFboFlag = false;
 	}
-	if (modeButtons){
-		//Color Button
-		gl::color(0.9, 0.85, 0.65);
-		gl::drawStrokedRect(Rectf(0, 2, 100, 50), 10);
-		gl::color(1.0, 1.0, 0);
-		gl::drawSolidRect(Rectf(0, 0, 20, 50));
-		gl::color(0.0, 1.0, 0.0);
-		gl::drawSolidRect(Rectf(20, 0, 35, 50));
-		gl::color(1.0, 0.0, 1.0);
-		gl::drawSolidRect(Rectf(35, 0, 50, 50));
+	if (uiFboFlag){//Constantly drawn Ui buttons. If ui flag is off, we shut down the ui
 
-		//Shapes button
-		gl::color(0.9, 0.85, 0.65);
-		gl::drawStrokedRect(Rectf(50, 2, 100, 50), 10);
-		gl::color(0.0, 1.0, 1.0);
-		gl::drawSolidRect(Rectf(50, 0, 100, 50));
 
-		//FilledShapes button
-		gl::color(0.9, 0.85, 0.65);
-		gl::drawStrokedRect(Rectf(100, 2, 150, 50), 10);
-		gl::color(1.0, 1.0, 1.0);
-		gl::drawSolidRect(Rectf(100, 0, 150, 50));
-
-		//Line Size
-		gl::color(0.9, 0.85, 0.65);
-		gl::drawStrokedRect(Rectf(150, 2, 200, 50), 10);
-		gl::color(0.0, 0.0, 0.0);
-		gl::drawSolidRect(Rectf(150, 0, 200, 50));
-
-		gl::color(1.0, 1.0, 1.0);
-		gl::lineWidth(5);
-		gl::drawLine(vec2(160, 25), vec2(190, 25));
-		gl::drawLine(vec2(175, 10), vec2(175, 40));
-
-		gl::color(0.9, 0.85, 0.65);
-		gl::drawStrokedRect(Rectf(200, 2, 250, 50), 10);
-		gl::color(0.0, 0.0, 0.0);
-		gl::drawSolidRect(Rectf(200, 0, 250, 50));
-
-		gl::color(1.0, 1.0, 1.0);
-		//gl::lineWidth(lineSize);
-		gl::drawLine(vec2(210, 25), vec2(240, 25));
-		//gl::drawLine(vec2(225, 10), vec2(225, 40));
-
-		//More transparency button
-		gl::color(0.9, 0.85, 0.65);
-		gl::drawStrokedRect(Rectf(250, 2, 300, 50), 10);
-		gl::color(1.0, 0.0, 1.0, 1.0);
-		gl::drawSolidRect(Rectf(250, 0, 300, 50));
-		//Less transparent button
-		gl::color(0.9, 0.85, 0.65);
-		gl::drawStrokedRect(Rectf(300, 2, 350, 50), 10);
-		gl::color(0.0, 1.0, 0.0, 1.0);
-		gl::drawSolidRect(Rectf(300, 0, 350, 50));
-
-	}
-	if (colorButtons){
-
-		for (int i = 0; i < COLOR_AMOUNT; i++)
-		{
+		if (modeButtons){
+			//Color Button
 			gl::color(0.9, 0.85, 0.65);
-			gl::drawStrokedRect(Rectf(0, 50*(i) + 50 , 50, 50 * i + 100), 10);
-			gl::color(colorArray[i][0], colorArray[i][1], colorArray[i][2]);
-			gl::drawSolidRect(Rectf(0, 50 * (i)+50, 50, 50 * (i)+100));
-		}
-	}
-	if (shapeButtons){
+			gl::drawStrokedRect(Rectf(0, 2, 100, 50), 10);
+			gl::color(1.0, 1.0, 0);
+			gl::drawSolidRect(Rectf(0, 0, 20, 50));
+			gl::color(0.0, 1.0, 0.0);
+			gl::drawSolidRect(Rectf(20, 0, 35, 50));
+			gl::color(1.0, 0.0, 1.0);
+			gl::drawSolidRect(Rectf(35, 0, 50, 50));
 
-		for (int i = 0; i < 4; i++){
+			//Shapes button
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(50, 2, 100, 50), 10);
+			gl::color(0.0, 1.0, 1.0);
+			gl::drawSolidRect(Rectf(50, 0, 100, 50));
+
+			//FilledShapes button
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(100, 2, 150, 50), 10);
+			gl::color(1.0, 1.0, 1.0);
+			gl::drawSolidRect(Rectf(100, 0, 150, 50));
+
+			//Line Size
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(150, 2, 200, 50), 10);
+			gl::color(0.0, 0.0, 0.0);
+			gl::drawSolidRect(Rectf(150, 0, 200, 50));
+
+			gl::color(1.0, 1.0, 1.0);
+			gl::lineWidth(5);
+			gl::drawLine(vec2(160, 25), vec2(190, 25));
+			gl::drawLine(vec2(175, 10), vec2(175, 40));
 
 			gl::color(0.9, 0.85, 0.65);
-			gl::drawStrokedRect(Rectf(50, 50 * (i)+50, 100, 50 * i + 100), 10);
-			gl::color(0.0,0.0,0.0);
-			gl::drawSolidRect(Rectf(50, 50 * i + 50, 100, 50 * i + 100));
+			gl::drawStrokedRect(Rectf(200, 2, 250, 50), 10);
+			gl::color(0.0, 0.0, 0.0);
+			gl::drawSolidRect(Rectf(200, 0, 250, 50));
+
+			gl::color(1.0, 1.0, 1.0);
+			//gl::lineWidth(lineSize);
+			gl::drawLine(vec2(210, 25), vec2(240, 25));
+			//gl::drawLine(vec2(225, 10), vec2(225, 40));
+
+			//More transparency button
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(250, 2, 300, 50), 10);
+			gl::color(1.0, 0.0, 1.0, 1.0);
+			gl::drawSolidRect(Rectf(250, 0, 300, 50));
+			//Less transparent button
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(300, 2, 350, 50), 10);
+			gl::color(0.0, 1.0, 0.0, 1.0);
+			gl::drawSolidRect(Rectf(300, 0, 350, 50));
+
+			//Symmetry Button
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(350, 2, 400, 50), 10);
+			gl::drawLine(vec2(375, 2), vec2(375, 15));
+			gl::drawLine(vec2(375, 20), vec2(375, 25));
+			gl::drawLine(vec2(375, 30), vec2(375, 35));
+			gl::drawLine(vec2(375, 40), vec2(375, 45));
+		}
+		if (colorButtons){
+
+			for (int i = 0; i < COLOR_AMOUNT; i++)
+			{
+				gl::color(0.9, 0.85, 0.65);
+				gl::drawStrokedRect(Rectf(0, 50 * (i)+50, 50, 50 * i + 100), 10);
+				gl::color(colorArray[i][0], colorArray[i][1], colorArray[i][2]);
+				gl::drawSolidRect(Rectf(0, 50 * (i)+50, 50, 50 * (i)+100));
+			}
+		}
+		if (shapeButtons){
+
+			for (int i = 0; i < 4; i++){
+
+				gl::color(0.9, 0.85, 0.65);
+				gl::drawStrokedRect(Rectf(50, 50 * (i)+50, 100, 50 * i + 100), 10);
+				gl::color(0.0, 0.0, 0.0);
+				gl::drawSolidRect(Rectf(50, 50 * i + 50, 100, 50 * i + 100));
+			}
+
+			gl::color(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
+			gl::lineWidth(2);
+			gl::drawLine(vec2(55, 95), vec2(95, 55));
+
+			if (filledShapes)
+				gl::drawSolidCircle(vec2(75, 125), 15);
+			else gl::drawStrokedCircle(vec2(75, 125), 15);
+
+			if (filledShapes)
+				gl::drawSolidRect(Rectf(60, 188, 90, 160));
+			else gl::drawStrokedRect(Rectf(60, 188, 90, 160));
+
+
+			if (filledShapes)
+				gl::drawSolidTriangle(vec2(55, 245), vec2(95, 245), vec2(73, 205));
+			else {
+
+				gl::drawLine(vec2(55, 245), vec2(95, 245));
+				gl::drawLine(vec2(95, 245), vec2(73, 205));
+				gl::drawLine(vec2(73, 205), vec2(55, 245));
+			}
 		}
 
-		gl::color(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2]);
-		gl::lineWidth(2);
-		gl::drawLine(vec2(55, 95), vec2(95, 55));
-
-		if (filledShapes)
-			gl::drawSolidCircle(vec2(75, 125), 15);
-		else gl::drawStrokedCircle(vec2(75, 125), 15);
-
-		if (filledShapes)
-			gl::drawSolidRect(Rectf(60, 188, 90, 160));
-		else gl::drawStrokedRect(Rectf(60, 188, 90, 160));
-
-
-		if (filledShapes)
-			gl::drawSolidTriangle(vec2(55, 245), vec2(95, 245), vec2(73, 205));
-		else {
-
-			gl::drawLine(vec2(55, 245), vec2(95, 245));
-			gl::drawLine(vec2(95, 245), vec2(73, 205));
-			gl::drawLine(vec2(73, 205), vec2(55, 245));
-		}
 	}
 	if (symmetryOn){
 		for (int i = 0; i < 50; i = i + 2){
 			gl::lineWidth(3);
 			gl::color(1.0, 1.0, 1.0);
-			gl::drawLine(vec2(windowWidth / 2, windowHeight - i * 50), vec2(windowWidth/ 2 , windowHeight - (i+1) * 50)) ;
+			gl::drawLine(vec2(windowWidth / 2, windowHeight - i * 50), vec2(windowWidth / 2, windowHeight - (i + 1) * 50));
 		}
 	}
 }
@@ -2256,7 +2347,7 @@ void TouchPointsApp::draw()
 			gl::draw(uiFbo->getColorTexture());
 		}
 	}
-	else gl::draw(uiFbo->getColorTexture());
+	else if (uiFboFlag) gl::draw(uiFbo->getColorTexture());
 
 
 	gl::color(1.0, 1.0, 1.0, 1.0);
