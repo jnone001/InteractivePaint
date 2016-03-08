@@ -23,7 +23,7 @@
 
 //Our own includes
 //#include "TouchShapes.h"
-#include "symmetryLine.h"
+#include "SymmetryLine.h"
 #include "TouchShapes.h"
 
 
@@ -37,6 +37,13 @@
 #include "cinder/ImageIo.h"
 #include "cinder/Utilities.h"
 #include "String.h"
+
+
+
+//Standard Library Includes
+#include <vector>
+#include <map>
+#include <list> 
 
 
 using namespace ci;
@@ -92,7 +99,7 @@ int resolutionY;
 #define COLOR_FIVE "Blue.png"
 #define COLOR_SIX "Purple.png"
 
-#define SHAPE_LINE "Line.png"
+#define SHAPE_LINE "LineIcon.png"
 #define SHAPE_Circle "Circle.png"
 #define SHAPE_Rectangle "Rectangle.png"
 #define SHAPE_Triangle "Triangle.png"
@@ -112,6 +119,8 @@ int resolutionY;
 map<uint32_t, vec2> pointsMap;
 
 bool imageFlag = false;
+bool drawing = false;
+bool lockCurrentFrame = false;
 bool leapDrawFlag = true;
 bool processing = false;
 gl::TextureRef imageTexture;
@@ -760,10 +769,11 @@ void missedPoints(int xi, int yi, int xf, int yf, TouchPoint& points){
 }
 
 static Area calcCenter(gl::TextureRef imageTexture){
+
 	Area image = imageTexture->getBounds();
 	Area window = getWindowBounds();
 	Area center = Area::proportionalFit(window, image, true, false);
-
+	//Area center(vec2(800, 800), vec2(1100, 1100));
 	return center;
 }
 
@@ -777,63 +787,66 @@ void TouchPointsApp::enableGest(Leap::Controller controller){
 }
 
 void TouchPointsApp::gestRecognition(Leap::Frame frame , Leap::Controller controller){
-	//List of all gestures
-	gestList = frame.gestures();
+	
+	if (!drawing){
+		//List of all gestures
+		gestList = frame.gestures();
 		//Process gestures...
-	if (!processing){
-		//for (int g = 0; g < gestures.count(); ++g)
-		for (Leap::Gesture gesture : gestList) {
-			//Gesture gesture = gestList[g];
+		if (!processing){
+			//for (int g = 0; g < gestures.count(); ++g)
+			for (Leap::Gesture gesture : gestList) {
+				//Gesture gesture = gestList[g];
 
-			switch (gesture.type()) {
-			case Leap::Gesture::TYPE_CIRCLE:
-			{
-				Leap::CircleGesture circle = gesture;
+				switch (gesture.type()) {
+				case Leap::Gesture::TYPE_CIRCLE:
+				{
+					Leap::CircleGesture circle = gesture;
 
-				if (circle.pointable().direction().angleTo(circle.normal()) <= M_PI / 2) {
-					//clockwise circle
+					if (circle.pointable().direction().angleTo(circle.normal()) <= M_PI / 2) {
+						//clockwise circle
+						processing = true;
+						leapShapeChange();
+					}
+					else {
+						//counterclockwise circle
+						processing = true;
+						leapShapeChange();
+					}
+
+					// Calculate angle swept since last frame
+
+					float sweptAngle = 0;
+					if (circle.state() != Leap::Gesture::STATE_START) {
+						Leap::CircleGesture previousUpdate = Leap::CircleGesture(controller.frame(1).gesture(circle.id()));
+						sweptAngle = (circle.progress() - previousUpdate.progress()) * 2 * M_PI;
+					}
+
+					break;
+				}
+				case Leap::Gesture::TYPE_SWIPE:
+				{
 					processing = true;
-					leapShapeChange();
+					leapColorChange();
+					break;
 				}
-				else {
-					//counterclockwise circle
+				case Leap::Gesture::TYPE_KEY_TAP:
+				{
 					processing = true;
-					leapShapeChange();
+					leapSave();
+					break;
+
 				}
-
-				// Calculate angle swept since last frame
-
-				float sweptAngle = 0;
-				if (circle.state() != Leap::Gesture::STATE_START) {
-					Leap::CircleGesture previousUpdate = Leap::CircleGesture(controller.frame(1).gesture(circle.id()));
-					sweptAngle = (circle.progress() - previousUpdate.progress()) * 2 * M_PI;
+				case Leap::Gesture::TYPE_SCREEN_TAP:
+				{
+					Leap::ScreenTapGesture screentap = gesture;
+					//return 5;
+					std::cout << "Screen Tap Gesture Found" << std::endl;
+					break;
 				}
-
-				break;
-			}
-			case Leap::Gesture::TYPE_SWIPE:
-			{
-				processing = true;
-				leapColorChange();
-				break;
-			}
-			case Leap::Gesture::TYPE_KEY_TAP:
-			{
-				processing = true;
-				leapSave();
-				break;
-
-			}
-			case Leap::Gesture::TYPE_SCREEN_TAP:
-			{
-				Leap::ScreenTapGesture screentap = gesture;
-				//return 5;
-				std::cout << "Screen Tap Gesture Found" << std::endl;
-				break;
-			}
-			default:
-				std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
-				break;
+				default:
+					std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
+					break;
+				}
 			}
 		}
 	}
@@ -855,6 +868,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 	//Traverse all pointables
 	for (auto& points : pointables){
+		
 		//Normalize points from iBox
 		Leap::Vector normalizedPosition = iBox.normalizePoint(points.stabilizedTipPosition());
 		//Get x and y coordinate value form normalized value within given window
@@ -878,6 +892,9 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 		}
 		else if (points.touchDistance() <= 0)
 		{
+
+			lockCurrentFrame = true;
+			
 			//Check to see if id for pointable object is present
 			auto result = pointsMap.find(points.id());
 			//Checks to see if new pointable is drawing
@@ -955,6 +972,8 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 				*/
 				
 			}
+
+		
 		}
 		else
 		{
@@ -973,75 +992,77 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 void TouchPointsApp::leapShapeChange(){
 
-	if (currShape != TOTAL_SYMBOLS - 1){
-		currShape++;
-	}
-	else{
-		currShape = 0;
-	}
 
-	switch (currShape){
-	case 0:{
-		changeShape(Line);
-		loadImages(SHAPE_LINE);
-		imageFlag = true;
-		//Might not need this since changeShape has it
-		//modeChangeFlag = true;
-		break;
-	}
-	case 1:{
-		filledShapes = false;
-		changeShape(Circle);
-		loadImages(SHAPE_Circle);
-		imageFlag = true;
-		//modeChangeFlag = true;
-		break;
-	}
-	case 2:{
-		filledShapes = false;
-		changeShape(Rectangle);
-		loadImages(SHAPE_Rectangle);
-		imageFlag = true;
-		//modeChangeFlag = true;
-		break;
-	}
-	case 3:{
-		filledShapes = false;
-		changeShape(Triangle);
-		loadImages(SHAPE_Triangle);
-		imageFlag = true;
-		//modeChangeFlag = true;
-		break;
-	}case 4:{
-		filledShapes = true;
-		changeShape(Circle);
-		loadImages(SHAPE_Filled_Circle);
-		imageFlag = true;
-		//modeChangeFlag = true;
-		break;
-	}
-	case 5:{
-		filledShapes = true;
-		changeShape(Rectangle);
-		loadImages(SHAPE_Filled_Rectangle);
-		imageFlag = true;
-		//modeChangeFlag = true;
-		break;
-	}
-	case 6:{
-		filledShapes = true;
-		changeShape(Triangle);
-		loadImages(SHAPE_Filled_Triangle);
-		imageFlag = true;
-		//modeChangeFlag = true;
-		break;
-	}
-	default:{
-		//std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
-		break;
-	}
 
-	}
+		if (currShape != TOTAL_SYMBOLS - 1){
+			currShape++;
+		}
+		else{
+			currShape = 0;
+		}
+
+		switch (currShape){
+		case 0:{
+			changeShape(Line);
+			loadImages(SHAPE_LINE);
+			imageFlag = true;
+			//Might not need this since changeShape has it
+			//modeChangeFlag = true;
+			break;
+		}
+		case 1:{
+			filledShapes = false;
+			changeShape(Circle);
+			loadImages(SHAPE_Circle);
+			imageFlag = true;
+			//modeChangeFlag = true;
+			break;
+		}
+		case 2:{
+			filledShapes = false;
+			changeShape(Rectangle);
+			loadImages(SHAPE_Rectangle);
+			imageFlag = true;
+			//modeChangeFlag = true;
+			break;
+		}
+		case 3:{
+			filledShapes = false;
+			changeShape(Triangle);
+			loadImages(SHAPE_Triangle);
+			imageFlag = true;
+			//modeChangeFlag = true;
+			break;
+		}case 4:{
+			filledShapes = true;
+			changeShape(Circle);
+			loadImages(SHAPE_Filled_Circle);
+			imageFlag = true;
+			//modeChangeFlag = true;
+			break;
+		}
+		case 5:{
+			filledShapes = true;
+			changeShape(Rectangle);
+			loadImages(SHAPE_Filled_Rectangle);
+			imageFlag = true;
+			//modeChangeFlag = true;
+			break;
+		}
+		case 6:{
+			filledShapes = true;
+			changeShape(Triangle);
+			loadImages(SHAPE_Filled_Triangle);
+			imageFlag = true;
+			//modeChangeFlag = true;
+			break;
+		}
+		default:{
+			//std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
+			break;
+		}
+
+		}
 }
 
 void TouchPointsApp::leapColorChange(){
@@ -1138,6 +1159,7 @@ void TouchPointsApp::drawImageTexture(){
 void TouchPointsApp::loadImages(string imageName){
 
 	imageTexture = gl::Texture::create(loadImage(loadAsset(imageName)));
+
 }
 
 void TouchPointsApp::saveImage(string imageType){
@@ -2294,6 +2316,13 @@ void TouchPointsApp::draw()
 		leapDraw(currentFrame);
 	}
 
+	if (!lockCurrentFrame){
+		//Calls specified action from gesture recgonized
+		gestRecognition(currentFrame, leapContr);
+	}
+
+	lockCurrentFrame = false;
+
 #ifdef EYEX
 	gl::color(1.0, 1.0, 1.0, .4);
 	vec2 gaze1(gazePositionX - 10, gazePositionY);
@@ -2324,10 +2353,7 @@ void TouchPointsApp::draw()
 		//gl::draw(uiFbo->getColorTexture());
 
 	}
-
-	//Calls specified action from gesture recgonized
-	gestRecognition(currentFrame, leapContr);
-
+	
 	/*Draws image that provides feedback */
 	if (imageFlag){
 		Area center = calcCenter(imageTexture);
