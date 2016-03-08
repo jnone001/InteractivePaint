@@ -23,7 +23,7 @@
 
 //Our own includes
 //#include "TouchShapes.h"
-#include "symmetryLine.h"
+#include "SymmetryLine.h"
 #include "TouchShapes.h"
 
 
@@ -43,8 +43,7 @@
 //Standard Library Includes
 #include <vector>
 #include <map>
-#include <list>
-#include <mutex>  
+#include <list> 
 
 
 using namespace ci;
@@ -100,7 +99,7 @@ int resolutionY;
 #define COLOR_FIVE "Blue.png"
 #define COLOR_SIX "Purple.png"
 
-#define SHAPE_LINE "Line.png"
+#define SHAPE_LINE "LineIcon.png"
 #define SHAPE_Circle "Circle.png"
 #define SHAPE_Rectangle "Rectangle.png"
 #define SHAPE_Triangle "Triangle.png"
@@ -109,11 +108,11 @@ int resolutionY;
 #define SHAPE_Filled_Triangle "FilledTriangle.png"
 
 #define SWIPE_GESTURE 8
-//#define windowWidth  getWindowSize().x
-//#define windowHeight getWindowSize().y
+#define windowWidth  getWindowSize().x
+#define windowHeight getWindowSize().y
 
-#define windowWidth  1919
-#define windowHeight 1079
+//#define windowWidth  1919
+//#define windowHeight 1079
 #define FRAME_RATE 120
 
 //Leap map
@@ -127,11 +126,6 @@ bool processing = false;
 gl::TextureRef imageTexture;
 int imageNum;
 float fadeTime = 1;
-
-
-
-
-mutex mtx;
 
 
 bool modeChangeFlag = true;
@@ -1157,6 +1151,7 @@ void TouchPointsApp::drawImageTexture(){
 void TouchPointsApp::loadImages(string imageName){
 
 	imageTexture = gl::Texture::create(loadImage(loadAsset(imageName)));
+
 }
 
 void TouchPointsApp::saveImage(string imageType){
