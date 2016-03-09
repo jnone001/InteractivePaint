@@ -1180,6 +1180,11 @@ void TouchPointsApp::drawImageTexture(){
 
 void TouchPointsApp::drawRadial(){
 
+	(*radialFbo).bindFramebuffer();
+	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	(*radialFbo).unbindFramebuffer();
+
 	//Draw to radial menu buffer
 	(*radialFbo).bindFramebuffer();
 	//Make background transparent
@@ -1218,8 +1223,6 @@ void TouchPointsApp::drawRadial(){
 	gl::color(1.0, 1.0, 1.0);
 	gl::drawSolidCircle(vec2(radialCenter.x, radialCenter.y + 100), 29.0f);
 
-		
-		
 	(*radialFbo).unbindFramebuffer();	
 
 	radialActive = true;
@@ -1567,6 +1570,11 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		glClear(GL_COLOR_BUFFER_BIT);
 		(*secondFbo).unbindFramebuffer();
 
+		(*thirdFbo).bindFramebuffer();
+		glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		(*thirdFbo).unbindFramebuffer();
+
 		(*uiFbo).bindFramebuffer();
 		glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -1687,9 +1695,26 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 			leapColorChange();
 			return true;
 		}
-		radialActive = false;
 
-		return true;
+		if ((((radialCenter.x + 100) - 30) < x && x < ((radialCenter.x + 100) + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30))){
+			leapShapeChange();
+			return true;
+		}
+
+		if ((((radialCenter.x) - 30) < x && x < ((radialCenter.x) + 30)) && ((radialCenter.y -100) - 30) < y && y < (radialCenter.y -100) + 30){
+			symmetryOn = !symmetryOn;
+			return true;
+		}
+
+		if ((((radialCenter.x ) - 30) < x && x < ((radialCenter.x ) + 30)) && ((radialCenter.y+100) - 30) < y && y < (radialCenter.y + 100) + 30){
+			uiFboFlag = !uiFboFlag;
+			return true;
+		}
+
+		if ((radialCenter.x - 30) < x && x < ((radialCenter.x + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30))){
+			radialActive = false;
+			return true;
+		}
 	}
 	//modeButtons UI
 	if (modeButtons){
@@ -2193,7 +2218,11 @@ bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, Tou
 				//gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
 				//gl::drawSolidCircle(vec2(500, 500), 30, 10);
 				//(*firstFbo).unbindFramebuffer();
-				uiFboFlag = !uiFboFlag;
+				//uiFboFlag = !uiFboFlag;
+				radialCenter = currentPoint.getPos();
+				
+				drawRadial(); 
+				radialActive = true;
 				bufferTouches.erase(previousPoint.getId());
 				bufferTouches.erase(currentPoint.getId());
 				return true;
