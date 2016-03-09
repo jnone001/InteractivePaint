@@ -225,6 +225,7 @@ public:
 	bool colorButtons = false;
 	bool shapeButtons = false;
 	bool uiFboFlag = false;
+	bool layerVisualization = false;
 
 
 	void modeChangeFlagTrue();
@@ -314,8 +315,11 @@ private:
 	//This way we can dynamically have multiple layers....????
 	std::shared_ptr<gl::Fbo>		firstFbo;
 	std::shared_ptr<gl::Fbo>		secondFbo;
+	std::shared_ptr<gl::Fbo>		thirdFbo;
 	std::shared_ptr<gl::Fbo>		activeFbo;
 
+	std::vector<std::shared_ptr<gl::Fbo>> layerList;
+	
 	std::shared_ptr<gl::Fbo>		uiFbo;
 	std::shared_ptr<gl::Fbo>		imageFbo;
 };
@@ -600,6 +604,7 @@ void TouchPointsApp::setup()
 	gl::Fbo::Format format;
 	firstFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	secondFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+	thirdFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	activeFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
 
@@ -624,6 +629,12 @@ void TouchPointsApp::setup()
 	//Set up symmetry line
 	
 	mySymmetry = SymmetryLine(windowWidth/2,true);
+
+	//Sets up layers
+	layerList.emplace_back(firstFbo);
+	layerList.emplace_back(secondFbo);
+	layerList.emplace_back(thirdFbo);
+
 
 	//Sets up eyeX context
 #ifdef EYEX
@@ -1585,6 +1596,15 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	else if (event.getChar() == 'l')
 	{
 
+			std::shared_ptr<gl::Fbo> temp1 = layerList[0];
+			std::shared_ptr<gl::Fbo> temp2 = layerList[1];
+			std::shared_ptr<gl::Fbo> temp3 = layerList[2];
+			layerList[2] = temp2;
+			layerList[1] = temp1;
+			layerList[0] = temp3;
+		
+
+		/*
 		if (currLayer == 0){
 			currLayer = 1;
 		}
@@ -1592,6 +1612,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		{
 			currLayer = 0;
 		}
+		*/
 	}
 
 }
@@ -1643,6 +1664,10 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 				symmetryOn = !symmetryOn;
 				return true;
 			}
+			else if (x < 450 && y < 50){
+				layerVisualization = !layerVisualization;
+				return true;
+			}
 		}
 	}
 
@@ -1656,6 +1681,29 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 				modeChangeFlag = true;
 				return true;
 			}
+		}
+	}
+	if (layerVisualization){
+		int yDist = layerList.size();
+		yDist = layerList.size() * 200 + 50;
+		int size = 0;
+		for (auto frame : layerList){
+			//gl::color(0.9, 0.85, 0.65);
+			//gl::drawStrokedRect(Rectf(400, y - 200, 600, y), 10);
+
+			if(x > 400 && x < 600)
+			{
+				if (y > yDist - 200 && y < yDist)
+				{
+					std::shared_ptr<gl::Fbo> temp = layerList[2];
+					layerList[2] = layerList[size];
+					layerList[size] = temp;
+					return true;
+
+				}
+			}
+			yDist = yDist - 200;
+			size = size + 1;
 		}
 	}
 	if (shapeButtons){
@@ -1684,6 +1732,7 @@ bool TouchPointsApp::inInteractiveUi(int x, int y)
 			return true;
 		}
 	}
+
 	return false;
 }
 
@@ -1759,6 +1808,17 @@ void TouchPointsApp::movingTouchShapes( uint32_t myId, vec2 myPos, vec2 prevPos)
 		myActivePoints[myId].clearPoints();
 
 		myActiveCirclesEraser[myId].changePosition(myPos);
+		//Draws to the layer at the end of the list. Which is drawn on 'top'
+		(*layerList.back()).bindFramebuffer();
+		for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+			oldPoints->draw();
+			if (symmetryOn)
+				mySymmetry.symmetricLine(*oldPoints).draw();
+			++oldPoints;
+		}
+		(*layerList.back()).unbindFramebuffer();
+
+		/*
 		if (currLayer == 0){
 
 
@@ -1781,6 +1841,7 @@ void TouchPointsApp::movingTouchShapes( uint32_t myId, vec2 myPos, vec2 prevPos)
 
 			(*secondFbo).unbindFramebuffer();
 		}
+		*/
 
 		myPoints.clear();
 
@@ -1794,6 +1855,16 @@ void TouchPointsApp::movingTouchShapes( uint32_t myId, vec2 myPos, vec2 prevPos)
 		myPoints.push_back(myActivePoints[myId]);
 		myActivePoints[myId].clearPoints();
 
+		//Draws to the layer at the end of the list. Which is drawn on 'top'
+		(*layerList.back()).bindFramebuffer();
+		for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();) {
+			oldPoints->draw();
+			if (symmetryOn)
+				mySymmetry.symmetricLine(*oldPoints).draw();
+			++oldPoints;
+		}
+		(*layerList.back()).unbindFramebuffer();
+		/*
 		if (currLayer == 0){
 
 
@@ -1820,7 +1891,7 @@ void TouchPointsApp::movingTouchShapes( uint32_t myId, vec2 myPos, vec2 prevPos)
 
 			(*secondFbo).unbindFramebuffer();
 		}
-
+		*/
 		myPoints.clear();
 
 
@@ -1890,7 +1961,17 @@ void TouchPointsApp::endTouchShapes(uint32_t myId)
 
 		myCircles.push_back(myActiveCircles[myId]);
 		myActiveCircles.erase(myId);
+		//Draws to the layer at the end of the list. Which is drawn on 'top'
+		(*layerList.back()).bindFramebuffer();
+		for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
+			oldPoints->draw();
+			if (symmetryOn)
+				mySymmetry.symmetricCircle(*oldPoints).draw();
+			++oldPoints;
+		}
+		(*layerList.back()).unbindFramebuffer();
 
+		/*
 		if (currLayer == 0){
 
 
@@ -1918,7 +1999,7 @@ void TouchPointsApp::endTouchShapes(uint32_t myId)
 
 			(*secondFbo).unbindFramebuffer();
 		}
-
+		*/
 		myCircles.clear();
 
 	}
@@ -1931,6 +2012,17 @@ void TouchPointsApp::endTouchShapes(uint32_t myId)
 
 		myRectangles.push_back(myActiveRectangles[myId]);
 		myActiveRectangles.erase(myId);
+		//Draws to the layer at the end of the list. Which is drawn on 'top'
+		(*layerList.back()).bindFramebuffer();
+		for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();) {
+			oldPoints->draw();
+			if (symmetryOn)
+				mySymmetry.symmetricRectangle(*oldPoints).draw();
+			++oldPoints;
+		}
+		(*layerList.back()).unbindFramebuffer();
+
+		/*
 		if (currLayer == 0){
 
 
@@ -1956,7 +2048,7 @@ void TouchPointsApp::endTouchShapes(uint32_t myId)
 
 			(*secondFbo).unbindFramebuffer();
 		}
-
+		*/
 		myRectangles.clear();
 	}
 	else if (triangleDraw){
@@ -1968,6 +2060,17 @@ void TouchPointsApp::endTouchShapes(uint32_t myId)
 
 		myTriangles.push_back(myActiveTriangles[myId]);
 		myActiveTriangles.erase(myId);
+		//Draws to the layer at the end of the list. Which is drawn on 'top'
+		(*layerList.back()).bindFramebuffer();
+		for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();) {
+			oldPoints->draw();
+			if (symmetryOn)
+				mySymmetry.symmetricTriangle(*oldPoints).draw();
+			++oldPoints;
+		}
+		(*layerList.back()).unbindFramebuffer();
+
+		/*
 		if (currLayer == 0){
 
 
@@ -1994,7 +2097,7 @@ void TouchPointsApp::endTouchShapes(uint32_t myId)
 
 			(*secondFbo).unbindFramebuffer();
 		}
-
+		*/
 		myTriangles.clear();
 	}
 }
@@ -2247,6 +2350,15 @@ void TouchPointsApp::drawUi(){
 			gl::drawLine(vec2(375, 20), vec2(375, 25));
 			gl::drawLine(vec2(375, 30), vec2(375, 35));
 			gl::drawLine(vec2(375, 40), vec2(375, 45));
+
+			//Layer Visualization Button
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(400, 2, 450, 50), 10);
+			gl::color(1.0, 1.0, 1.0, 1.0);
+			gl::drawStrokedRect(Rectf(410, 10, 430, 30), 1);
+			gl::drawStrokedRect(Rectf(420, 20, 440, 40), 1);
+
+
 		}
 		if (colorButtons){
 
@@ -2299,6 +2411,22 @@ void TouchPointsApp::drawUi(){
 			gl::drawLine(vec2(windowWidth / 2, windowHeight - i * 50), vec2(windowWidth / 2, windowHeight - (i + 1) * 50));
 		}
 	}
+	if (layerVisualization){
+
+	//gl::draw(layerList[0]->blitFromScreen(const Area &srcArea, const Area &dstArea, GLenum filter = GL_NEAREST, GLbitfield mask = GL_COLOR_BUFFER_BIT);
+	//Area(vec2(0, 0), vec2(1920, 1080));
+		//gl::drawSolidRect(Rectf(500, 500, 800, 800));
+		int y = layerList.size();
+		y = y * 200 + 50;
+		for (auto frame : layerList){
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(400, y - 200, 600, y), 10);
+			frame->blitToScreen(Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(400, 1080 - (y - 200) ), vec2(600, 1080-y)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
+			y = y - 200;
+		}
+		//layerList[0]->blitToScreen(Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(500, 500), vec2(1000, 800)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
+		//layerList[1]->blitToScreen(Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(300, 100), vec2(400, 400)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
+	}
 }
 
 void TouchPointsApp::draw()
@@ -2307,6 +2435,8 @@ void TouchPointsApp::draw()
 
 	//Add a vector instead of the 3 ref to arrays.
 	gl::clear(ColorA(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0));
+	//gl::color(1.0, 1.0, 1.0);
+	//gl::drawStrokedCircle(vec2(windowWidth *.5, windowHeight*.5), 200.0f, 50.0f);
 	//glClearColor(1.0, 1.0, 1.0, 0.0);
 	//glClear(GL_COLOR_BUFFER_BIT);
 
@@ -2332,8 +2462,15 @@ void TouchPointsApp::draw()
 	gl::drawStrokedCircle(gaze2, 10.0f, 10.0f);
 
 #endif
+	gl::color(1.0, 1.0, 1.0, 1.0);
+	for (auto frames : layerList){
+		gl::draw(frames->getColorTexture());
+	}
+
+	//gl::draw(layerList[0]->getColorTexture());
 
 	/*Draws the framebuffers for layer one and layer two*/
+	/*
 	if (currLayer == 0)
 	{
 		//Must always draw framebuffers as a set color!
@@ -2353,7 +2490,7 @@ void TouchPointsApp::draw()
 		//gl::draw(uiFbo->getColorTexture());
 
 	}
-	
+	*/
 	/*Draws image that provides feedback */
 	if (imageFlag){
 		Area center = calcCenter(imageTexture);
