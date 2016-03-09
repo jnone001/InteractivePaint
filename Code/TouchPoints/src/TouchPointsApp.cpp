@@ -108,21 +108,27 @@ int resolutionY;
 #define SHAPE_Filled_Triangle "FilledTriangle.png"
 
 #define SWIPE_GESTURE 8
-#define windowWidth  getWindowSize().x
-#define windowHeight getWindowSize().y
+//#define windowWidth  getWindowSize().x
+//#define windowHeight getWindowSize().y
 
-//#define windowWidth  1919
-//#define windowHeight 1079
+#define windowWidth  1919
+#define windowHeight 1079
+
+
+
 #define FRAME_RATE 120
 
 //Leap map
 map<uint32_t, vec2> pointsMap;
+
+vec2 radialCenter = vec2(windowWidth *.5, windowHeight*.5);
 
 bool imageFlag = false;
 bool drawing = false;
 bool lockCurrentFrame = false;
 bool leapDrawFlag = true;
 bool processing = false;
+bool radialActive = false;
 gl::TextureRef imageTexture;
 int imageNum;
 float fadeTime = 1;
@@ -193,6 +199,7 @@ public:
 	//Ui Functions
 	void	drawUi();
 	bool	inInteractiveUi(int x, int y);
+	void	drawRadial();
 
 
 	void	drawImageTexture();
@@ -208,7 +215,7 @@ public:
 	void	leapShapeChange();
 	void	leapDraw(Leap::Frame frame);
 	void 	gestRecognition(Leap::Frame frame , Leap::Controller controller);
-
+	
 
 	//List of MODES
 	bool randColor = false;
@@ -318,6 +325,8 @@ private:
 
 	std::shared_ptr<gl::Fbo>		uiFbo;
 	std::shared_ptr<gl::Fbo>		imageFbo;
+	std::shared_ptr<gl::Fbo>		radialFbo;
+
 };
 
 /*Retrieves frames from leap motion Service*/
@@ -602,11 +611,13 @@ void TouchPointsApp::setup()
 	secondFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	activeFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
-
+	
 	//Set up UI
 	uiFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	//Set up image feedback fbo
 	imageFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+	//Set up fbo for proxy menu
+	radialFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
 	//Enable all Leap Gestures
 	TouchPointsApp::enableGest(leapContr);
@@ -811,6 +822,7 @@ void TouchPointsApp::gestRecognition(Leap::Frame frame , Leap::Controller contro
 						//counterclockwise circle
 						processing = true;
 						leapShapeChange();
+
 					}
 
 					// Calculate angle swept since last frame
@@ -839,8 +851,7 @@ void TouchPointsApp::gestRecognition(Leap::Frame frame , Leap::Controller contro
 				case Leap::Gesture::TYPE_SCREEN_TAP:
 				{
 					Leap::ScreenTapGesture screentap = gesture;
-					//return 5;
-					std::cout << "Screen Tap Gesture Found" << std::endl;
+					
 					break;
 				}
 				default:
@@ -1155,6 +1166,55 @@ void TouchPointsApp::drawImageTexture(){
 	(*imageFbo).unbindFramebuffer();
 
 }
+
+void TouchPointsApp::drawRadial(){
+
+	//Draw to radial menu buffer
+	(*radialFbo).bindFramebuffer();
+	//Make background transparent
+	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	gl::color(1.0, 0.9, 0.5);
+	gl::drawStrokedCircle(radialCenter, 30.0f, 2.0f);
+		
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawSolidCircle(radialCenter, 29.0f);
+
+
+	gl::color(1.0, 0.9, 0.5);
+	gl::drawStrokedCircle(vec2(radialCenter.x - 100, radialCenter.y), 30.0f, 2.0f);
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawSolidCircle(vec2(radialCenter.x - 100, radialCenter.y), 29.0f);
+
+	gl::color(1.0, 0.9, 0.5);
+	gl::drawStrokedCircle(vec2(radialCenter.x + 100, radialCenter.y), 30.0f, 2.0f);
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawSolidCircle(vec2(radialCenter.x + 100, radialCenter.y), 29.0f);
+
+
+	gl::color(1.0, 0.9, 0.5);
+	gl::drawStrokedCircle(vec2(radialCenter.x, radialCenter.y - 100), 30.0f, 2.0f);
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawSolidCircle(vec2(radialCenter.x , radialCenter.y - 100), 29.0f);
+
+	gl::color(1.0, 0.9, 0.5);
+	gl::drawStrokedCircle(vec2(radialCenter.x, radialCenter.y + 100), 30.0f, 2.0f);
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawSolidCircle(vec2(radialCenter.x, radialCenter.y + 100), 29.0f);
+
+		
+		
+	(*radialFbo).unbindFramebuffer();	
+
+	radialActive = true;
+	
+}
+	
 
 void TouchPointsApp::loadImages(string imageName){
 
@@ -1551,6 +1611,8 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		symmetryOn = !symmetryOn;
 	}
 	else if (event.getChar() == 'a'){
+
+		drawRadial();
 		
 	}
 	else if (event.getChar() == 'g'){
@@ -1598,6 +1660,16 @@ void TouchPointsApp::keyDown(KeyEvent event)
 
 bool TouchPointsApp::inInteractiveUi(int x, int y)
 {
+	if (radialActive){
+
+		if ((((radialCenter.x - 100) - 30) < x && x < ((radialCenter.x - 100) + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30))){
+			leapColorChange();
+			return true;
+		}
+		radialActive = false;
+
+		return true;
+	}
 	//modeButtons UI
 	if (modeButtons){
 		//Color change button.
@@ -2134,6 +2206,7 @@ void TouchPointsApp::update(){
 	}
 }
 
+
 void TouchPointsApp::drawUi(){
 	//(*uiFbo).unbindTexture();
 
@@ -2303,6 +2376,7 @@ void TouchPointsApp::drawUi(){
 
 void TouchPointsApp::draw()
 {
+	
 	gl::enableAlphaBlending();
 
 	//Add a vector instead of the 3 ref to arrays.
@@ -2362,6 +2436,12 @@ void TouchPointsApp::draw()
 	}
 
 	drawUi();
+
+	if (radialActive){
+		gl::draw(radialFbo->getColorTexture());
+	}
+
+
 	gl::color(1.0, 1.0, 1.0,1.0);
 
 	/*Draws the frame buffer for UI*/
@@ -2409,6 +2489,7 @@ void TouchPointsApp::draw()
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	gl::draw(activeFbo->getColorTexture());
 
+	
 }
 
 CINDER_APP(TouchPointsApp, RendererGl, prepareSettings)
