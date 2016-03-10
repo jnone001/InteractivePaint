@@ -108,11 +108,11 @@ int resolutionY;
 #define SHAPE_Filled_Triangle "FilledTriangle.png"
 
 #define SWIPE_GESTURE 8
-//#define windowWidth  getWindowSize().x
-//#define windowHeight getWindowSize().y
+#define windowWidth  getWindowSize().x
+#define windowHeight getWindowSize().y
 
-#define windowWidth  1919
-#define windowHeight 1079
+//#define windowWidth  1919
+//#define windowHeight 1079
 
 
 
@@ -121,7 +121,7 @@ int resolutionY;
 //Leap map
 map<uint32_t, vec2> pointsMap;
 
-vec2 radialCenter = vec2(windowWidth *.5, windowHeight*.5);
+
 
 bool imageFlag = false;
 bool drawing = false;
@@ -257,7 +257,7 @@ private:
 	LeapListener	myLeapListener;
 
 	//EyeX
-
+	vec2 radialCenter = vec2(windowWidth *.5, windowHeight*.5);
 
 	TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
 	TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
@@ -324,6 +324,7 @@ private:
 	std::shared_ptr<gl::Fbo>		secondFbo;
 	std::shared_ptr<gl::Fbo>		thirdFbo;
 	std::shared_ptr<gl::Fbo>		activeFbo;
+	std::shared_ptr<gl::Fbo>		iconFbo;
 
 	std::vector<std::shared_ptr<gl::Fbo>> layerList;
 
@@ -616,6 +617,7 @@ void TouchPointsApp::setup()
 	thirdFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	activeFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
+	iconFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
 	//Set up UI
 	uiFbo = gl::Fbo::create(windowWidth, windowHeight, format);
@@ -1158,12 +1160,12 @@ void TouchPointsApp::drawImageTexture(){
 
 	(*imageFbo).bindFramebuffer();
 
-	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	gl::color(1.0, 1.0, 1.0, fadeTime);
 
-	gl::draw(imageTexture);
+	gl::draw(imageTexture, Rectf(0, 0, 1920, 1080));
 
 	if (fadeTime <= 0.1){
 		imageFlag = false;
@@ -1179,7 +1181,7 @@ void TouchPointsApp::drawImageTexture(){
 }
 
 void TouchPointsApp::drawRadial(){
-
+	gl::color(1.0, 1.0, 1.0, 1.0);
 	(*radialFbo).bindFramebuffer();
 	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -1191,32 +1193,72 @@ void TouchPointsApp::drawRadial(){
 	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	//Center Circle
 	gl::color(1.0, 0.9, 0.5);
 	gl::drawStrokedCircle(radialCenter, 30.0f, 2.0f);
 
-	gl::color(1.0, 1.0, 1.0);
+	gl::color(1.0, 1.0, 1.0, 0.8);
+
 	gl::drawSolidCircle(radialCenter, 29.0f);
 
+	//Draws outer ring
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawStrokedCircle(radialCenter, 100.0f, 60.0f);
 
+
+	gl::color(1.0, 1.0, 1.0, 0.5);
+	gl::drawStrokedCircle(radialCenter, 131.0f, 2.0f, 300);
+
+
+	gl::color(1.0, 1.0, 1.0,0.8);
+	gl::drawStrokedCircle(radialCenter, 69.0f, 2.0f, 300);
+		
+
+
+	//Draw left icon
+	
+	imageTexture = gl::Texture::create(loadImage(loadAsset("AllColor.png")));
+	(*iconFbo).bindFramebuffer();
+	gl::clear(ColorA(1.0, 1.0, 1.0, 1.0));
+	gl::draw(imageTexture, Rectf(0,0,1920,1080));
+	(*iconFbo).unbindFramebuffer();
+	(*radialFbo).bindFramebuffer();
+	
+	iconFbo->blitTo(radialFbo, Area(vec2(0,0), vec2(1920, 1080)), Area(vec2(radialCenter.x - 125, windowHeight - radialCenter.y + 25), vec2(radialCenter.x - 75, windowHeight - radialCenter.y -25)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
+	//iconFbo->blitTo(radialFbo, Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(0,0), vec2(100,100)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
+	/*
 	gl::color(1.0, 0.9, 0.5);
 	gl::drawStrokedCircle(vec2(radialCenter.x - 100, radialCenter.y), 30.0f, 2.0f);
 
-	gl::color(1.0, 1.0, 1.0);
+	gl::color(1.0,1.0,1.0);
 	gl::drawSolidCircle(vec2(radialCenter.x - 100, radialCenter.y), 29.0f);
+	*/
+	//Draw Right IconimageTexture = gl::Texture::create(loadImage(loadAsset("AllColor.png")));
 
+	imageTexture = gl::Texture::create(loadImage(loadAsset("ShapesIcon.png")));
+	(*iconFbo).bindFramebuffer();
+	gl::clear(ColorA(1.0, 1.0, 1.0, 1.0));
+	gl::draw(imageTexture, Rectf(10, 10, 1910, 1070));
+	(*iconFbo).unbindFramebuffer();
+	(*radialFbo).bindFramebuffer();
+
+	iconFbo->blitTo(radialFbo, Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(radialCenter.x + 75, windowHeight - radialCenter.y + 25), vec2(radialCenter.x + 125, windowHeight - radialCenter.y - 25)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
+	/*
 	gl::color(1.0, 0.9, 0.5);
 	gl::drawStrokedCircle(vec2(radialCenter.x + 100, radialCenter.y), 30.0f, 2.0f);
 
 	gl::color(1.0, 1.0, 1.0);
 	gl::drawSolidCircle(vec2(radialCenter.x + 100, radialCenter.y), 29.0f);
+	*/
 
-
+	//Draw lower Icon
 	gl::color(1.0, 0.9, 0.5);
 	gl::drawStrokedCircle(vec2(radialCenter.x, radialCenter.y - 100), 30.0f, 2.0f);
 
 	gl::color(1.0, 1.0, 1.0);
-	gl::drawSolidCircle(vec2(radialCenter.x, radialCenter.y - 100), 29.0f);
 
+	gl::drawSolidCircle(vec2(radialCenter.x , radialCenter.y - 100), 29.0f);
+	//Draw Upper Icon
 	gl::color(1.0, 0.9, 0.5);
 	gl::drawStrokedCircle(vec2(radialCenter.x, radialCenter.y + 100), 30.0f, 2.0f);
 
@@ -1632,7 +1674,6 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	else if (event.getChar() == 'a'){
 
 		drawRadial();
-
 	}
 	else if (event.getChar() == 'g'){
 		leapDrawFlag = true;
@@ -2596,14 +2637,17 @@ void TouchPointsApp::draw()
 	*/
 	/*Draws image that provides feedback */
 	if (imageFlag){
-		Area center = calcCenter(imageTexture);
+		//Area center = calcCenter(imageTexture);
 		drawImageTexture();
-		gl::draw(imageFbo->getColorTexture(), center);
+		//gl::draw(imageFbo->getColorTexture(), center);
+		gl::color(ColorA(0.0, 0.0, 0.0, 1.0));
+		imageFbo->blitToScreen(Area(0, 0, 1920, 1080), Area(windowWidth / 2 - 100, windowHeight / 2 + 100, windowWidth / 2 + 55, windowHeight / 2 - 55), GL_NEAREST, GL_COLOR_BUFFER_BIT);
 	}
-
+	
 	drawUi();
 
 	if (radialActive){
+		gl::color(1.0, 1.0, 1.0, 1.0);
 		gl::draw(radialFbo->getColorTexture());
 	}
 
