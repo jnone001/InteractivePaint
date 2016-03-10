@@ -98,6 +98,7 @@ int resolutionY;
 #define COLOR_FOUR "Torquise.png"
 #define COLOR_FIVE "Blue.png"
 #define COLOR_SIX "Purple.png"
+#define COLOR_SEVEN "Orange.png"
 
 #define SHAPE_LINE "LineIcon.png"
 #define SHAPE_Circle "Circle.png"
@@ -108,11 +109,11 @@ int resolutionY;
 #define SHAPE_Filled_Triangle "FilledTriangle.png"
 
 #define SWIPE_GESTURE 8
-#define windowWidth  getWindowSize().x
-#define windowHeight getWindowSize().y
+//#define windowWidth  getWindowSize().x
+//#define windowHeight getWindowSize().y
 
-//#define windowWidth  1919
-//#define windowHeight 1079
+#define windowWidth  1919
+#define windowHeight 1079
 
 
 
@@ -1143,7 +1144,7 @@ void TouchPointsApp::leapColorChange(){
 		break;
 	}
 	case 7:{
-		loadImages(COLOR_SIX);
+		loadImages(COLOR_SEVEN);
 		imageFlag = true;
 		modeChangeFlag = true;
 		break;
