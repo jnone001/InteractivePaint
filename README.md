@@ -32,10 +32,31 @@ Top Left Buttons - From left to right
 		Increases the size of lines as well as non-filled shapes lines.
 	Line Size Decrease Button
 		Decreases the size of lines as well as non-filled shapes lines.
-	Transparency Increase
-	
-	Transparency Decrease
-	
+	Transparency Increase (Purple Button)
+		Increases transparency of any shapes or lines you draw 
+	Transparency Decrease (Green Button)
+		Decreases transparency (makes then more solid) for any shapes or lines you draw.
+	Toggle Symmetry (Dotted line Icon)
+		Toggles a line of symmetry on and off.
+		A dotted white line will split the screen when it is enabled. 
+		Any shapes that you draw will be reflected over this Axis.
+	Layer Visualization (Two 'Pages' Icon)
+		Toggles on and off layer visualization
+		These are the three 'layers' you can draw on. Press either of the bottom two layers to move it to the top.
+		The top layer is the layer you are currently drawing on.
+		
+		
+Multitouch Gestures - 
+	Double tap the screen
+		Double tapping the screen will open up a radial menu at the fingers location
+			Radial Menu - 
+				Left button cycles through colors
+				Right Button - Cycles through Shapes
+				Top button - Toggles on and off symmetry
+				Bottom button - toggles on and off UI
+				Grey Center Button - Turns off the radial menu.
+				
+	More gestures coming soon!
 	
 
 
@@ -74,8 +95,7 @@ Keyboard Shortcuts
 	'o' - turns on rectangle drawing
 	'p' - turns on triangle drawing
 	'f' - toggles filled shapes on and off
-	'l' - Changes between the two layers. 
-		The application currently has two layers. There is no UI Representation for which layer is currently on top at the moment. 
+	'v' - Toggles on and off the ability to draw with the leap motion device.
 		
 		
 Drawing - 
