@@ -32,6 +32,11 @@ Top Left Buttons - From left to right
 		Increases the size of lines as well as non-filled shapes lines.
 	Line Size Decrease Button
 		Decreases the size of lines as well as non-filled shapes lines.
+	Transparency Increase
+	
+	Transparency Decrease
+	
+	
 
 
 Mode Box - Bottom Right
