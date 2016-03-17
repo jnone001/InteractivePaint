@@ -46,7 +46,8 @@ Top Left Buttons - From left to right
 		The top layer is the layer you are currently drawing on.
 		
 		
-Multitouch Gestures - 
+Multitouch Gestures 
+
 	Double tap the screen
 		Double tapping the screen will open up a radial menu at the fingers location
 			Radial Menu - 
@@ -55,7 +56,6 @@ Multitouch Gestures -
 				Top button - Toggles on and off symmetry
 				Bottom button - toggles on and off UI
 				Grey Center Button - Turns off the radial menu.
-				
 	More gestures coming soon!
 	
 
