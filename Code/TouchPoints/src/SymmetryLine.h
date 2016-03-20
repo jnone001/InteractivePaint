@@ -33,7 +33,7 @@ struct SymmetryLine{
 			point1 = vec2(0, x);
 			point2 = vec2(1, x);
 		}
-
+		symmetryOn = false;
 	}
 
 	TouchPoint symmetricLine(TouchPoint line);
@@ -41,15 +41,26 @@ struct SymmetryLine{
 	TouchRectangle symmetricRectangle(TouchRectangle rectangle);
 	TouchTriangle symmetricTriangle(TouchTriangle triangle);
 	vec2 symmetricPoint(vec2 point);
+	void toggleSymmetry();
+	bool getSymmetryOn();
 
 
 private:
 	vec2 point1;
 	vec2 point2;
+	bool symmetryOn;
 	//float slope;
 
 
 };
+
+void SymmetryLine::toggleSymmetry(){
+	symmetryOn = !symmetryOn;
+}
+
+bool SymmetryLine::getSymmetryOn(){
+	return symmetryOn;
+}
 
 TouchPoint SymmetryLine::symmetricLine(TouchPoint line){
 
