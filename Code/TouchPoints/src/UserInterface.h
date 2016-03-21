@@ -1,20 +1,29 @@
+
+
 #ifndef USERINTERFACE_H
 #define USERINTERFACE_H
 
 #include "Brush.h"
 #include "Illustrator.h"
+#include "libusb.h"
+#include <stdio.h>
+#include "DeviceHandler.h"
+
+
+
 
 
 struct UserInterface{
 
 	UserInterface(){}
 	//Creates a User Interface
-	UserInterface(int mWindowWidth, int mWindowHeight, bool leapRun, bool eyeXRun, Brush* brush, Illustrator* mIllustrator, std::shared_ptr<gl::Fbo> fbo, std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList){
+	UserInterface(int mWindowWidth, int mWindowHeight, bool leapRun, bool eyeXRun, Brush* brush, Illustrator* mIllustrator, DeviceHandler* mDeviceHandler, std::shared_ptr<gl::Fbo> fbo, std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList){
 		modeChangeFlag = true;
 		windowWidth = mWindowWidth;
 		windowHeight = mWindowHeight;
 		mBrush = brush;
 		illustrator = mIllustrator;
+		deviceHandler = mDeviceHandler;
 		uiFbo = fbo;
 		leapRunning = leapRun;
 		eyeXRunning = eyeXRun;
@@ -62,6 +71,7 @@ struct UserInterface{
 private:
 	Brush* mBrush;
 	Illustrator* illustrator;
+	DeviceHandler * deviceHandler;
 	std::shared_ptr<gl::Fbo> uiFbo;
 
 	int windowWidth;
@@ -518,15 +528,15 @@ void UserInterface::drawUi(){
 		}
 
 		//auto maxTouches = System::getMaxMultiTouchPoints();
-		if (System::hasMultiTouch()){
+		if ((*deviceHandler).multiTouchStatus()){
 			gl::color(0.0, 0.0, 1.0);
 			gl::drawSolidRect(Rectf(windowWidth*.81, windowHeight * .81, windowWidth*.83, windowHeight *.83));
 		}
-		if (leapRunning){
+		if ((*deviceHandler).leapStatus()){
 			gl::color(0.0, 1.0, 0.0);
 			gl::drawSolidRect(Rectf(windowWidth*.84, windowHeight * .81, windowWidth*.86, windowHeight *.83));
 		}
-		if (eyeXRunning){
+		if ((*deviceHandler).eyeXStatus()){
 			gl::color(1.0, 0.0, 0.0);
 			gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight * .81, windowWidth*.89, windowHeight *.83));
 		}

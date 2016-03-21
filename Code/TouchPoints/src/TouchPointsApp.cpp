@@ -1,5 +1,3 @@
-
-
 //Cinder and OpenGL Includes
 #include "cinder/app/App.h"
 #include "cinder/app/RendererGl.h"
@@ -31,6 +29,10 @@
 #include "UserInterface.h"
 
 
+#include "libusb.h"
+#include <stdio.h>
+#include "DeviceHandler.h"
+
 //Leap Includes
 #include "Leap.h"
 #include "LeapMath.h"
@@ -57,6 +59,8 @@ using namespace cinder;
 //Device connection status
 bool eyeXRunning = false;
 bool leapRunning = false;
+//int multiTouchConnected;
+//int leapConnected;
 
 #define EYEX
 #ifdef EYEX
@@ -117,8 +121,6 @@ int resolutionY;
 
 //#define windowWidth  1919
 //#define windowHeight 1079
-
-
 
 #define FRAME_RATE 120
 
@@ -259,6 +261,7 @@ private:
 	Brush brush;
 	Illustrator illustrator;
 	UserInterface ui;
+	DeviceHandler deviceHandler;
 
 	
 	//Leap Motion Controller
@@ -668,11 +671,12 @@ void TouchPointsApp::setup()
 	Shape::Shape myShape = Shape::Shape::Line;
 	brush = Brush(myShape, newColor, tempFloat , tempInt, tempFalse, tempFalse, tempFalse, &mySymmetry);
 	illustrator = Illustrator(&brush, &layerList);
+	deviceHandler = DeviceHandler();
 
 	//Set up UI
-	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush, &illustrator, uiFbo, &layerList);
 
-	
+	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList);
+
 
 	//Sets up eyeX context
 #ifdef EYEX
@@ -2059,6 +2063,10 @@ void TouchPointsApp::update(){
 	//bool testvar2 = System::hasMultiTouch();
 	//auto testvar3 = System::getMaxMultiTouchPoints();
 
+	if (deviceHandler.deviceConnection()){
+		ui.setModeChangeFlag();
+	}
+
 	if (eyeXRunning){
 
 			if (gazePositionX < 400 && gazePositionY < 100){
@@ -2072,8 +2080,6 @@ void TouchPointsApp::update(){
 		
 	}
 }
-
-
 
 void TouchPointsApp::draw()
 {
