@@ -124,8 +124,16 @@ void Brush::incrementShape()
 	else if (mShape == Shape::Shape::Rectangle){
 		mShape = Shape::Shape::Triangle;
 	}
-	else if (mShape = Shape::Shape::Triangle){
-		mShape = Shape::Shape::Line;
+	else if (mShape == Shape::Shape::Triangle){
+		if (mFilledShapes == true){
+			mShape = Shape::Shape::Line;
+			mFilledShapes = false;
+		}
+		else{
+			mFilledShapes = true;
+			mShape = Shape::Shape::Circle;
+		}
+		
 	}
 }
 std::vector<Color> Brush::getColorList()
@@ -212,7 +220,7 @@ void Brush::incrementColor(){
 }
 void Brush::decrementColor(){
 	currColor--;
-	if (currColor == 0){
+	if (currColor == -1){
 		currColor = colorList.size() - 1;
 	}
 	mColor = ColorA(colorList[currColor], mAlphaColor);

@@ -130,6 +130,7 @@ int resolutionY;
 
 //Leap map
 map<uint32_t, vec2> pointsMap;
+map<uint32_t, bool> activePointsMap;
 
 
 
@@ -929,6 +930,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 		//Get x and y coordinate value form normalized value within given window
 		float leapXCoordinate = normalizedPosition.x * windowWidth;
 		float leapYCoordinate = windowHeight - normalizedPosition.y * windowHeight;
+		
 
 		//Create a prevous vec2
 		//vec2 prevPoint;
@@ -937,13 +939,14 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 		{
 			gl::color(0, 1, 0, 1 - points.touchDistance());
 			gl::drawSolidCircle(vec2(leapXCoordinate, leapYCoordinate), 40);
-			/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION
+			/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
 			if(pointsMap.find(points.id()) != pointsMap.end()){
 			pointsMap.erase(points.id());
-			myActivePoints[points.id()].clearPoints();
-			endTouchShapes(points.id());
+			//myActivePoints[points.id()].clearPoints();
+			activePointsMap.erase(points.id());
+			illustrator.endTouchShapes(points.id());
 			}
-			*/
+			
 		}
 		else if (points.touchDistance() <= 0)
 		{
@@ -957,7 +960,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 				//myPrevX = leapXCoordinate;
 				//myPrevY = leapYCoordinate;
-				
+				/*
 				if (brush.getRandColor()){
 					ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, currentAlpha);
 					myActivePoints.insert(make_pair(points.id(), TouchPoint(vec2(leapXCoordinate, leapYCoordinate), newColor, lineSize)));
@@ -966,12 +969,13 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 					ColorA newColor(colorArray[currColor][0], colorArray[currColor][1], colorArray[currColor][2], currentAlpha);
 					myActivePoints.insert(make_pair(points.id(), TouchPoint(vec2(leapXCoordinate, leapYCoordinate), newColor, lineSize)));
 				}
-
-				/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION
-				beginTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate));
 				*/
+				/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
+				illustrator.beginTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate));
+				
 				pointsMap.emplace(points.id(), vec2(leapXCoordinate, leapYCoordinate));
-				myActivePoints[points.id()].addPoint(vec2(leapXCoordinate, leapYCoordinate));
+				activePointsMap.emplace(points.id(), true);
+				//myActivePoints[points.id()].addPoint(vec2(leapXCoordinate, leapYCoordinate));
 
 
 			}
@@ -980,11 +984,11 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 				//prevPoint = result->second;
 				//gl::clear(Color(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2]));
 
-				missingPoints(leapXCoordinate, leapYCoordinate, myActivePoints[points.id()].getFirstPoint().x, myActivePoints[points.id()].getFirstPoint().y, myActivePoints[points.id()]);
+				//missingPoints(leapXCoordinate, leapYCoordinate, myActivePoints[points.id()].getFirstPoint().x, myActivePoints[points.id()].getFirstPoint().y, myActivePoints[points.id()]);
 
 				//myPrevX = leapXCoordinate;
 				//myPrevY = leapYCoordinate;
-
+				/*
 				myPoints.push_back(myActivePoints[points.id()]);
 				myActivePoints[points.id()].clearPoints();
 
@@ -1001,7 +1005,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 				(*(layerList).back()).unbindFramebuffer();
 
 
-				/*
+				
 				if (currLayer == 0){
 
 					(*firstFbo).bindFramebuffer();
@@ -1028,13 +1032,17 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 					//}
 					(*secondFbo).unbindFramebuffer();
 				}
-				*/
-				myPoints.clear();
+				
 
-				/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION
-				movingTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate), vec2(myActivePoints[points.id()].getFirstPoint()));
-				myActivePoints[points.id()].addPoint(vec2(leapXCoordinate, leapYCoordinate));
+				myPoints.clear();
 				*/
+				/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
+				
+				illustrator.movingTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate), pointsMap[points.id()]);
+				//pointsMap.emplace(points.id(), vec2(leapXCoordinate, leapYCoordinate));
+				pointsMap[points.id()] = vec2(leapXCoordinate, leapYCoordinate);
+				//myActivePoints[points.id()].addPoint(vec2(leapXCoordinate, leapYCoordinate));
+				
 
 			}
 
@@ -1052,6 +1060,17 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 		}
 	}
+	for(auto points : activePointsMap){
+		if ( points.second ){
+			points.second = false;
+		}
+		else {
+			illustrator.endTouchShapes(points.first);
+			activePointsMap.erase(points.first);
+			pointsMap.erase(points.first);
+		}
+	}
+
 }
 
 void TouchPointsApp::leapShapeChange(){
@@ -1068,7 +1087,7 @@ void TouchPointsApp::leapShapeChange(){
 	ui.setModeChangeFlag();
 	switch (brush.getCurrentShape()){
 	case 0:{
-		brush.changeShape(Shape::Shape::Line);
+		//brush.changeShape(Shape::Shape::Line);
 		loadImages(SHAPE_LINE);
 		imageFlag = true;
 		//Might not need this since brush.changeShape has it
@@ -1077,53 +1096,33 @@ void TouchPointsApp::leapShapeChange(){
 	}
 	case 1:{
 		bool tempBool = false;
-		brush.changeFilledShapes(tempBool);
-		brush.changeShape(Shape::Shape::Circle);
+		//brush.changeFilledShapes(tempBool);
+		//brush.changeShape(Shape::Shape::Circle);
+		if (!brush.getFilledShapes())
 		loadImages(SHAPE_Circle);
+		else loadImages(SHAPE_Filled_Circle);
 		imageFlag = true;
 		//modeChangeFlag = true;
 		break;
 	}
 	case 2:{
-			   bool tempBool = false;
-			   brush.changeFilledShapes(tempBool);
-		brush.changeShape(Shape::Shape::Rectangle);
+			  
+			   //brush.changeFilledShapes(tempBool);
+		//brush.changeShape(Shape::Shape::Rectangle);
+		if (!brush.getFilledShapes())
 		loadImages(SHAPE_Rectangle);
+		else loadImages(SHAPE_Filled_Rectangle);
 		imageFlag = true;
 		//modeChangeFlag = true;
 		break;
 	}
 	case 3:{
-			   bool tempBool = false;
-			   brush.changeFilledShapes(tempBool);
-		brush.changeShape(Shape::Shape::Triangle);
+			   
+			   //brush.changeFilledShapes(tempBool);
+		//brush.changeShape(Shape::Shape::Triangle);
+		if (!brush.getFilledShapes())
 		loadImages(SHAPE_Triangle);
-		imageFlag = true;
-		//modeChangeFlag = true;
-		break;
-	}case 4:{
-			   bool tempBool = true;
-			   brush.changeFilledShapes(tempBool);
-		brush.changeShape(Shape::Shape::Circle);
-		loadImages(SHAPE_Filled_Circle);
-		imageFlag = true;
-		//modeChangeFlag = true;
-		break;
-	}
-	case 5:{
-			   bool tempBool = true;
-			   brush.changeFilledShapes(tempBool);
-		brush.changeShape( Shape::Shape::Rectangle );
-		loadImages(SHAPE_Filled_Rectangle);
-		imageFlag = true;
-		//modeChangeFlag = true;
-		break;
-	}
-	case 6:{
-			   bool tempBool = true;
-			   brush.changeFilledShapes(tempBool);
-		brush.changeShape(Shape::Shape::Triangle);
-		loadImages(SHAPE_Filled_Triangle);
+		else loadImages(SHAPE_Filled_Triangle);
 		imageFlag = true;
 		//modeChangeFlag = true;
 		break;
@@ -2091,6 +2090,10 @@ void TouchPointsApp::draw()
 	glClearColor(myBG.r, myBG.g, myBG.b, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	gl::color(1.0, 1.0, 1.0, 1.0);
+	for (auto frames : layerList){
+		gl::draw(frames->getColorTexture());
+	}
 	currentFrame = getLeapFrame(leapContr);
 
 	if (leapDrawFlag){
@@ -2113,10 +2116,7 @@ void TouchPointsApp::draw()
 	gl::drawStrokedCircle(gaze2, 10.0f, 10.0f);
 
 #endif
-	gl::color(1.0, 1.0, 1.0, 1.0);
-	for (auto frames : layerList){
-		gl::draw(frames->getColorTexture());
-	}
+
 
 	//gl::draw(layerList[0]->getColorTexture());
 
