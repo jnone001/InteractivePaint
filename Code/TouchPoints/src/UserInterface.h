@@ -27,6 +27,16 @@ struct UserInterface{
 		uiFbo = fbo;
 		leapRunning = leapRun;
 		eyeXRunning = eyeXRun;
+		/*
+		if (eyeXRunning){
+			modeButtons = false;
+			uiFlag = false;
+		}
+		else {
+			uiFlag = true;
+			modeButtons = true;
+		}
+		*/
 		uiFboFlag = true;
 		modeButtons = true;
 		colorButtons = false;
@@ -51,6 +61,9 @@ struct UserInterface{
 	void UserInterface::changeBackgroundColor(Color background);
 	void clearLayers();
 	bool getUiFboFlag();
+	void changeModeButtons(bool x);
+	void toggleUiFlag();
+	bool getUiFlag();
 	//Functions to get brush values
 
 
@@ -73,6 +86,7 @@ private:
 	bool colorButtons;
 	bool shapeButtons;
 	bool layerVisualization;
+	bool uiFlag;
 	//bool radialActive = false;
 	//vec2 radialCenter = vec2(0.0f, 0.0f);
 
@@ -81,6 +95,25 @@ private:
 
 
 };
+bool UserInterface::getUiFlag(){
+	return uiFlag;
+}
+void UserInterface::toggleUiFlag(){
+	if (uiFlag){
+		modeButtons = false;
+		uiFboFlag = false;
+		uiFlag = false;
+	}
+	else{
+		uiFlag = true;
+		uiFboFlag = true;
+		modeButtons = true;
+	}
+
+}
+void UserInterface::changeModeButtons(bool x){
+	modeButtons = x;
+}
 
 bool UserInterface::getUiFboFlag(){
 	return uiFboFlag;

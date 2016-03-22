@@ -674,7 +674,9 @@ void TouchPointsApp::setup()
 	deviceHandler = DeviceHandler();
 
 	//Set up UI
+
 	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList);
+
 
 	//Sets up eyeX context
 #ifdef EYEX
@@ -730,6 +732,7 @@ void TouchPointsApp::setup()
 	}
 	*/
 #endif
+	
 }
 /*Bresenhams Line Algorithm for smooth lines*/
 void missingPoints(int xi, int yi, int xf, int yf, TouchPoint& points){
@@ -1959,7 +1962,7 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 			}
 
 			if ((((radialCenter.x) - 30) < x && x < ((radialCenter.x) + 30)) && ((radialCenter.y + 100) - 30) < y && y < (radialCenter.y + 100) + 30){
-				uiFboFlag = !uiFboFlag;
+				ui.toggleUiFlag();
 				continue;
 			}
 
@@ -2065,10 +2068,16 @@ void TouchPointsApp::update(){
 	}
 
 	if (eyeXRunning){
-		if (gazePositionX < 400 && gazePositionY < 100){
-			modeButtons = true;
-		}
-		else modeButtons = false;
+
+			if (gazePositionX < 400 && gazePositionY < 100){
+				bool tempBool = true;
+				ui.changeModeButtons(tempBool);
+			}
+			else {
+				bool tempBool = false;
+				ui.changeModeButtons(tempBool);
+			}
+		
 	}
 }
 
