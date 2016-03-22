@@ -176,57 +176,60 @@ bool UserInterface::inInteractiveUi(int x, int y)
 	*/
 	
 	//modeButtons UI
-	if (modeButtons){
-		//Color change button.
-		if (uiFboFlag){
+	if ((*illustrator).getActiveDrawings() == 0){
 
-			if (x < 50 && y < 50)
-			{
-				colorButtons = !colorButtons;
-				return true;
-			}
-			else if (x < 100 && y < 50){
-				shapeButtons = !shapeButtons;
-				return true;
-			}
-			else if (x < 150 && y < 50){
-				(*mBrush).changeFilledShapes(!(*mBrush).getFilledShapes());
-				modeChangeFlag = true;
-				return true;
-			}
-			else if (x < 200 && y < 50){
-				(*mBrush).increaseLineSize();
-				//else lineSize = 1;
-				modeChangeFlag = true;
-				return true;
-			}
-			else if (x < 250 && y < 50){
-				(*mBrush).decreaseLineSize();
-				//else lineSize = 15;
-				modeChangeFlag = true;
-				return true;
-			}
-			else if (x < 300 && y < 50){
-				(*mBrush).decreaseAlpha();
-				modeChangeFlag = true;
-				return true;
-			}
-			else if (x < 350 && y < 50){
-				(*mBrush).increaseAlpha();
-				modeChangeFlag = true;
-				return true;
-			}
-			else if (x < 400 && y < 50){
-				(*(*mBrush).getSymmetry()).toggleSymmetry();
-				return true;
-			}
-			else if (x < 450 && y < 50){
-				layerVisualization = !layerVisualization;
-				return true;
+
+		if (modeButtons){
+			//Color change button.
+			if (uiFboFlag){
+
+				if (x < 50 && y < 50)
+				{
+					colorButtons = !colorButtons;
+					return true;
+				}
+				else if (x < 100 && y < 50){
+					shapeButtons = !shapeButtons;
+					return true;
+				}
+				else if (x < 150 && y < 50){
+					(*mBrush).changeFilledShapes(!(*mBrush).getFilledShapes());
+					modeChangeFlag = true;
+					return true;
+				}
+				else if (x < 200 && y < 50){
+					(*mBrush).increaseLineSize();
+					//else lineSize = 1;
+					modeChangeFlag = true;
+					return true;
+				}
+				else if (x < 250 && y < 50){
+					(*mBrush).decreaseLineSize();
+					//else lineSize = 15;
+					modeChangeFlag = true;
+					return true;
+				}
+				else if (x < 300 && y < 50){
+					(*mBrush).decreaseAlpha();
+					modeChangeFlag = true;
+					return true;
+				}
+				else if (x < 350 && y < 50){
+					(*mBrush).increaseAlpha();
+					modeChangeFlag = true;
+					return true;
+				}
+				else if (x < 400 && y < 50){
+					(*(*mBrush).getSymmetry()).toggleSymmetry();
+					return true;
+				}
+				else if (x < 450 && y < 50){
+					layerVisualization = !layerVisualization;
+					return true;
+				}
 			}
 		}
 	}
-
 	//Color buttons UI
 	if (colorButtons){
 		for (int i = 0; i < 8; i++){ // i < total colors

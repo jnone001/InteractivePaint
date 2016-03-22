@@ -76,7 +76,6 @@ int DeviceHandler::deviceConnection(){
 			//Error
 			return -1;
 		}
-
 		uint16_t vendorid = desc.idVendor;
 
 		if (vendorid == vendorList[0]){
