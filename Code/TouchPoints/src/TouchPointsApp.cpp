@@ -116,11 +116,11 @@ int resolutionY;
 #define SHAPE_Filled_Triangle "FilledTriangle.png"
 
 #define SWIPE_GESTURE 8
-#define windowWidth  getWindowSize().x
-#define windowHeight getWindowSize().y
+//#define windowWidth  getWindowSize().x
+//#define windowHeight getWindowSize().y
 
-//#define windowWidth  1919
-//#define windowHeight 1079
+#define windowWidth  1919
+#define windowHeight 1079
 
 #define FRAME_RATE 120
 
