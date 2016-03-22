@@ -37,6 +37,7 @@ struct Illustrator{
 	void movingTouchShapes(uint32_t myId, vec2 myPos, vec2 prevPos);
 	void endTouchShapes(uint32_t myId);
 	void missedPoints(int xi, int yi, int xf, int yf, TouchPoint& points);
+	int getActiveDrawings();
 
 	void drawActiveShapes();
 
@@ -61,7 +62,9 @@ private:
 
 };
 
-
+int Illustrator::getActiveDrawings(){
+	return activeDrawings;
+}
 
 void Illustrator::drawActiveShapes(){
 	for (auto &activePoint : myActiveCircles) {
@@ -429,7 +432,7 @@ void Illustrator::endTouchShapes(uint32_t myId)
 			activeDrawings--;
 
 			myCircles.push_back(myActiveCircles[myId]);
-			myActiveCircles.erase(myId);
+			
 			//Draws to the layer at the end of the list. Which is drawn on 'top'
 			(*(*mLayerList).back()).bindFramebuffer();
 			for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {
@@ -439,7 +442,7 @@ void Illustrator::endTouchShapes(uint32_t myId)
 				++oldPoints;
 			}
 			(*(*mLayerList).back()).unbindFramebuffer();
-
+			myActiveCircles.erase(myId);
 			/*
 			if (currLayer == 0){
 
@@ -480,7 +483,7 @@ void Illustrator::endTouchShapes(uint32_t myId)
 			activeDrawings--;
 
 			myRectangles.push_back(myActiveRectangles[myId]);
-			myActiveRectangles.erase(myId);
+			
 			//Draws to the layer at the end of the list. Which is drawn on 'top'
 			(*(*mLayerList).back()).bindFramebuffer();
 			for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();) {
@@ -490,7 +493,7 @@ void Illustrator::endTouchShapes(uint32_t myId)
 				++oldPoints;
 			}
 			(*(*mLayerList).back()).unbindFramebuffer();
-
+			myActiveRectangles.erase(myId);
 			/*
 			if (currLayer == 0){
 
@@ -538,7 +541,7 @@ void Illustrator::endTouchShapes(uint32_t myId)
 				++oldPoints;
 			}
 			(*(*mLayerList).back()).unbindFramebuffer();
-
+			myActiveTriangles.erase(myId);
 			/*
 			if (currLayer == 0){
 

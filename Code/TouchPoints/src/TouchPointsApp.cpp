@@ -340,6 +340,7 @@ private:
 	std::shared_ptr<gl::Fbo>		thirdFbo;
 	std::shared_ptr<gl::Fbo>		activeFbo;
 	std::shared_ptr<gl::Fbo>		iconFbo;
+	std::shared_ptr<gl::Fbo>		saveImageFbo;
 
 	std::vector<std::shared_ptr<gl::Fbo>> layerList;
 
@@ -633,7 +634,7 @@ void TouchPointsApp::setup()
 	activeFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
 	iconFbo = gl::Fbo::create(windowWidth, windowHeight, format);
-
+	saveImageFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	//Set up UI
 	uiFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	//Set up image feedback fbo
@@ -934,10 +935,15 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 		//Create a prevous vec2
 		//vec2 prevPoint;
 
+
+
 		if (points.touchDistance() > 0 && points.touchZone() != Leap::Pointable::Zone::ZONE_NONE)
 		{
+
 			gl::color(0, 1, 0, 1 - points.touchDistance());
 			gl::drawSolidCircle(vec2(leapXCoordinate, leapYCoordinate), 40);
+			gl::color(1.0, 0.9, 0.5);
+			gl::drawStrokedCircle(vec2(leapXCoordinate, leapYCoordinate), 40.0f, 10.0f);
 			/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
 			if(pointsMap.find(points.id()) != pointsMap.end()){
 			pointsMap.erase(points.id());
@@ -1039,6 +1045,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 				
 				illustrator.movingTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate), pointsMap[points.id()]);
 				//pointsMap.emplace(points.id(), vec2(leapXCoordinate, leapYCoordinate));
+				activePointsMap[points.id()] = true;
 				pointsMap[points.id()] = vec2(leapXCoordinate, leapYCoordinate);
 				//myActivePoints[points.id()].addPoint(vec2(leapXCoordinate, leapYCoordinate));
 				
@@ -1059,15 +1066,19 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 		}
 	}
-	for(auto points : activePointsMap){
+	std::vector<uint32_t> list;
+	for(auto& points : activePointsMap){
 		if ( points.second ){
 			points.second = false;
 		}
 		else {
 			illustrator.endTouchShapes(points.first);
-			activePointsMap.erase(points.first);
+			list.emplace_back(points.first);
 			pointsMap.erase(points.first);
 		}
+	}
+	for (auto ids : list){
+		activePointsMap.erase(ids);
 	}
 
 }
@@ -1326,8 +1337,19 @@ void TouchPointsApp::loadImages(string imageName){
 }
 
 void TouchPointsApp::saveImage(string imageType){
+	(*saveImageFbo).bindFramebuffer();
+	Color myBG = ui.getBackgroundColor();
+	glClearColor(myBG.r, myBG.g, myBG.b, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
 
-	writeImage(getHomeDirectory() / "cinder" / "Saved_Images" / (toString(imageNum) + imageType), copyWindowSurface());
+	gl::color(1.0, 1.0, 1.0, 1.0);
+	for (auto frames : layerList){
+		gl::draw(frames->getColorTexture());
+	}
+	(*saveImageFbo).unbindFramebuffer();
+	//writeImage(getHomeDirectory() / "cinder" / "Saved_Images" / (toString(imageNum) + imageType), copyWindowSurface());
+
+	writeImage(getHomeDirectory() / "cinder" / "Saved_Images" / (toString(imageNum) + imageType), (saveImageFbo->getColorTexture())->createSource());
 	imageNum++;
 	loadImages("Save" + imageType);
 	cout << "Image " << imageNum << "Saved!";
@@ -2086,6 +2108,7 @@ void TouchPointsApp::draw()
 
 	gl::enableAlphaBlending();
 
+
 	//Add a vector instead of the 3 ref to arrays.
 	//gl::clear(ColorA(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0));
 	//gl::clear(ColorA(ui.getBackgroundColor(), 0.0));
@@ -2095,15 +2118,20 @@ void TouchPointsApp::draw()
 	glClearColor(myBG.r, myBG.g, myBG.b, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
+	//Currently leapDraw before drawing layers to prevent flickering. 
+	//However, this makes it impossible to see green 'hands' on top of images.
+	if (leapDrawFlag){
+		leapDraw(currentFrame);
+	}
+
+
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	for (auto frames : layerList){
 		gl::draw(frames->getColorTexture());
 	}
 	currentFrame = getLeapFrame(leapContr);
 
-	if (leapDrawFlag){
-		leapDraw(currentFrame);
-	}
+
 
 	if (!lockCurrentFrame){
 		//Calls specified action from gesture recgonized
