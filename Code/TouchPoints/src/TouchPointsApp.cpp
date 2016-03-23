@@ -141,6 +141,10 @@ int imageNum;
 float fadeTime = 1;
 
 
+/*Code for Proximity Menu*/
+bool proxActive = false;
+
+
 bool modeChangeFlag = true;
 
 //Layers
@@ -207,7 +211,8 @@ public:
 	void	drawUi();
 	bool	inInteractiveUi(int x, int y);
 	void	drawRadial();
-
+	//Proxyfucntions
+	void	drawProx();
 
 	void	drawImageTexture();
 	void	loadImages(string imageName);
@@ -328,6 +333,9 @@ private:
 	std::shared_ptr<gl::Fbo>		uiFbo;
 	std::shared_ptr<gl::Fbo>		imageFbo;
 	std::shared_ptr<gl::Fbo>		radialFbo;
+	//Proxy Menu Fbo
+	std::shared_ptr<gl::Fbo>		proxFbo;
+
 
 };
 
@@ -622,6 +630,8 @@ void TouchPointsApp::setup()
 	imageFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	//Set up fbo for proxy menu
 	radialFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+	//Set up fbo for proxy menu
+	proxFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
 	//Enable all Leap Gestures
 	TouchPointsApp::enableGest(leapContr);
@@ -754,14 +764,30 @@ void TouchPointsApp::gestRecognition(Leap::Frame frame, Leap::Controller control
 
 					if (circle.pointable().direction().angleTo(circle.normal()) <= M_PI / 2) {
 						//clockwise circle
-						processing = true;
-						leapShapeChange();
-					}
-					else {
-						//counterclockwise circle
-						processing = true;
-						leapShapeChange();
+					
+						Leap::Vector position = circle.pointable().tipPosition();
 
+						if (position.x < 0 && position.y > 250){
+							processing = true;
+							leapColorChange();
+						}
+
+						if (position.x < 0 && position.y < 150){
+							processing = true;
+							leapShapeChange();
+						}
+
+						if (position.x > 0 && position.y > 250){
+							processing = true;
+							leapSave();
+						}
+
+						if (position.x > 0 && position.y < 150){
+							proxActive = false;
+						}
+					}else {
+						//counterclockwise circle
+						drawProx();
 					}
 
 					// Calculate angle swept since last frame
@@ -837,7 +863,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 			gl::color(0, 1, 0, 1 - points.touchDistance());
 			gl::drawSolidCircle(vec2(leapXCoordinate, leapYCoordinate), 40);
-			gl::color(1.0, 0.9, 0.5);
+			gl::color(1.0, 0.9, 0.5, 1-points.touchDistance());
 			gl::drawStrokedCircle(vec2(leapXCoordinate, leapYCoordinate), 40.0f, 10.0f);
 			/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
 			if(pointsMap.find(points.id()) != pointsMap.end()){
@@ -848,7 +874,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 			}
 			
 		}
-		else if (points.touchDistance() <= 0)
+		else if (points.touchDistance() <= 0 && !proxActive)
 		{
 
 			lockCurrentFrame = true;
@@ -1131,6 +1157,31 @@ void TouchPointsApp::drawRadial(){
 
 }
 
+/*Proxy menu Function*/
+void TouchPointsApp::drawProx(){
+
+	(*proxFbo).bindFramebuffer();
+	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	(*proxFbo).unbindFramebuffer();
+
+	//Draw to radial menu buffer
+	(*proxFbo).bindFramebuffer();
+	//Make background transparent
+	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawLine(vec2(windowWidth*.5, windowHeight), vec2(windowWidth*.5, 0));
+
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawLine(vec2(0, windowHeight*.5), vec2(windowWidth, windowHeight*.5));
+
+	(*proxFbo).unbindFramebuffer();
+
+	proxActive = true;
+}
 
 void TouchPointsApp::loadImages(string imageName){
 
@@ -1467,11 +1518,11 @@ void TouchPointsApp::update(){
 
 	//bool testvar2 = System::hasMultiTouch();
 	//auto testvar3 = System::getMaxMultiTouchPoints();
-
+	
 	if (deviceHandler.deviceConnection()){
 		ui.setModeChangeFlag();
 	}
-
+	
 	if (eyeXRunning){
 
 			if (gazePositionX < 400 && gazePositionY < 100){
@@ -1543,9 +1594,14 @@ void TouchPointsApp::draw()
 	}
 	
 	ui.drawUi();
+
 	if (radialActive){
 		gl::color(1.0, 1.0, 1.0, 1.0);
 		gl::draw(radialFbo->getColorTexture());
+	}
+
+	if (proxActive){
+		gl::draw(proxFbo->getColorTexture());
 	}
 
 
