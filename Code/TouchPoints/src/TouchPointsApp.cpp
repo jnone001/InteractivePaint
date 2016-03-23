@@ -1390,9 +1390,9 @@ void TouchPointsApp::update(){
 	//bool testvar2 = System::hasMultiTouch();
 	//auto testvar3 = System::getMaxMultiTouchPoints();
 
-	if (deviceHandler.deviceConnection()){
-		ui.setModeChangeFlag();
-	}
+	//if (deviceHandler.deviceConnection()){
+		//ui.setModeChangeFlag();
+	//}
 	
 
 	if (eyeXRunning){
