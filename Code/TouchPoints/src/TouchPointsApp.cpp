@@ -8,6 +8,8 @@
 #include "cinder/gl/Fbo.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/app/AppBase.h"
+#include "cinder/ImageIo.h"
+#include "cinder/Utilities.h"
 #include <math.h>
 #include <chrono>
 #include <ctime>
@@ -27,11 +29,12 @@
 #include "Enums.h"
 #include "Brush.h"
 #include "UserInterface.h"
-
+#include "ImageHandler.h"
 
 #include "libusb.h"
 #include <stdio.h>
 #include "DeviceHandler.h"
+
 
 //Leap Includes
 #include "Leap.h"
@@ -39,8 +42,6 @@
 
 
 //include Images
-#include "cinder/ImageIo.h"
-#include "cinder/Utilities.h"
 #include "String.h"
 
 
@@ -98,22 +99,7 @@ int resolutionY;
 #define TOTAL_SYMBOLS 7
 #define TOTAL_SHAPES 7
 
-#define COLOR_ZERO "White.png"
-#define COLOR_ONE "Red.png"
-#define COLOR_TWO "Yellow.png"
-#define COLOR_THREE "Green.png"
-#define COLOR_FOUR "Torquise.png"
-#define COLOR_FIVE "Blue.png"
-#define COLOR_SIX "Purple.png"
-#define COLOR_SEVEN "Orange.png"
 
-#define SHAPE_LINE "LineIcon.png"
-#define SHAPE_Circle "Circle.png"
-#define SHAPE_Rectangle "Rectangle.png"
-#define SHAPE_Triangle "Triangle.png"
-#define SHAPE_Filled_Circle "FilledCircle.png"
-#define SHAPE_Filled_Rectangle "FilledRectangle.png"
-#define SHAPE_Filled_Triangle "FilledTriangle.png"
 
 #define SWIPE_GESTURE 8
 //#define windowWidth  getWindowSize().x
@@ -214,11 +200,6 @@ public:
 	//Proxyfucntions
 	void	drawProx();
 
-	void	drawImageTexture();
-	void	loadImages(string imageName);
-	void	saveImage(string imageType);
-	void	saveFboImage(std::shared_ptr<gl::Fbo> myFbo);
-
 
 	/*Leap related functions*/
 	void	enableGest(Leap::Controller controller);
@@ -255,6 +236,7 @@ private:
 	Illustrator illustrator;
 	UserInterface ui;
 	DeviceHandler deviceHandler;
+	ImageHandler imageHandler;
 
 	
 	//Leap Motion Controller
@@ -664,9 +646,10 @@ void TouchPointsApp::setup()
 	brush = Brush(myShape, newColor, tempFloat , tempInt, tempFalse, tempFalse, tempFalse, &mySymmetry);
 	illustrator = Illustrator(&brush, &layerList);
 	deviceHandler = DeviceHandler();
-
+	cinder::getHomeDirectory();
+	imageHandler = ImageHandler(&layerList);
 	//Set up UI
-
+	
 	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList);
 
 
@@ -752,7 +735,7 @@ void TouchPointsApp::gestRecognition(Leap::Frame frame, Leap::Controller control
 		//List of all gestures
 		gestList = frame.gestures();
 		//Process gestures...
-		if (!processing){
+		if (!imageHandler.getIconFlag()){
 			//for (int g = 0; g < gestures.count(); ++g)
 			for (Leap::Gesture gesture : gestList) {
 				//Gesture gesture = gestList[g];
@@ -830,8 +813,7 @@ void TouchPointsApp::gestRecognition(Leap::Frame frame, Leap::Controller control
 
 void TouchPointsApp::leapSave(){
 
-	saveImage(".png");
-	imageFlag = true;
+	imageHandler.saveCanvas(vec2(windowWidth, windowHeight));
 }
 
 void TouchPointsApp::leapDraw(Leap::Frame frame){
@@ -855,7 +837,6 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 		//Create a prevous vec2
 		//vec2 prevPoint;
-
 
 
 		if (points.touchDistance() > 0 && points.touchZone() != Leap::Pointable::Zone::ZONE_NONE)
@@ -934,34 +915,32 @@ void TouchPointsApp::leapShapeChange(){
 	ui.setModeChangeFlag();
 	switch (brush.getCurrentShape()){
 	case 0:{
-		//brush.changeShape(Shape::Shape::Line);
-		loadImages(SHAPE_LINE);
-		imageFlag = true;
+		imageHandler.loadIcon(SHAPE_LINE);
+
 		break;
 	}
 	case 1:{
 		bool tempBool = false;
 
 		if (!brush.getFilledShapes())
-		loadImages(SHAPE_Circle);
-		else loadImages(SHAPE_Filled_Circle);
-		imageFlag = true;
+			imageHandler.loadIcon(SHAPE_Circle);
+		else imageHandler.loadIcon(SHAPE_Filled_Circle);
 		break;
 	}
 	case 2:{
 			  
 
 		if (!brush.getFilledShapes())
-		loadImages(SHAPE_Rectangle);
-		else loadImages(SHAPE_Filled_Rectangle);
+			imageHandler.loadIcon(SHAPE_Rectangle);
+		else imageHandler.loadIcon(SHAPE_Filled_Rectangle);
 		imageFlag = true;
 		break;
 	}
 	case 3:{
 			
 		if (!brush.getFilledShapes())
-		loadImages(SHAPE_Triangle);
-		else loadImages(SHAPE_Filled_Triangle);
+		imageHandler.loadIcon(SHAPE_Triangle);
+		else imageHandler.loadIcon(SHAPE_Filled_Triangle);
 		imageFlag = true;
 		break;
 	}
@@ -987,51 +966,43 @@ void TouchPointsApp::leapColorChange(){
 	//Provides correct image to provide feedback
 	switch (brush.getCurrentColor()){
 	case 0:{
-		loadImages(COLOR_ZERO);
-		imageFlag = true;
-		modeChangeFlag = true;
+
+		imageHandler.loadIcon(COLOR_ZERO);
+
 		break;
 	}
 	case 1:{
-		loadImages(COLOR_ONE);
-		imageFlag = true;
-		modeChangeFlag = true;
+
+		imageHandler.loadIcon(COLOR_ONE);
+
 		break;
 	}
 	case 2:{
-		loadImages(COLOR_TWO);
-		imageFlag = true;
-		modeChangeFlag = true;
+
+		imageHandler.loadIcon(COLOR_TWO);
+
 		break;
 	}
 	case 3:{
-		loadImages(COLOR_THREE);
-		imageFlag = true;
-		modeChangeFlag = true;
+		imageHandler.loadIcon(COLOR_THREE);
+
 		break;
 	}
 	case 4:{
-		loadImages(COLOR_FOUR);
-		imageFlag = true;
-		modeChangeFlag = true;
+		imageHandler.loadIcon(COLOR_FOUR);
 		break;
 	}
 	case 5:{
-		loadImages(COLOR_FIVE);
-		imageFlag = true;
-		modeChangeFlag = true;
+		imageHandler.loadIcon(COLOR_FIVE);
+
 		break;
 	}
 	case 6:{
-		loadImages(COLOR_SIX);
-		imageFlag = true;
-		modeChangeFlag = true;
+		imageHandler.loadIcon(COLOR_SIX);
 		break;
 	}
 	case 7:{
-		loadImages(COLOR_SEVEN);
-		imageFlag = true;
-		modeChangeFlag = true;
+		imageHandler.loadIcon(COLOR_SEVEN);
 		break;
 	}
 	default:{
@@ -1042,29 +1013,6 @@ void TouchPointsApp::leapColorChange(){
 	}
 }
 
-void TouchPointsApp::drawImageTexture(){
-
-	(*imageFbo).bindFramebuffer();
-
-	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	gl::color(1.0, 1.0, 1.0, fadeTime);
-
-	gl::draw(imageTexture, Rectf(0, 0, 1920, 1080));
-
-	if (fadeTime <= 0.1){
-		imageFlag = false;
-		processing = false;
-		fadeTime = 1;
-	}
-
-	fadeTime -= 0.009;
-
-
-	(*imageFbo).unbindFramebuffer();
-
-}
 
 void TouchPointsApp::drawRadial(){
 	gl::color(1.0, 1.0, 1.0, 1.0);
@@ -1183,35 +1131,6 @@ void TouchPointsApp::drawProx(){
 	proxActive = true;
 }
 
-void TouchPointsApp::loadImages(string imageName){
-
-	imageTexture = gl::Texture::create(loadImage(loadAsset(imageName)));
-
-}
-
-void TouchPointsApp::saveImage(string imageType){
-	(*saveImageFbo).bindFramebuffer();
-	Color myBG = ui.getBackgroundColor();
-	glClearColor(myBG.r, myBG.g, myBG.b, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	gl::color(1.0, 1.0, 1.0, 1.0);
-	for (auto frames : layerList){
-		gl::draw(frames->getColorTexture());
-	}
-	(*saveImageFbo).unbindFramebuffer();
-	//writeImage(getHomeDirectory() / "cinder" / "Saved_Images" / (toString(imageNum) + imageType), copyWindowSurface());
-
-	writeImage(getHomeDirectory() / "cinder" / "Saved_Images" / (toString(imageNum) + imageType), (saveImageFbo->getColorTexture())->createSource());
-	imageNum++;
-	loadImages("Save" + imageType);
-	cout << "Image " << imageNum << "Saved!";
-}
-
-void TouchPointsApp::saveFboImage(std::shared_ptr<gl::Fbo> myFbo){
-
-	writeImage(getHomeDirectory() / "cinder" / "Saved_Images" / (toString(imageNum) + "myPixels.png"), (myFbo->getColorTexture())->createSource());
-}
 /*Mode Change Functions*/
 
 
@@ -1327,17 +1246,20 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		ui.setModeChangeFlag();
 	}
 	else if (event.getChar() == 'n'){
-		saveImage(".png");
-		imageFlag = true;
+		//saveImage(".png");
+		//imageFlag = true;
+		imageHandler.saveCanvas(vec2(windowWidth, windowHeight));
 	}
 	else if (event.getChar() == 'j') {
-		saveImage(".jpeg");
-		imageFlag = true;
+		//saveImage(".jpeg");
+		//imageFlag = true;
+		imageHandler.changeImageType("jpeg");
 
 	}
 	else if (event.getChar() == 't') {
-		saveImage(".tif");
-		imageFlag = true;
+		//saveImage(".tif");
+		//imageFlag = true;
+		imageHandler.changeImageType("tif");
 	}
 	else if (event.getChar() == 'v'){
 		leapDrawFlag = !leapDrawFlag;
@@ -1540,7 +1462,7 @@ void TouchPointsApp::update(){
 void TouchPointsApp::draw()
 {
 
-	gl::enableAlphaBlending();
+	//gl::enableAlphaBlending();
 
 
 	//Add a vector instead of the 3 ref to arrays.
@@ -1554,6 +1476,7 @@ void TouchPointsApp::draw()
 
 	//Currently leapDraw before drawing layers to prevent flickering. 
 	//However, this makes it impossible to see green 'hands' on top of images.
+	currentFrame = getLeapFrame(leapContr);
 	if (leapDrawFlag){
 		leapDraw(currentFrame);
 	}
@@ -1563,7 +1486,7 @@ void TouchPointsApp::draw()
 	for (auto frames : layerList){
 		gl::draw(frames->getColorTexture());
 	}
-	currentFrame = getLeapFrame(leapContr);
+
 
 
 
@@ -1585,6 +1508,7 @@ void TouchPointsApp::draw()
 #endif
 
 	/*Draws image that provides feedback */
+	/*
 	if (imageFlag){
 		//Area center = calcCenter(imageTexture);
 		drawImageTexture();
@@ -1592,7 +1516,8 @@ void TouchPointsApp::draw()
 		gl::color(ColorA(0.0, 0.0, 0.0, 1.0));
 		imageFbo->blitToScreen(Area(0, 0, 1920, 1080), Area(windowWidth / 2 - 100, windowHeight / 2 + 100, windowWidth / 2 + 55, windowHeight / 2 - 55), GL_NEAREST, GL_COLOR_BUFFER_BIT);
 	}
-	
+	*/
+	imageHandler.displayIcon();
 	ui.drawUi();
 
 	if (radialActive){
