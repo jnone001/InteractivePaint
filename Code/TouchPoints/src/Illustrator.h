@@ -433,6 +433,7 @@ void Illustrator::endTouchShapes(uint32_t myId)
 
 			myCircles.push_back(myActiveCircles[myId]);
 			
+			
 			//Draws to the layer at the end of the list. Which is drawn on 'top'
 			(*(*mLayerList).back()).bindFramebuffer();
 			for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();) {

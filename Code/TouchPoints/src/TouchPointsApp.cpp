@@ -311,6 +311,7 @@ private:
 	std::shared_ptr<gl::Fbo>		saveImageFbo;
 
 	std::vector<std::shared_ptr<gl::Fbo>> layerList;
+	std::vector<float> layerAlpha;
 
 	std::shared_ptr<gl::Fbo>		uiFbo;
 	std::shared_ptr<gl::Fbo>		imageFbo;
@@ -647,10 +648,10 @@ void TouchPointsApp::setup()
 	illustrator = Illustrator(&brush, &layerList);
 	deviceHandler = DeviceHandler();
 	cinder::getHomeDirectory();
-	imageHandler = ImageHandler(&layerList);
+	imageHandler = ImageHandler(&layerList, &layerAlpha);
 	//Set up UI
 	
-	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList);
+	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
 
 	//Sets up eyeX context
@@ -1217,7 +1218,8 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	else if (event.getChar() == 'b')
 	{
 
-		ui.changeBackgroundColor(Color(1.0, 1.0, 1.0));
+		//ui.changeBackgroundColor(Color(1.0, 1.0, 1.0));
+		ui.incrementBackground();
 		ui.setModeChangeFlag();
 	}
 	else if (event.getChar() == 'u')
@@ -1459,6 +1461,7 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 {
 
 	for (const auto &touch : event.getTouches()) {
+		ui.slideButtons(touch.getX(), touch.getY());
 		if (bufferTouches.find(touch.getId()) == bufferTouches.end()){
 			illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
 		}
@@ -1561,9 +1564,11 @@ void TouchPointsApp::draw()
 	}
 
 
-	gl::color(1.0, 1.0, 1.0, 1.0);
+	int x = 0;
 	for (auto frames : layerList){
+		gl::color(1.0, 1.0, 1.0, ui.getLayerAlpha(x));
 		gl::draw(frames->getColorTexture());
+		x++;
 	}
 
 

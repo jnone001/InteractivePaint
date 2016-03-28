@@ -17,7 +17,7 @@ struct UserInterface{
 
 	UserInterface(){}
 	//Creates a User Interface
-	UserInterface(int mWindowWidth, int mWindowHeight, bool leapRun, bool eyeXRun, Brush* brush, Illustrator* mIllustrator, DeviceHandler* mDeviceHandler, std::shared_ptr<gl::Fbo> fbo, std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList){
+	UserInterface(int mWindowWidth, int mWindowHeight, bool leapRun, bool eyeXRun, Brush* brush, Illustrator* mIllustrator, DeviceHandler* mDeviceHandler, std::shared_ptr<gl::Fbo> fbo, std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha){
 		modeChangeFlag = true;
 		windowWidth = mWindowWidth;
 		windowHeight = mWindowHeight;
@@ -42,9 +42,24 @@ struct UserInterface{
 		colorButtons = false;
 		shapeButtons = false;
 		layerVisualization = false;
-		backgroundColor = Color(0.0, 0.0, 0.0);
-		layerList = fboLayerList;
+		//Adds our backgroundColors to the list. 
+		backgroundList.emplace_back(Color(0.0f, 0.0f, 0.0f));
+		backgroundList.emplace_back(Color(256.0f, 256.0f, 256.0f));
+		backgroundList.emplace_back(Color(256.0f, 0.0f, 0.0f));
+		backgroundList.emplace_back(Color(256.0f, 256.0f, 0.0f));
+		backgroundList.emplace_back(Color(0.0f, 256.0f, 0.0f));
+		backgroundList.emplace_back(Color(0.0f, 256.0f, 256.0f));
+		backgroundList.emplace_back(Color(0.0f, 0.0f, 256.0f)); 
+		backgroundList.emplace_back(Color(256.0f, 0.0f, 256.0f));
 
+		backgroundColor = backgroundList.front();
+		layerList = fboLayerList;
+		layerAlpha = fboLayerAlpha;
+		int x = 0;
+		for (auto layers : *layerList){
+			(*layerAlpha).emplace_back(1.0f);
+		}
+		
 
 
 		
@@ -64,6 +79,9 @@ struct UserInterface{
 	void changeModeButtons(bool x);
 	void toggleUiFlag();
 	bool getUiFlag();
+	void slideButtons(int x, int y);
+	float getLayerAlpha(int layerNumber);
+	void incrementBackground();
 	//Functions to get brush values
 
 
@@ -91,10 +109,25 @@ private:
 	//vec2 radialCenter = vec2(0.0f, 0.0f);
 
 	std::vector<std::shared_ptr<gl::Fbo>>* layerList;
+	std::vector<float>* layerAlpha;
+	list<Color> backgroundList; 
 	Color backgroundColor;
 
 
 };
+
+void UserInterface::incrementBackground(){
+	//Pops the current color
+	Color tempColor = backgroundList.front();
+	backgroundList.pop_front();
+	//Assign the new background color to the new front of list.
+	backgroundColor = backgroundList.front();
+	//Place the old background color back into the list
+	backgroundList.emplace_back(tempColor);
+}
+float UserInterface::getLayerAlpha(int layerNumber){
+	return (*layerAlpha)[layerNumber];
+}
 bool UserInterface::getUiFlag(){
 	return uiFlag;
 }
@@ -125,6 +158,7 @@ void UserInterface::clearLayers(){
 		(*layer).bindFramebuffer();
 		//glClearColor(1.0,1.0,1.0, 0.0);
 		glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, 0.0);
+
 		glClear(GL_COLOR_BUFFER_BIT);
 		//gl::clear(Color(1.0,1.0,1.0)/*ColorA(backgroundColor)*/, 0.0);
 		(*layer).unbindFramebuffer();
@@ -142,7 +176,28 @@ Color UserInterface::getBackgroundColor(){
 void UserInterface::changeBackgroundColor(Color background){
 	backgroundColor = background;
 }
+void UserInterface::slideButtons(int x, int y){
+	if (layerVisualization){
+		int yDist = (*layerList).size();
+		yDist = (*layerList).size() * 200 + 50;
+		int size = 0;
+		for (auto frame : (*layerList)){
+			//gl::color(0.9, 0.85, 0.65);
+			//gl::drawStrokedRect(Rectf(400, y - 200, 600, y), 10);
 
+			if (x > 400 && x < 450)
+			{
+				if (y > yDist - 200 && y < yDist)
+				{
+					(*layerAlpha)[size] = ((y - ((float)yDist - 200)) / ((float)yDist - ((float)yDist - 200)));
+					//(*layerAlpha)[size] = 0.5f;
+				}
+			}
+			yDist = yDist - 200;
+			size = size + 1;
+		}
+	}
+}
 bool UserInterface::inInteractiveUi(int x, int y)
 {
 	/*
@@ -176,6 +231,7 @@ bool UserInterface::inInteractiveUi(int x, int y)
 	*/
 	
 	//modeButtons UI
+	
 	if ((*illustrator).getActiveDrawings() == 0){
 
 
@@ -251,13 +307,25 @@ bool UserInterface::inInteractiveUi(int x, int y)
 			//gl::color(0.9, 0.85, 0.65);
 			//gl::drawStrokedRect(Rectf(400, y - 200, 600, y), 10);
 
-			if (x > 400 && x < 600)
+			
+
+			if (x > 400 && x < 800)
 			{
+				if (x < 450){
+					//Signals that the user is pressing layerVisualization 'slide button'
+					return true;
+				}
 				if (y > yDist - 200 && y < yDist)
 				{
+					//Swaps layers
 					std::shared_ptr<gl::Fbo> temp = (*layerList)[2];
 					(*layerList)[2] = (*layerList)[size];
 					(*layerList)[size] = temp;
+
+					//Swaps alpha value of layers
+					float tempAlpha = (*layerAlpha)[2];
+					(*layerAlpha)[2] = (*layerAlpha)[size];
+					(*layerAlpha)[size] = tempAlpha;
 					return true;
 
 				}
@@ -680,11 +748,34 @@ void UserInterface::drawUi(){
 		//gl::drawSolidRect(Rectf(500, 500, 800, 800));
 		int y = (*layerList).size();
 		y = y * 200 + 50;
+		int layerNumber = 0;
 		for (auto frame : (*layerList)){
+			gl::color(backgroundColor.r,backgroundColor.g, backgroundColor.b, 1.0);
+			gl::drawSolidRect(Rectf(400,(y - 200), 800, y));
+
 			gl::color(0.9, 0.85, 0.65);
-			gl::drawStrokedRect(Rectf(400, y - 200, 600, y), 10);
-			frame->blitToScreen(Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(400, 1080 - (y - 200)), vec2(600, 1080 - y)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
+			gl::drawStrokedRect(Rectf(400, y - 200, 800, y), 10);
+			gl::color(1.0, 1.0, 1.0, (*layerAlpha)[layerNumber]);
+			//frame->blitToScreen(Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(400, 1080 - (y - 200)), vec2(800, 1080 - y)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
+			gl::draw(frame->getColorTexture(), Rectf(400, (y - 200), 800, y));
+			gl::color(0.0,0.0,0.0,1.0);
+			gl::drawSolidRect(Rectf(400, y - 200, 450, y));
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(400, y - 200, 450, y), 10);
+			gl::color(1.0, 1.0, 1.0, 1.0);
+			
+
+			//Draws indicator for alpha level
+			gl::color(0.0, 1.0f, 0.0, 1.0f);
+			gl::drawSolidCircle(vec2(425, (y - 200) + (*layerAlpha)[layerNumber] * (y - (y - 200))), 5.0f);
+
+			for (int x = 0; x < 8; x++)
+			{
+				gl::color(1.0, 1.0, 1.0, 1.0 - .125 * x);
+				gl::drawSolidRect(Rectf(400, (y - 200) + x*25, 450, (y - 200) + (x + 1) * 25));
+			}
 			y = y - 200;
+			layerNumber++;
 		}
 		//(*layerList)[0]->blitToScreen(Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(500, 500), vec2(1000, 800)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
 		//(*layerList)[1]->blitToScreen(Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(300, 100), vec2(400, 400)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
