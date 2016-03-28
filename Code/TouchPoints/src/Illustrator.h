@@ -17,6 +17,7 @@
 #include <vector>
 #include <map>
 #include <list>
+#include <stack>
 
 #include "TouchShapes.h"
 #include "SymmetryLine.h"
@@ -30,6 +31,13 @@ struct Illustrator{
 		mLayerList = layerList;
 		mBrush = brush;
 		activeDrawings = 0;
+
+		//Create Map for all Fbo's in Program 
+		for (auto layers : (*mLayerList)) {
+			std::list<std::shared_ptr<gl::Fbo>> storedFbo;
+			//storedFbo.emplace_back(*layers);
+			myTimeMachine.insert(make_pair(layers, storedFbo));
+		}
 	}
 
 
@@ -38,6 +46,9 @@ struct Illustrator{
 	void endTouchShapes(uint32_t myId);
 	void missedPoints(int xi, int yi, int xf, int yf, TouchPoint& points);
 	int getActiveDrawings();
+	//Time Machine
+	void saveCurrentFbo();
+	void undoDraw(Color background);
 
 	void drawActiveShapes();
 
@@ -59,6 +70,12 @@ private:
 	list<TouchRectangle>			myRectangles;
 	map<uint32_t, TouchTriangle>	myActiveTriangles;
 	list<TouchTriangle>				myTriangles;
+
+	//TimeMachine 
+	map< std::shared_ptr<gl::Fbo>, std::list<std::shared_ptr<gl::Fbo>> > myTimeMachine;
+	//Stack that tells which item in map to pop
+	stack < std::shared_ptr<gl::Fbo> > undoOrder;
+	int undoCount = 0;
 
 };
 
@@ -182,6 +199,10 @@ void Illustrator::missedPoints(int xi, int yi, int xf, int yf, TouchPoint& point
 
 void Illustrator::beginTouchShapes(uint32_t myId, vec2 myPos)
 {
+	/*Should go here*/
+	saveCurrentFbo();
+
+
 	if ((*mBrush).getEraserMode()){
 		activeDrawings++;
 		//ColorA newColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 1);
@@ -574,5 +595,88 @@ void Illustrator::endTouchShapes(uint32_t myId)
 		}
 	}
 }
+
+void Illustrator::saveCurrentFbo(){
+
+	if (myTimeMachine[(*mLayerList).back()].size() == 10){
+		myTimeMachine[(*mLayerList).back()].pop_back();
+	}
+
+	std::shared_ptr<gl::Fbo> tempFbo;
+
+
+	gl::Fbo::Format format;
+	tempFbo = gl::Fbo::create((*(*mLayerList).back()).getSize().x
+	, (*(*mLayerList).back()).getSize().y
+	, format);
+
+	(*tempFbo).bindFramebuffer();
+	gl::color(1.0, 1.0, 1.0, 1.0);
+	gl::draw((*(*mLayerList).back()).getColorTexture());
+	//gl::drawSolidCircle(vec2(500, 500), 100);
+	(*tempFbo).unbindFramebuffer();
+
+
+
+	/*
+		std::shared_ptr<gl::Fbo> tempFbo;
+		//*tempFbo = (*(*mLayerList).back());
+		gl::Fbo::Format format;
+		tempFbo = gl::Fbo::create(1920, 1080, format);
+
+		
+		*/
+		//Place current fbo on list
+
+
+		myTimeMachine[(*mLayerList).back()].emplace_front(tempFbo);
+		/*
+		undoOrder.push((*mLayerList).back());
+
+		if (undoCount < 3){
+			undoCount++;
+		}
+		*/
+	}
+
+
+void Illustrator::undoDraw(Color background){
+	
+
+	if (myTimeMachine[(*mLayerList).back()].size() != 0){
+
+		//gl::Fbo tempFbo = (*myTimeMachine[(*mLayerList).back()].front());
+
+		(*(*mLayerList).back()).bindFramebuffer();
+
+		glClearColor(background.r, background.g, background.b, 0.0);
+		glClear(GL_COLOR_BUFFER_BIT);
+		gl::color(1.0, 1.0, 1.0, 1.0);
+
+		gl::draw((*myTimeMachine[(*mLayerList).back()].front()).getColorTexture());
+
+		(*(*mLayerList).back()).unbindFramebuffer();
+
+
+		myTimeMachine[(*mLayerList).back()].pop_front();
+	}
+
+
+	/*
+	if (!(undoOrder.empty())){
+
+		undoOrder.pop();
+		if (undoCount > 0){
+			undoCount--;
+		}
+		return tempFbo;
+	}
+	else{
+		return (*(*mLayerList).back());
+	}
+	*/
+
+}
+
 
 #endif

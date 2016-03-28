@@ -13,6 +13,7 @@
 
 
 
+
 struct UserInterface{
 
 	UserInterface(){}
@@ -42,12 +43,10 @@ struct UserInterface{
 		colorButtons = false;
 		shapeButtons = false;
 		layerVisualization = false;
+		undoFlag = false;
 		backgroundColor = Color(0.0, 0.0, 0.0);
 		layerList = fboLayerList;
-
-
-
-		
+		currentLayerOrder = { 1, 2, 3 };
 	}
 
 	void modeRectangle();
@@ -64,6 +63,14 @@ struct UserInterface{
 	void changeModeButtons(bool x);
 	void toggleUiFlag();
 	bool getUiFlag();
+
+	/*Attributes for time Machine*/
+	bool getUndoFlag();
+	void resetUndoFlag();
+	int getCurrentLayer();
+
+	//int setLayerOrder();
+
 	//Functions to get brush values
 
 
@@ -87,10 +94,16 @@ private:
 	bool shapeButtons;
 	bool layerVisualization;
 	bool uiFlag;
+	bool undoFlag;
 	//bool radialActive = false;
 	//vec2 radialCenter = vec2(0.0f, 0.0f);
 
 	std::vector<std::shared_ptr<gl::Fbo>>* layerList;
+	std::vector<int>  currentLayerOrder;
+	
+	
+
+
 	Color backgroundColor;
 
 
@@ -178,7 +191,6 @@ bool UserInterface::inInteractiveUi(int x, int y)
 	//modeButtons UI
 	if ((*illustrator).getActiveDrawings() == 0){
 
-
 		if (modeButtons){
 			//Color change button.
 			if (uiFboFlag){
@@ -227,6 +239,10 @@ bool UserInterface::inInteractiveUi(int x, int y)
 					layerVisualization = !layerVisualization;
 					return true;
 				}
+				else if (x < 500 && y < 50 ){
+					(*illustrator).undoDraw(backgroundColor);
+					return true;
+				}
 			}
 		}
 	}
@@ -258,6 +274,11 @@ bool UserInterface::inInteractiveUi(int x, int y)
 					std::shared_ptr<gl::Fbo> temp = (*layerList)[2];
 					(*layerList)[2] = (*layerList)[size];
 					(*layerList)[size] = temp;
+
+					int temp2 = currentLayerOrder[2];
+					currentLayerOrder[2] = currentLayerOrder[size];
+					currentLayerOrder[size] = temp2;
+
 					return true;
 
 				}
@@ -620,6 +641,13 @@ void UserInterface::drawUi(){
 			gl::drawStrokedRect(Rectf(420, 20, 440, 40), 1);
 
 
+			//Undo Button
+			gl::color(0.9, 0.85, 0.65);
+			gl::drawStrokedRect(Rectf(450, 2, 500, 50), 10);
+			
+
+
+
 		}
 		if (colorButtons){
 			int i = 0;
@@ -694,5 +722,15 @@ void UserInterface::drawUi(){
 	//if (uiFboFlag) gl::draw(uiFbo->getColorTexture());
 }
 
+int UserInterface::getCurrentLayer(){
+	return currentLayerOrder[2];
+}
 
+bool UserInterface::getUndoFlag(){
+	return undoFlag;
+}
+
+void UserInterface::resetUndoFlag(){
+	undoFlag = false;
+}
 #endif
