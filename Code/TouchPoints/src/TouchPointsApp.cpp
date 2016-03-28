@@ -143,8 +143,8 @@ int currColor = 0;
 int currShape = 0;
 int currBackground = 0;
 
-float backgroundArray[BACKGROUND_COLORS][3] = { { 0.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f } };
-float colorArray[COLOR_AMOUNT][3] = { { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f }, { 1.0f, 0.3f, 0.0 } };
+//float backgroundArray[BACKGROUND_COLORS][3] = { { 0.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f } };
+//float colorArray[COLOR_AMOUNT][3] = { { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f }, { 1.0f, 0.3f, 0.0 } };
 
 string symbolArray[TOTAL_SYMBOLS];
 
@@ -314,6 +314,7 @@ private:
 	std::shared_ptr<gl::Fbo>		saveImageFbo;
 
 	std::vector<std::shared_ptr<gl::Fbo>> layerList;
+	std::vector<float> layerAlpha;
 
 
 	//Fbo for UserInterface
@@ -654,10 +655,12 @@ void TouchPointsApp::setup()
 	illustrator = Illustrator(&brush, &layerList);
 	deviceHandler = DeviceHandler();
 	cinder::getHomeDirectory();
-	imageHandler = ImageHandler(&layerList);
+	imageHandler = ImageHandler(&layerList, &layerAlpha);
 	//Set up UI
 
-	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush, &illustrator, &deviceHandler, uiFbo, &layerList);
+
+	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
+
 
 
 	//Sets up eyeX context
@@ -961,13 +964,7 @@ void TouchPointsApp::leapShapeChange(){
 
 void TouchPointsApp::leapColorChange(){
 
-	if (currColor != COLOR_AMOUNT - 1){
-		currColor++;
-	}
-	else {
-		currColor = 0;
-	}
-
+	
 	brush.incrementColor();
 	ui.setModeChangeFlag();
 	//Provides correct image to provide feedback
@@ -1023,14 +1020,14 @@ void TouchPointsApp::leapColorChange(){
 void TouchPointsApp::drawRadial(){
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	(*radialFbo).bindFramebuffer();
-	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	(*radialFbo).unbindFramebuffer();
 
 	//Draw to radial menu buffer
 	(*radialFbo).bindFramebuffer();
 	//Make background transparent
-	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//Center Circle
@@ -1115,14 +1112,14 @@ void TouchPointsApp::drawRadial(){
 void TouchPointsApp::drawProx(){
 
 	(*proxFbo).bindFramebuffer();
-	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	(*proxFbo).unbindFramebuffer();
 
 	//Draw to radial menu buffer
 	(*proxFbo).bindFramebuffer();
 	//Make background transparent
-	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	gl::color(1.0, 1.0, 1.0);
@@ -1185,9 +1182,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	}
 	else if (event.getChar() == 'q')	//Cycles through colors
 	{
-		if (currColor != 0)
-			currColor--;
-		else currColor = COLOR_AMOUNT - 1;
+		
 
 
 
@@ -1196,9 +1191,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	}
 	else if (event.getChar() == 'w')	//Cycles through colors
 	{
-		if (currColor != COLOR_AMOUNT - 1)
-			currColor++;
-		else currColor = 0;
+		
 		brush.incrementColor();
 
 		ui.setModeChangeFlag();
@@ -1228,7 +1221,8 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	else if (event.getChar() == 'b')
 	{
 
-		ui.changeBackgroundColor(Color(1.0, 1.0, 1.0));
+		//ui.changeBackgroundColor(Color(1.0, 1.0, 1.0));
+		ui.incrementBackground();
 		ui.setModeChangeFlag();
 	}
 	else if (event.getChar() == 'u')
@@ -1352,6 +1346,52 @@ bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, Tou
 			}
 		}
 	}
+	/*
+	if (0.05 >   currentPoint.getTime() - previousPoint.getTime())
+	{
+		if (((previousPoint.getX() > currentPoint.getX() + 20) && previousPoint.getX() < currentPoint.getX() + 75) || (previousPoint.getX() < currentPoint.getX() - 20 && previousPoint.getX() > currentPoint.getX() - 75))
+		{
+			if ((previousPoint.getY() < currentPoint.getY() + 20) && (previousPoint.getY() > currentPoint.getY() - 20)){
+
+
+				//(*firstFbo).bindFramebuffer();
+				//gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+				//gl::drawSolidCircle(vec2(500, 500), 30, 10);
+				//(*firstFbo).unbindFramebuffer();
+				//uiFboFlag = !uiFboFlag;
+				//brush.incrementColor();
+				leapColorChange();
+				bufferTouches.erase(previousPoint.getId());
+				bufferTouches.erase(currentPoint.getId());
+				return true;
+
+			}
+		}
+	}
+	*/
+	//'Two finger tap' gesture
+	if (0.05 >   currentPoint.getTime() - previousPoint.getTime())
+	{
+		if (((previousPoint.getX() > currentPoint.getX() + 20) && previousPoint.getX() < currentPoint.getX() + 75) || (previousPoint.getX() < currentPoint.getX() - 20 && previousPoint.getX() > currentPoint.getX() - 75))
+		{
+			if ((previousPoint.getY() < currentPoint.getY() + 120) && (previousPoint.getY() > currentPoint.getY() - 120)){
+
+
+				//(*firstFbo).bindFramebuffer();
+				//gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+				//gl::drawSolidCircle(vec2(500, 500), 30, 10);
+				//(*firstFbo).unbindFramebuffer();
+				//uiFboFlag = !uiFboFlag;
+				//brush.incrementColor();
+				leapColorChange();
+				bufferTouches.erase(previousPoint.getId());
+				bufferTouches.erase(currentPoint.getId());
+				return true;
+
+			}
+		}
+	}
+	
 	else return false;
 
 }
@@ -1415,20 +1455,53 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 {
 
 	for (const auto &touch : event.getTouches()) {
-		if (bufferTouches.find(touch.getId()) != bufferTouches.end() && touch.getPos() != touch.getPrevPos())
-		{
-			illustrator.beginTouchShapes(touch.getId(), bufferTouches[touch.getId()].front().getPos());
+		ui.slideButtons(touch.getX(), touch.getY());
+		if (bufferTouches.find(touch.getId()) == bufferTouches.end()){
 			illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
-			bufferTouches.erase(touch.getId());
 		}
-		else illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
+		//
+		else
+		{
+			TouchEvent::Touch myTouch = bufferTouches[touch.getId()].front();
+			/*
+			if (touch.getPos() != touch.getPrevPos())
+			{
+				illustrator.beginTouchShapes(touch.getId(), bufferTouches[touch.getId()].front().getPos());
+				illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
+				bufferTouches.erase(touch.getId());
+			}
+			*/
+			//On finger movement, we know it is no longer a gesture. 
+			//So we remove it from 'buffer' touches and begin drawing
+			//'Extended Touch' Gesture
+			if (touch.getPos() == touch.getPrevPos() && touch.getTime() > myTouch.getTime() + .75)
+			{
+				leapShapeChange();
+				bufferTouches[touch.getId()].clear();
+				bufferTouches[touch.getId()].emplace_front(touch);
+			}else 
+			if ((touch.getPos().x > myTouch.getX() + 25 || touch.getX() < myTouch.getX() - 25) || (touch.getY() > myTouch.getY() + 25 || touch.getY() < myTouch.getY() - 25))
+			{
+				illustrator.beginTouchShapes(touch.getId(), bufferTouches[touch.getId()].front().getPos());
+				for (auto touch : bufferTouches[touch.getId()]){
+					illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
+				}
+				illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
+				bufferTouches.erase(touch.getId());
+			}
+			else {
+				bufferTouches[touch.getId()].emplace_back(touch);
+			}
+		}
+		//auto myTouch = bufferTouches[touch.getId()].back;
+		//else illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
 	}
 }
 
 void TouchPointsApp::touchesEnded(TouchEvent event)
 {
 	for (const auto &touch : event.getTouches()) {
-
+		bufferTouches.erase(touch.getId());
 		illustrator.endTouchShapes(touch.getId());
 	}
 }
@@ -1446,6 +1519,7 @@ void TouchPointsApp::update(){
 	if (deviceHandler.deviceConnection()){
 		ui.setModeChangeFlag();
 	}
+
 
 	if (eyeXRunning){
 
@@ -1483,9 +1557,14 @@ void TouchPointsApp::draw()
 		leapDraw(currentFrame);
 	}
 
-	gl::color(1.0, 1.0, 1.0, 1.0);
+
+
+	int x = 0;
+
 	for (auto frames : layerList){
+		gl::color(1.0, 1.0, 1.0, ui.getLayerAlpha(x));
 		gl::draw(frames->getColorTexture());
+		x++;
 	}
 
 
@@ -1546,7 +1625,7 @@ void TouchPointsApp::draw()
 
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	(*activeFbo).bindFramebuffer();
-	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	//Draws all active Shapes (non-permanent);
 	illustrator.drawActiveShapes();

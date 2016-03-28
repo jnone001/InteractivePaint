@@ -31,12 +31,13 @@ struct ImageHandler{
 
 	ImageHandler(){}
 	//Creates an ImageHandler
-	ImageHandler(std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList){
+	ImageHandler(std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha){
 		mLayerList = fboLayerList;
 		iconFlag = false;
 		fadeTime = 1.0f;
 		imageType = "png";
 		imageNum = 0;
+		layerAlpha = fboLayerAlpha;
 	}
 
 	void saveCanvas(vec2 windowSize);
@@ -49,6 +50,7 @@ struct ImageHandler{
 
 private:
 	std::vector<std::shared_ptr<gl::Fbo>>* mLayerList;
+	std::vector<float>* layerAlpha;
 	bool iconFlag;
 	float fadeTime;
 	string imageType;
@@ -107,7 +109,9 @@ void ImageHandler::saveCanvas(vec2 windowSize){
 	(*saveImageFbo).bindFramebuffer();
 
 	gl::color(1.0, 1.0, 1.0, 1.0);
+	int x = 0;
 	for (auto frames : *mLayerList){
+		gl::color(1.0, 1.0, 1.0, (*layerAlpha)[x]);
 		gl::draw(frames->getColorTexture());
 	}
 	(*saveImageFbo).unbindFramebuffer();
