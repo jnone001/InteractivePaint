@@ -49,7 +49,7 @@ struct Illustrator{
 	//Time Machine
 	void saveCurrentFbo();
 	void undoDraw(Color background);
-
+	void clearTimeMachine();
 	void drawActiveShapes();
 
 
@@ -677,6 +677,12 @@ void Illustrator::undoDraw(Color background){
 	}
 	*/
 
+}
+
+void Illustrator::clearTimeMachine(){
+	for (auto layers : myTimeMachine){
+		layers.second.clear();
+	}
 }
 
 

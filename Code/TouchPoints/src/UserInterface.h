@@ -160,6 +160,7 @@ bool UserInterface::getUiFboFlag(){
 }
 
 void UserInterface::clearLayers(){
+
 	for (auto layer : *layerList)
 	{
 		(*layer).bindFramebuffer();
@@ -170,6 +171,7 @@ void UserInterface::clearLayers(){
 		//gl::clear(Color(1.0,1.0,1.0)/*ColorA(backgroundColor)*/, 0.0);
 		(*layer).unbindFramebuffer();
 	}
+	(*illustrator).clearTimeMachine();
 }
 
 void UserInterface::setModeChangeFlag(){
