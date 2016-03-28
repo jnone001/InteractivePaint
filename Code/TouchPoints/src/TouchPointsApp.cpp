@@ -127,6 +127,10 @@ int imageNum;
 float fadeTime = 1;
 
 
+/*Code for Proximity Menu*/
+bool proxActive = false;
+
+
 bool modeChangeFlag = true;
 
 //Layers
@@ -193,7 +197,8 @@ public:
 	void	drawUi();
 	bool	inInteractiveUi(int x, int y);
 	void	drawRadial();
-
+	//Proxyfucntions
+	void	drawProx();
 
 
 	/*Leap related functions*/
@@ -310,6 +315,9 @@ private:
 	std::shared_ptr<gl::Fbo>		uiFbo;
 	std::shared_ptr<gl::Fbo>		imageFbo;
 	std::shared_ptr<gl::Fbo>		radialFbo;
+	//Proxy Menu Fbo
+	std::shared_ptr<gl::Fbo>		proxFbo;
+
 
 };
 
@@ -604,6 +612,8 @@ void TouchPointsApp::setup()
 	imageFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	//Set up fbo for proxy menu
 	radialFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+	//Set up fbo for proxy menu
+	proxFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
 	//Enable all Leap Gestures
 	TouchPointsApp::enableGest(leapContr);
@@ -737,14 +747,30 @@ void TouchPointsApp::gestRecognition(Leap::Frame frame, Leap::Controller control
 
 					if (circle.pointable().direction().angleTo(circle.normal()) <= M_PI / 2) {
 						//clockwise circle
-						processing = true;
-						leapShapeChange();
-					}
-					else {
-						//counterclockwise circle
-						processing = true;
-						leapShapeChange();
+					
+						Leap::Vector position = circle.pointable().tipPosition();
 
+						if (position.x < 0 && position.y > 250){
+							processing = true;
+							leapColorChange();
+						}
+
+						if (position.x < 0 && position.y < 150){
+							processing = true;
+							leapShapeChange();
+						}
+
+						if (position.x > 0 && position.y > 250){
+							processing = true;
+							leapSave();
+						}
+
+						if (position.x > 0 && position.y < 150){
+							proxActive = false;
+						}
+					}else {
+						//counterclockwise circle
+						drawProx();
 					}
 
 					// Calculate angle swept since last frame
@@ -818,7 +844,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 
 			gl::color(0, 1, 0, 1 - points.touchDistance());
 			gl::drawSolidCircle(vec2(leapXCoordinate, leapYCoordinate), 40);
-			gl::color(1.0, 0.9, 0.5);
+			gl::color(1.0, 0.9, 0.5, 1-points.touchDistance());
 			gl::drawStrokedCircle(vec2(leapXCoordinate, leapYCoordinate), 40.0f, 10.0f);
 			/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
 			if(pointsMap.find(points.id()) != pointsMap.end()){
@@ -829,7 +855,7 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 			}
 			
 		}
-		else if (points.touchDistance() <= 0)
+		else if (points.touchDistance() <= 0 && !proxActive)
 		{
 
 			lockCurrentFrame = true;
@@ -1079,6 +1105,31 @@ void TouchPointsApp::drawRadial(){
 
 }
 
+/*Proxy menu Function*/
+void TouchPointsApp::drawProx(){
+
+	(*proxFbo).bindFramebuffer();
+	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	(*proxFbo).unbindFramebuffer();
+
+	//Draw to radial menu buffer
+	(*proxFbo).bindFramebuffer();
+	//Make background transparent
+	glClearColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawLine(vec2(windowWidth*.5, windowHeight), vec2(windowWidth*.5, 0));
+
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawLine(vec2(0, windowHeight*.5), vec2(windowWidth, windowHeight*.5));
+
+	(*proxFbo).unbindFramebuffer();
+
+	proxActive = true;
+}
 
 /*Mode Change Functions*/
 
@@ -1296,6 +1347,52 @@ bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, Tou
 			}
 		}
 	}
+	/*
+	if (0.05 >   currentPoint.getTime() - previousPoint.getTime())
+	{
+		if (((previousPoint.getX() > currentPoint.getX() + 20) && previousPoint.getX() < currentPoint.getX() + 75) || (previousPoint.getX() < currentPoint.getX() - 20 && previousPoint.getX() > currentPoint.getX() - 75))
+		{
+			if ((previousPoint.getY() < currentPoint.getY() + 20) && (previousPoint.getY() > currentPoint.getY() - 20)){
+
+
+				//(*firstFbo).bindFramebuffer();
+				//gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+				//gl::drawSolidCircle(vec2(500, 500), 30, 10);
+				//(*firstFbo).unbindFramebuffer();
+				//uiFboFlag = !uiFboFlag;
+				//brush.incrementColor();
+				leapColorChange();
+				bufferTouches.erase(previousPoint.getId());
+				bufferTouches.erase(currentPoint.getId());
+				return true;
+
+			}
+		}
+	}
+	*/
+	//'Two finger tap' gesture
+	if (0.05 >   currentPoint.getTime() - previousPoint.getTime())
+	{
+		if (((previousPoint.getX() > currentPoint.getX() + 20) && previousPoint.getX() < currentPoint.getX() + 75) || (previousPoint.getX() < currentPoint.getX() - 20 && previousPoint.getX() > currentPoint.getX() - 75))
+		{
+			if ((previousPoint.getY() < currentPoint.getY() + 120) && (previousPoint.getY() > currentPoint.getY() - 120)){
+
+
+				//(*firstFbo).bindFramebuffer();
+				//gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
+				//gl::drawSolidCircle(vec2(500, 500), 30, 10);
+				//(*firstFbo).unbindFramebuffer();
+				//uiFboFlag = !uiFboFlag;
+				//brush.incrementColor();
+				leapColorChange();
+				bufferTouches.erase(previousPoint.getId());
+				bufferTouches.erase(currentPoint.getId());
+				return true;
+
+			}
+		}
+	}
+	
 	else return false;
 
 }
@@ -1362,20 +1459,52 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 {
 
 	for (const auto &touch : event.getTouches()) {
-		if (bufferTouches.find(touch.getId()) != bufferTouches.end() && touch.getPos() != touch.getPrevPos())
-		{
-			illustrator.beginTouchShapes(touch.getId(), bufferTouches[touch.getId()].front().getPos());
+		if (bufferTouches.find(touch.getId()) == bufferTouches.end()){
 			illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
-			bufferTouches.erase(touch.getId());
 		}
-		else illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
+		//
+		else
+		{
+			TouchEvent::Touch myTouch = bufferTouches[touch.getId()].front();
+			/*
+			if (touch.getPos() != touch.getPrevPos())
+			{
+				illustrator.beginTouchShapes(touch.getId(), bufferTouches[touch.getId()].front().getPos());
+				illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
+				bufferTouches.erase(touch.getId());
+			}
+			*/
+			//On finger movement, we know it is no longer a gesture. 
+			//So we remove it from 'buffer' touches and begin drawing
+			//'Extended Touch' Gesture
+			if (touch.getPos() == touch.getPrevPos() && touch.getTime() > myTouch.getTime() + .75)
+			{
+				leapShapeChange();
+				bufferTouches[touch.getId()].clear();
+				bufferTouches[touch.getId()].emplace_front(touch);
+			}else 
+			if ((touch.getPos().x > myTouch.getX() + 25 || touch.getX() < myTouch.getX() - 25) || (touch.getY() > myTouch.getY() + 25 || touch.getY() < myTouch.getY() - 25))
+			{
+				illustrator.beginTouchShapes(touch.getId(), bufferTouches[touch.getId()].front().getPos());
+				for (auto touch : bufferTouches[touch.getId()]){
+					illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
+				}
+				illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
+				bufferTouches.erase(touch.getId());
+			}
+			else {
+				bufferTouches[touch.getId()].emplace_back(touch);
+			}
+		}
+		//auto myTouch = bufferTouches[touch.getId()].back;
+		//else illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
 	}
 }
 
 void TouchPointsApp::touchesEnded(TouchEvent event)
 {
 	for (const auto &touch : event.getTouches()) {
-
+		bufferTouches.erase(touch.getId());
 		illustrator.endTouchShapes(touch.getId());
 	}
 }
@@ -1390,11 +1519,11 @@ void TouchPointsApp::update(){
 	//bool testvar2 = System::hasMultiTouch();
 	//auto testvar3 = System::getMaxMultiTouchPoints();
 
-	//if (deviceHandler.deviceConnection()){
-		//ui.setModeChangeFlag();
-	//}
-	
+	if (deviceHandler.deviceConnection()){
+		ui.setModeChangeFlag();
+	}
 
+	
 	if (eyeXRunning){
 
 			if (gazePositionX < 400 && gazePositionY < 100){
@@ -1469,9 +1598,14 @@ void TouchPointsApp::draw()
 	*/
 	imageHandler.displayIcon();
 	ui.drawUi();
+
 	if (radialActive){
 		gl::color(1.0, 1.0, 1.0, 1.0);
 		gl::draw(radialFbo->getColorTexture());
+	}
+
+	if (proxActive){
+		gl::draw(proxFbo->getColorTexture());
 	}
 
 
