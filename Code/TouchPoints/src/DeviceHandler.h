@@ -25,7 +25,11 @@ struct DeviceHandler{
 	int leapStatus();
 	int multiTouchStatus();
 	int eyeXStatus();
-	
+	void setDefaultMode();
+	int leapStatus();
+	int multiTouchStatus();
+	int eyeXStatus();
+	int realSenseStatus();
 
 
 private:
@@ -38,6 +42,7 @@ private:
 	int leapConnected;
 	int multiTouchConnected;
 	int eyeXConnected;
+	int realSenseConnected;
 	int leapConnectedFlag;
 	int multiTouchConnectedFlag;
 	int eyeXConnectedFlag;
@@ -97,7 +102,7 @@ int DeviceHandler::deviceConnection(){
 	stateCounter = stateCounter + (setMultiTouchState());
 
 	stateCounter = stateCounter + (setEyeXState());
-	
+
 	resetFlags();
 
 	libusb_free_device_list(devs, 1);
@@ -107,6 +112,10 @@ int DeviceHandler::deviceConnection(){
 
 	return stateCounter
 ;
+}
+
+void DeviceHandler::setDefaultMode(){
+
 }
 
 int DeviceHandler::leapStatus(){
@@ -119,6 +128,10 @@ int DeviceHandler::multiTouchStatus(){
 
 int DeviceHandler::eyeXStatus(){
 	return eyeXConnected;
+}
+
+int DeviceHandler::realSenseStatus(){
+	return realSenseConnected;
 }
 
 int DeviceHandler::setLeapState(){
