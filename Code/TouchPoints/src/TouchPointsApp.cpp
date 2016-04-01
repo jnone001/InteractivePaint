@@ -101,11 +101,11 @@ int resolutionY;
 
 
 #define SWIPE_GESTURE 8
-//#define windowWidth  getWindowSize().x
-//#define windowHeight getWindowSize().y
+#define windowWidth  getWindowSize().x
+#define windowHeight getWindowSize().y
 
-#define windowWidth  1919
-#define windowHeight 1079
+//#define windowWidth  1919
+//#define windowHeight 1079
 
 #define FRAME_RATE 120
 
@@ -1521,18 +1521,7 @@ void TouchPointsApp::update(){
 	}
 
 
-	if (eyeXRunning){
 
-		if (gazePositionX < 400 && gazePositionY < 100){
-			bool tempBool = true;
-			ui.changeModeButtons(tempBool);
-		}
-		else {
-			bool tempBool = false;
-			ui.changeModeButtons(tempBool);
-		}
-
-	}
 }
 
 void TouchPointsApp::draw()
@@ -1552,12 +1541,19 @@ void TouchPointsApp::draw()
 
 	//Currently leapDraw before drawing layers to prevent flickering. 
 	//However, this makes it impossible to see green 'hands' on top of images.
-	currentFrame = getLeapFrame(leapContr);
-	if (leapDrawFlag){
-		leapDraw(currentFrame);
+	if (deviceHandler.leapStatus()){
+
+		currentFrame = getLeapFrame(leapContr);
+		if (leapDrawFlag){
+			leapDraw(currentFrame);
+		}
+		if (!lockCurrentFrame){
+			//Calls specified action from gesture recgonized
+			gestRecognition(currentFrame, leapContr);
+		}
+
+		lockCurrentFrame = false;
 	}
-
-
 
 	int x = 0;
 
@@ -1570,12 +1566,7 @@ void TouchPointsApp::draw()
 
 
 
-	if (!lockCurrentFrame){
-		//Calls specified action from gesture recgonized
-		gestRecognition(currentFrame, leapContr);
-	}
 
-	lockCurrentFrame = false;
 
 #ifdef EYEX
 	gl::color(1.0, 1.0, 1.0, .4);
@@ -1615,6 +1606,17 @@ void TouchPointsApp::draw()
 	/*Draws the frame buffer for UI*/
 	if (eyeXRunning){
 
+
+		if (gazePositionX < 400 && gazePositionY < 100){
+			bool tempBool = true;
+			ui.changeModeButtons(tempBool);
+		}
+		else {
+			bool tempBool = false;
+			ui.changeModeButtons(tempBool);
+		}
+
+		
 
 		if (gazePositionX > windowWidth*.8 && gazePositionY > windowHeight*.8)
 		{

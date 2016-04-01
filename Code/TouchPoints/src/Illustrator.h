@@ -680,9 +680,18 @@ void Illustrator::undoDraw(Color background){
 }
 
 void Illustrator::clearTimeMachine(){
-	for (auto layers : myTimeMachine){
-		layers.second.clear();
+	//Working
+	myTimeMachine.clear();
+	for (auto layers : (*mLayerList)) {
+		std::list<std::shared_ptr<gl::Fbo>> storedFbo;
+		//storedFbo.emplace_back(*layers);
+		myTimeMachine.insert(make_pair(layers, storedFbo));
 	}
+	/* not working for some reason
+	for (auto machines : myTimeMachine){
+		machines.second.clear();
+	}
+	*/
 }
 
 
