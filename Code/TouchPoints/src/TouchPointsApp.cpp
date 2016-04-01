@@ -102,11 +102,11 @@ int resolutionY;
 
 
 #define SWIPE_GESTURE 8
-//#define windowWidth  getWindowSize().x
-//#define windowHeight getWindowSize().y
+#define windowWidth  getWindowSize().x
+#define windowHeight getWindowSize().y
 
-#define windowWidth  1919
-#define windowHeight 1079
+//#define windowWidth  1919
+//#define windowHeight 1079
 
 #define FRAME_RATE 120
 
@@ -640,7 +640,6 @@ void TouchPointsApp::setup()
 	layerList.emplace_back(firstFbo);
 	layerList.emplace_back(secondFbo);
 	layerList.emplace_back(thirdFbo);
-	
 	
 
 
@@ -1404,6 +1403,8 @@ bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, Tou
 
 void TouchPointsApp::touchesBegan(TouchEvent event)
 {
+	if (!deviceHandler.multiTouchStatus())
+		return;
 	for (const auto &touch : event.getTouches()) {
 
 		if (radialActive){
@@ -1459,6 +1460,8 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 
 void TouchPointsApp::touchesMoved(TouchEvent event)
 {
+	if (!deviceHandler.multiTouchStatus())
+		return;
 
 	for (const auto &touch : event.getTouches()) {
 		ui.slideButtons(touch.getX(), touch.getY());
@@ -1506,6 +1509,8 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 
 void TouchPointsApp::touchesEnded(TouchEvent event)
 {
+	if (!deviceHandler.multiTouchStatus())
+		return;
 	for (const auto &touch : event.getTouches()) {
 		bufferTouches.erase(touch.getId());
 		illustrator.endTouchShapes(touch.getId());
@@ -1521,24 +1526,14 @@ void TouchPointsApp::update(){
 
 	//bool testvar2 = System::hasMultiTouch();
 	//auto testvar3 = System::getMaxMultiTouchPoints();
-
+	
 	if (deviceHandler.deviceConnection()){
 		ui.setModeChangeFlag();
 	}
 
+	
 
-	if (eyeXRunning){
-
-		if (gazePositionX < 400 && gazePositionY < 100){
-			bool tempBool = true;
-			ui.changeModeButtons(tempBool);
-		}
-		else {
-			bool tempBool = false;
-			ui.changeModeButtons(tempBool);
-		}
-
-	}
+	
 
 	realSenseHandler.streamData();
 
@@ -1550,7 +1545,7 @@ void TouchPointsApp::update(){
 		illustrator.undoDraw(ui.getBackgroundColor());
 		realSenseHandler.resetKissGestureFlag();
 	}
-
+	
 }
 
 void TouchPointsApp::draw()
@@ -1570,12 +1565,25 @@ void TouchPointsApp::draw()
 
 	//Currently leapDraw before drawing layers to prevent flickering. 
 	//However, this makes it impossible to see green 'hands' on top of images.
-	currentFrame = getLeapFrame(leapContr);
-	if (leapDrawFlag){
-		leapDraw(currentFrame);
+	if (deviceHandler.leapStatus()){
+		currentFrame = getLeapFrame(leapContr);
+		if (deviceHandler.leapDraw()){
+
+			if (leapDrawFlag){
+				leapDraw(currentFrame);
+			}
+		}
+		if (deviceHandler.leapGesture())
+		{
+			if (!lockCurrentFrame){
+				//Calls specified action from gesture recgonized
+				gestRecognition(currentFrame, leapContr);
+			}
+
+			
+		}
+		lockCurrentFrame = false;
 	}
-
-
 
 	int x = 0;
 
@@ -1588,12 +1596,7 @@ void TouchPointsApp::draw()
 
 
 
-	if (!lockCurrentFrame){
-		//Calls specified action from gesture recgonized
-		gestRecognition(currentFrame, leapContr);
-	}
 
-	lockCurrentFrame = false;
 
 #ifdef EYEX
 	gl::color(1.0, 1.0, 1.0, .4);
@@ -1633,6 +1636,17 @@ void TouchPointsApp::draw()
 	/*Draws the frame buffer for UI*/
 	if (eyeXRunning){
 
+
+		if (gazePositionX < 400 && gazePositionY < 100){
+			bool tempBool = true;
+			ui.changeModeButtons(tempBool);
+		}
+		else {
+			bool tempBool = false;
+			ui.changeModeButtons(tempBool);
+		}
+
+		
 
 		if (gazePositionX > windowWidth*.8 && gazePositionY > windowHeight*.8)
 		{

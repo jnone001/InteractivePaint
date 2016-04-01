@@ -18,6 +18,11 @@ struct DeviceHandler{
 		vendorList[0] = 61826;
 		vendorList[1] = 8746;
 		vendorList[2] = 8452;
+		overrideLeap = false;
+		overrideMultiTouch = false;
+		overrideEyeX = false;
+		leapDrawEnabled = true;
+		leapGestureEnabled = true;
 	}
 
 
@@ -25,11 +30,16 @@ struct DeviceHandler{
 	int leapStatus();
 	int multiTouchStatus();
 	int eyeXStatus();
-	void setDefaultMode();
-	int leapStatus();
-	int multiTouchStatus();
-	int eyeXStatus();
-	int realSenseStatus();
+
+	void toggleLeap();
+	void toggleMultiTouch();
+	void toggleEyeX();
+	void toggleLeapDraw();
+	void toggleLeapGesture();
+
+	bool leapDraw();
+	bool leapGesture();
+	
 
 
 private:
@@ -39,16 +49,60 @@ private:
 	void resetFlags();
 
 
-	int leapConnected;
-	int multiTouchConnected;
-	int eyeXConnected;
-	int realSenseConnected;
+
 	int leapConnectedFlag;
 	int multiTouchConnectedFlag;
 	int eyeXConnectedFlag;
 	int stateCounter;
 	int vendorList[3];
+
+	//Mode Flags
+	int leapConnected;
+	int multiTouchConnected;
+	int eyeXConnected;
+	bool leapDrawEnabled;
+	bool leapGestureEnabled;
+	bool eyeXEnabled;
+	bool overrideLeap;
+	bool overrideMultiTouch;
+	bool overrideEyeX;
 };
+
+bool DeviceHandler::leapDraw(){
+	return leapDrawEnabled;
+}
+
+bool DeviceHandler::leapGesture(){
+	return leapGestureEnabled;
+}
+
+void DeviceHandler::toggleLeap(){
+
+	overrideLeap = true;
+	leapConnected = !leapConnected;
+}
+void DeviceHandler::toggleLeapDraw(){
+
+
+	leapDrawEnabled = !leapDrawEnabled;
+}
+void DeviceHandler::toggleLeapGesture(){
+
+
+	leapGestureEnabled = !leapGestureEnabled;
+}
+void DeviceHandler::toggleMultiTouch(){
+	overrideMultiTouch = true;
+	multiTouchConnected = !multiTouchConnected;
+
+}
+void DeviceHandler::toggleEyeX(){
+	overrideEyeX = true;
+
+	eyeXConnected = !eyeXConnected;
+
+	
+}
 
 int DeviceHandler::deviceConnection(){
 
@@ -138,6 +192,9 @@ int DeviceHandler::setLeapState(){
 
 	if (leapConnectedFlag == 1){
 		if (leapConnected == 0){
+			if (overrideLeap){
+				return 0;
+			}
 			leapConnected = 1;
 			return 1;
 		}
@@ -160,6 +217,9 @@ int DeviceHandler::setMultiTouchState(){
 
 	if( multiTouchConnectedFlag == 1){
 		if (multiTouchConnected == 0){
+			if (overrideMultiTouch){
+				return 0;
+			}
 			multiTouchConnected = 1;
 			return 1;
 		}
@@ -182,6 +242,9 @@ int DeviceHandler::setEyeXState(){
 
 	if (eyeXConnectedFlag == 1){
 		if (eyeXConnected == 0){
+			if (overrideEyeX){
+				return 0;
+			}
 			eyeXConnected = 1;
 			return 1;
 		}

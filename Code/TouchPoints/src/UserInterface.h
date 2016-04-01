@@ -43,6 +43,7 @@ struct UserInterface{
 		colorButtons = false;
 		shapeButtons = false;
 		layerVisualization = false;
+		deviceButtons = true;
 
 		//Adds our backgroundColors to the list. 
 		backgroundList.emplace_back(Color(0.0f, 0.0f, 0.0f));
@@ -108,6 +109,7 @@ private:
 	bool modeButtons;
 	bool colorButtons;
 	bool shapeButtons;
+	bool deviceButtons;
 	bool layerVisualization;
 	bool uiFlag;
 	bool undoFlag;
@@ -374,6 +376,30 @@ bool UserInterface::inInteractiveUi(int x, int y)
 			modeChangeFlag = true;
 			return true;
 		}
+	}
+	if (deviceButtons){
+		if (x < windowWidth && x > windowWidth *.87){
+			if (y > windowHeight * .65 && y < windowHeight * .68){
+				deviceHandler->toggleLeap();
+			}
+			if (y > windowHeight * .68 && y < windowHeight * .71){
+				deviceHandler->toggleLeapDraw();
+			}
+			if (y > windowHeight * .71 && y < windowHeight * .74){
+				deviceHandler->toggleLeapGesture();
+			}
+			if (y > windowHeight * .74 && y < windowHeight * .77){
+				deviceHandler->toggleEyeX();
+			}
+			if (y > windowHeight * .77 && y < windowHeight * .8){
+				deviceHandler->toggleMultiTouch();
+			}
+
+
+
+
+		}
+
 	}
 
 	return false;
@@ -711,6 +737,7 @@ void UserInterface::drawUi(){
 
 
 		}
+
 		if (colorButtons){
 			int i = 0;
 			for (auto myColor : (*mBrush).getColorList())
@@ -805,6 +832,88 @@ void UserInterface::drawUi(){
 
 	//gl::color(1.0, 1.0, 1.0);
 	//if (uiFboFlag) gl::draw(uiFbo->getColorTexture());
+	if (deviceButtons){
+		TextLayout layout1;
+		layout1.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
+		layout1.setFont(Font("Arial", 50));
+		layout1.setColor(Color(1, 1, 1));
+		unsigned char japanese[] = { 0xE6, 0x97, 0xA5, 0xE6, 0x9C, 0xAC, 0xE8, 0xAA, 0x9E, 0 };
+		layout1.addLine(std::string(" MultiTouch") );
+		Surface8u rendered = layout1.render(true, false);
+		gl::Texture2dRef mTexture = gl::Texture2d::create(rendered);
+		gl::color(Color::white());
+		gl::draw(mTexture, Rectf(windowWidth*.9, windowHeight*.77,windowWidth, windowHeight*.8));
+
+		TextLayout layout2;
+		layout2.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
+		layout2.setFont(Font("Arial", 50));
+		layout2.setColor(Color(1, 1, 1));
+		layout2.addLine(std::string("       EyeX"));
+		rendered = layout2.render(true, false);
+		mTexture = gl::Texture2d::create(rendered);
+		gl::color(Color::white());
+		gl::draw(mTexture, Rectf(windowWidth*.9, windowHeight*.74, windowWidth, windowHeight*.77));
+
+		TextLayout layout3;
+		layout3.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
+		layout3.setFont(Font("Arial", 50));
+		layout3.setColor(Color(1, 1, 1));
+		layout3.addLine(std::string("Leap Gesture"));
+		rendered = layout3.render(true, false);
+		mTexture = gl::Texture2d::create(rendered);
+		gl::color(Color::white());
+		gl::draw(mTexture, Rectf(windowWidth*.9, windowHeight*.71, windowWidth, windowHeight*.74));
+
+		TextLayout layout4;
+		layout4.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
+		layout4.setFont(Font("Arial", 50));
+		layout4.setColor(Color(1, 1, 1));
+		layout4.addLine(std::string("  Leap Draw"));
+		rendered = layout4.render(true, false);
+		mTexture = gl::Texture2d::create(rendered);
+		gl::color(Color::white());
+		gl::draw(mTexture, Rectf(windowWidth*.9, windowHeight*.68, windowWidth, windowHeight*.71));
+
+		TextLayout layout5;
+		layout5.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
+		layout5.setFont(Font("Arial", 50));
+		layout5.setColor(Color(1, 1, 1));
+		layout5.addLine(std::string("Leap Motion"));
+		rendered = layout5.render(true, false);
+		mTexture = gl::Texture2d::create(rendered);
+		gl::color(Color::white());
+		gl::draw(mTexture, Rectf(windowWidth*.9, windowHeight*.65, windowWidth, windowHeight*.68));
+
+		gl::color(0.0,0.0,0.0);
+		if (deviceHandler->leapStatus())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.65, windowWidth*.89, windowHeight*.68));
+		if (deviceHandler->leapDraw())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.68, windowWidth*.89, windowHeight*.71));
+		if (deviceHandler->leapGesture())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.71, windowWidth*.89, windowHeight*.74));
+		if (deviceHandler->eyeXStatus())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.74, windowWidth*.89, windowHeight*.77));
+		if (deviceHandler->multiTouchStatus())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.77, windowWidth*.89, windowHeight*.8));
+
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.65, windowWidth*.89, windowHeight*.68));
+		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.68, windowWidth*.89, windowHeight*.71));
+		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.71, windowWidth*.89, windowHeight*.74));
+		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.74, windowWidth*.89, windowHeight*.77));
+		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.77, windowWidth*.89, windowHeight*.8));
+
+	}
 }
 
 #endif
