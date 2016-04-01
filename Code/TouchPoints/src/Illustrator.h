@@ -596,8 +596,10 @@ void Illustrator::endTouchShapes(uint32_t myId)
 		}
 	}
 }
-
+//Need to add color background to parameter
 void Illustrator::saveCurrentFbo(){
+
+	//Check if the active drawing is occuring
 
 	if (myTimeMachine[(*mLayerList).back()].size() == 10){
 		myTimeMachine[(*mLayerList).back()].pop_back();
@@ -612,6 +614,11 @@ void Illustrator::saveCurrentFbo(){
 	, format);
 
 	(*tempFbo).bindFramebuffer();
+
+	//glClearColor(background.r, background.g, background.b, 0.0);
+	glClearColor(1.0, 1.0, 1.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	gl::draw((*(*mLayerList).back()).getColorTexture());
 	//gl::drawSolidCircle(vec2(500, 500), 100);

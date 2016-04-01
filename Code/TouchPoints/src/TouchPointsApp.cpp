@@ -31,6 +31,7 @@
 #include "UserInterface.h"
 #include "ImageHandler.h"
 
+#include "RealSenseHandler.h"
 
 #include "libusb.h"
 #include <stdio.h>
@@ -148,8 +149,6 @@ int currBackground = 0;
 
 string symbolArray[TOTAL_SYMBOLS];
 
-
-
 //Global EyeX Handler
 TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
 
@@ -238,6 +237,7 @@ private:
 	UserInterface ui;
 	DeviceHandler deviceHandler;
 	ImageHandler imageHandler;
+	RealSenseHandler realSenseHandler;
 	//UndoLine undoLine;
 
 
@@ -656,9 +656,15 @@ void TouchPointsApp::setup()
 	deviceHandler = DeviceHandler();
 	cinder::getHomeDirectory();
 	imageHandler = ImageHandler(&layerList, &layerAlpha);
+
+	//RealSense Setup
+	realSenseHandler = RealSenseHandler();
+	realSenseHandler.intializeFaceSensing();
+	//realSenseHandler.streamData();
+
+
+
 	//Set up UI
-
-
 	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
 
@@ -1522,6 +1528,18 @@ void TouchPointsApp::update(){
 
 
 
+
+
+	realSenseHandler.streamData();
+
+	if (realSenseHandler.getBrowGestureFlag()){
+		illustrator.undoDraw(ui.getBackgroundColor());
+		realSenseHandler.resetBrowGestureFlag();
+	}
+	if (realSenseHandler.getKissGestureFlag()){
+		illustrator.undoDraw(ui.getBackgroundColor());
+		realSenseHandler.resetKissGestureFlag();
+	}
 }
 
 void TouchPointsApp::draw()
