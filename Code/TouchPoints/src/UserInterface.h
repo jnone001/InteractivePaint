@@ -377,6 +377,30 @@ bool UserInterface::inInteractiveUi(int x, int y)
 			return true;
 		}
 	}
+	if (deviceButtons){
+		if (x < windowWidth && x > windowWidth *.87){
+			if (y > windowHeight * .65 && y < windowHeight * .68){
+				deviceHandler->toggleLeap();
+			}
+			if (y > windowHeight * .68 && y < windowHeight * .71){
+				deviceHandler->toggleLeapDraw();
+			}
+			if (y > windowHeight * .71 && y < windowHeight * .74){
+				deviceHandler->toggleLeapGesture();
+			}
+			if (y > windowHeight * .74 && y < windowHeight * .77){
+				deviceHandler->toggleEyeX();
+			}
+			if (y > windowHeight * .77 && y < windowHeight * .8){
+				deviceHandler->toggleMultiTouch();
+			}
+
+
+
+
+		}
+
+	}
 
 	return false;
 }
@@ -861,10 +885,25 @@ void UserInterface::drawUi(){
 		gl::draw(mTexture, Rectf(windowWidth*.9, windowHeight*.65, windowWidth, windowHeight*.68));
 
 		gl::color(0.0,0.0,0.0);
+		if (deviceHandler->leapStatus())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
 		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.65, windowWidth*.89, windowHeight*.68));
+		if (deviceHandler->leapDraw())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
 		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.68, windowWidth*.89, windowHeight*.71));
+		if (deviceHandler->leapGesture())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
 		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.71, windowWidth*.89, windowHeight*.74));
+		if (deviceHandler->eyeXStatus())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
 		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.74, windowWidth*.89, windowHeight*.77));
+		if (deviceHandler->multiTouchStatus())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
 		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.77, windowWidth*.89, windowHeight*.8));
 
 		gl::color(0.9, 0.85, 0.65);

@@ -18,9 +18,11 @@ struct DeviceHandler{
 		vendorList[0] = 61826;
 		vendorList[1] = 8746;
 		vendorList[2] = 8452;
-		bool overrideLeap = false;
-		bool overrideMultiTouch = false;
-		bool overrideEyeX = false;
+		overrideLeap = false;
+		overrideMultiTouch = false;
+		overrideEyeX = false;
+		leapDrawEnabled = true;
+		leapGestureEnabled = true;
 	}
 
 
@@ -32,6 +34,8 @@ struct DeviceHandler{
 	void toggleLeap();
 	void toggleMultiTouch();
 	void toggleEyeX();
+	void toggleLeapDraw();
+	void toggleLeapGesture();
 
 	bool leapDraw();
 	bool leapGesture();
@@ -74,25 +78,30 @@ bool DeviceHandler::leapGesture(){
 
 void DeviceHandler::toggleLeap(){
 
-	overrideLeap = !overrideLeap;
-	if (overrideLeap == true){
-		leapConnected = false;
+	overrideLeap = true;
+	leapConnected = !leapConnected;
+}
+void DeviceHandler::toggleLeapDraw(){
 
-	}
+
+	leapDrawEnabled = !leapDrawEnabled;
+}
+void DeviceHandler::toggleLeapGesture(){
+
+
+	leapGestureEnabled = !leapGestureEnabled;
 }
 void DeviceHandler::toggleMultiTouch(){
-	overrideMultiTouch = !overrideMultiTouch;
-	if (overrideMultiTouch == true){
-		multiTouchConnected = false;
+	overrideMultiTouch = true;
+	multiTouchConnected = !multiTouchConnected;
 
-	}
 }
 void DeviceHandler::toggleEyeX(){
-	overrideEyeX = !overrideEyeX;
-	if (overrideEyeX == true){
-		eyeXConnected = false;
+	overrideEyeX = true;
 
-	}
+	eyeXConnected = !eyeXConnected;
+
+	
 }
 
 int DeviceHandler::deviceConnection(){
@@ -175,6 +184,9 @@ int DeviceHandler::setLeapState(){
 
 	if (leapConnectedFlag == 1){
 		if (leapConnected == 0){
+			if (overrideLeap){
+				return 0;
+			}
 			leapConnected = 1;
 			return 1;
 		}
@@ -197,6 +209,9 @@ int DeviceHandler::setMultiTouchState(){
 
 	if( multiTouchConnectedFlag == 1){
 		if (multiTouchConnected == 0){
+			if (overrideMultiTouch){
+				return 0;
+			}
 			multiTouchConnected = 1;
 			return 1;
 		}
@@ -219,6 +234,9 @@ int DeviceHandler::setEyeXState(){
 
 	if (eyeXConnectedFlag == 1){
 		if (eyeXConnected == 0){
+			if (overrideEyeX){
+				return 0;
+			}
 			eyeXConnected = 1;
 			return 1;
 		}

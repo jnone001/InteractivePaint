@@ -641,7 +641,6 @@ void TouchPointsApp::setup()
 	layerList.emplace_back(secondFbo);
 	layerList.emplace_back(thirdFbo);
 	
-	
 
 
 	//Set up Brush
@@ -1404,6 +1403,8 @@ bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, Tou
 
 void TouchPointsApp::touchesBegan(TouchEvent event)
 {
+	if (!deviceHandler.multiTouchStatus())
+		return;
 	for (const auto &touch : event.getTouches()) {
 
 		if (radialActive){
@@ -1459,6 +1460,8 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 
 void TouchPointsApp::touchesMoved(TouchEvent event)
 {
+	if (!deviceHandler.multiTouchStatus())
+		return;
 
 	for (const auto &touch : event.getTouches()) {
 		ui.slideButtons(touch.getX(), touch.getY());
@@ -1506,6 +1509,8 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 
 void TouchPointsApp::touchesEnded(TouchEvent event)
 {
+	if (!deviceHandler.multiTouchStatus())
+		return;
 	for (const auto &touch : event.getTouches()) {
 		bufferTouches.erase(touch.getId());
 		illustrator.endTouchShapes(touch.getId());
@@ -1521,14 +1526,14 @@ void TouchPointsApp::update(){
 
 	//bool testvar2 = System::hasMultiTouch();
 	//auto testvar3 = System::getMaxMultiTouchPoints();
-
+	
 	if (deviceHandler.deviceConnection()){
 		ui.setModeChangeFlag();
 	}
 
+	
 
-
-
+	
 
 	realSenseHandler.streamData();
 
@@ -1540,6 +1545,7 @@ void TouchPointsApp::update(){
 		illustrator.undoDraw(ui.getBackgroundColor());
 		realSenseHandler.resetKissGestureFlag();
 	}
+	
 }
 
 void TouchPointsApp::draw()
@@ -1560,16 +1566,22 @@ void TouchPointsApp::draw()
 	//Currently leapDraw before drawing layers to prevent flickering. 
 	//However, this makes it impossible to see green 'hands' on top of images.
 	if (deviceHandler.leapStatus()){
-
 		currentFrame = getLeapFrame(leapContr);
-		if (leapDrawFlag){
-			leapDraw(currentFrame);
-		}
-		if (!lockCurrentFrame){
-			//Calls specified action from gesture recgonized
-			gestRecognition(currentFrame, leapContr);
-		}
+		if (deviceHandler.leapDraw()){
 
+			if (leapDrawFlag){
+				leapDraw(currentFrame);
+			}
+		}
+		if (deviceHandler.leapGesture())
+		{
+			if (!lockCurrentFrame){
+				//Calls specified action from gesture recgonized
+				gestRecognition(currentFrame, leapContr);
+			}
+
+			
+		}
 		lockCurrentFrame = false;
 	}
 
