@@ -1557,6 +1557,9 @@ void TouchPointsApp::update(){
 		ui.setModeChangeFlag();
 	}
 
+	int resultMode = deviceHandler.getDefaultMode();
+	setDefaultMode(resultMode);
+
 	if (deviceHandler.realSenseStatus()){
 
 		realSenseHandler.streamData();
