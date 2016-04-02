@@ -102,11 +102,11 @@ int resolutionY;
 
 
 #define SWIPE_GESTURE 8
-//#define windowWidth  getWindowSize().x
-//#define windowHeight getWindowSize().y
+#define windowWidth  getWindowSize().x
+#define windowHeight getWindowSize().y
 
-#define windowWidth  1919
-#define windowHeight 1079
+//#define windowWidth  1919
+//#define windowHeight 1079
 
 #define FRAME_RATE 120
 
@@ -662,6 +662,7 @@ void TouchPointsApp::setup()
 	//realSenseHandler.streamData();
 
 	//Set up UI
+	deviceHandler.deviceConnection();
 	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
 	deviceHandler.deviceConnection();
@@ -1404,9 +1405,15 @@ bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, Tou
 
 void TouchPointsApp::touchesBegan(TouchEvent event)
 {
-	if (!deviceHandler.multiTouchStatus())
-		return;
+
+
 	for (const auto &touch : event.getTouches()) {
+
+		if (!deviceHandler.multiTouchStatus())
+		{
+			ui.inInteractiveUi(touch.getX(), touch.getY());
+			return;
+		}
 
 		if (radialActive){
 			int x = touch.getX();
@@ -1557,10 +1564,8 @@ void TouchPointsApp::update(){
 		ui.setModeChangeFlag();
 	}
 
-	int resultMode = deviceHandler.getDefaultMode();
-	setDefaultMode(resultMode);
-
 	if (deviceHandler.realSenseStatus()){
+
 
 		realSenseHandler.streamData();
 
@@ -1607,7 +1612,7 @@ void TouchPointsApp::draw()
 				gestRecognition(currentFrame, leapContr);
 			}
 
-			
+
 		}
 		lockCurrentFrame = false;
 	}
@@ -1661,7 +1666,7 @@ void TouchPointsApp::draw()
 	gl::color(1.0, 1.0, 1.0, 1.0);
 
 	/*Draws the frame buffer for UI*/
-	if (eyeXRunning){
+	if (deviceHandler.eyeXStatus()){
 
 
 		if (gazePositionX < 400 && gazePositionY < 100){
@@ -1673,9 +1678,7 @@ void TouchPointsApp::draw()
 			ui.changeModeButtons(tempBool);
 		}
 
-		
-
-		if (gazePositionX > windowWidth*.8 && gazePositionY > windowHeight*.8)
+		if (gazePositionX > windowWidth*.75 && gazePositionY > windowHeight*.75)
 		{
 			gl::draw(uiFbo->getColorTexture());
 		}

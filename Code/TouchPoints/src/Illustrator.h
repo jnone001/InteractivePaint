@@ -598,7 +598,9 @@ void Illustrator::endTouchShapes(uint32_t myId)
 }
 //Need to add color background to parameter
 void Illustrator::saveCurrentFbo(){
-
+	if (activeDrawings > 0){
+		return;
+	}
 	//Check if the active drawing is occuring
 
 	if (myTimeMachine[(*mLayerList).back()].size() == 10){
