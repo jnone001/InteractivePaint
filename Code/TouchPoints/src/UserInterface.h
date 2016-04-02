@@ -43,7 +43,7 @@ struct UserInterface{
 		colorButtons = false;
 		shapeButtons = false;
 		layerVisualization = false;
-		deviceButtons = true;
+		deviceButtons = false;
 
 		//Adds our backgroundColors to the list. 
 		backgroundList.emplace_back(Color(0.0f, 0.0f, 0.0f));
@@ -211,6 +211,37 @@ void UserInterface::slideButtons(int x, int y){
 }
 bool UserInterface::inInteractiveUi(int x, int y)
 {
+
+	if (deviceHandler->multiTouchStatus() == false){
+		//If the multi-touch is 'disabled' we still allow the user to toggle devices on and off using the multitouch
+		if (deviceButtons){
+			if (x < windowWidth && x > windowWidth *.87){
+				if (y > windowHeight * .65 && y < windowHeight * .68){
+					deviceHandler->toggleLeap();
+					modeChangeFlag = true;
+				}
+				if (y > windowHeight * .68 && y < windowHeight * .71){
+					deviceHandler->toggleLeapDraw();
+				}
+				if (y > windowHeight * .71 && y < windowHeight * .74){
+					deviceHandler->toggleLeapGesture();
+				}
+				if (y > windowHeight * .74 && y < windowHeight * .77){
+					deviceHandler->toggleEyeX();
+					if (deviceHandler->eyeXStatus() == false){
+						modeButtons = true;
+					}
+					modeChangeFlag = true;
+				}
+				if (y > windowHeight * .77 && y < windowHeight * .8){
+					deviceHandler->toggleMultiTouch();
+					modeChangeFlag = true;
+				}
+			}
+
+		}
+		return true;
+	}
 	/*
 	if (radialActive){
 
@@ -244,6 +275,12 @@ bool UserInterface::inInteractiveUi(int x, int y)
 	//modeButtons UI
 	
 	if ((*illustrator).getActiveDrawings() == 0){
+
+		if (uiFboFlag){
+			if (x > windowWidth*.92 && x < windowWidth && y > windowHeight*.8 && y < windowHeight*.83){
+				deviceButtons = !deviceButtons;
+			}
+		}
 
 		if (modeButtons){
 			//Color change button.
@@ -354,24 +391,36 @@ bool UserInterface::inInteractiveUi(int x, int y)
 	if (shapeButtons){
 		if (x > 50 && x < 100 && y < 100){
 			(*mBrush).changeShape(Shape::Shape::Line);
+			(*mBrush).changeEraserMode(false);
 			shapeButtons = false;
 			modeChangeFlag = true;
 			return true;
 		}
 		if (x > 50 && x < 100 && y < 150){
 			(*mBrush).changeShape(Shape::Shape::Circle);
+			(*mBrush).changeEraserMode(false);
 			shapeButtons = false;
 			modeChangeFlag = true;
 			return true;
 		}
 		if (x > 50 && x < 100 && y < 200){
 			(*mBrush).changeShape(Shape::Shape::Rectangle);
+			(*mBrush).changeEraserMode(false);
 			shapeButtons = false;
 			modeChangeFlag = true;
 			return true;
 		}
 		if (x > 50 && x < 100 && y < 250){
+			(*mBrush).changeEraserMode(false);
 			(*mBrush).changeShape(Shape::Shape::Triangle);
+			shapeButtons = false;
+			modeChangeFlag = true;
+			return true;
+		}
+		if (x > 50 && x < 100 && y < 300){
+			if (mBrush->getEraserMode())
+				(*mBrush).changeEraserMode(false);
+			else mBrush->changeEraserMode(true);
 			shapeButtons = false;
 			modeChangeFlag = true;
 			return true;
@@ -381,6 +430,7 @@ bool UserInterface::inInteractiveUi(int x, int y)
 		if (x < windowWidth && x > windowWidth *.87){
 			if (y > windowHeight * .65 && y < windowHeight * .68){
 				deviceHandler->toggleLeap();
+				modeChangeFlag = true;
 			}
 			if (y > windowHeight * .68 && y < windowHeight * .71){
 				deviceHandler->toggleLeapDraw();
@@ -390,9 +440,14 @@ bool UserInterface::inInteractiveUi(int x, int y)
 			}
 			if (y > windowHeight * .74 && y < windowHeight * .77){
 				deviceHandler->toggleEyeX();
+				if (deviceHandler->eyeXStatus() == false){
+					modeButtons = true;
+				}
+				modeChangeFlag = true;
 			}
 			if (y > windowHeight * .77 && y < windowHeight * .8){
 				deviceHandler->toggleMultiTouch();
+				modeChangeFlag = true;
 			}
 
 
@@ -600,19 +655,25 @@ void UserInterface::drawUi(){
 	{
 		modeChangeFlag = false;
 		(*uiFbo).bindFramebuffer();
-		//uiFboFlag = true;
-
-		//glClearColor(0.0,0.0,0.0,  0.0);
-		//glClear(GL_COLOR_BUFFER_BIT);
-
+		gl::lineWidth(5);
+		//Clears the framebuffer to redraw
 		gl::clear(ColorA(0.0,0.0,0.0,0.0));
 
+		//Draw Device Mode button
+		TextLayout layout1;
+		layout1.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
+		layout1.setFont(Font("Arial", 50));
+		layout1.setColor(Color(1, 1, 1));
+		layout1.addLine(std::string("Device Modes"));
+		Surface8u rendered = layout1.render(true, false);
+		gl::Texture2dRef mTexture = gl::Texture2d::create(rendered);
+		gl::color(Color::white());
+		gl::draw(mTexture, Rectf(windowWidth*.92, windowHeight*.8, windowWidth, windowHeight*.83));
+		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(windowWidth*.92, windowHeight*.8, windowWidth, windowHeight*.83));
 
+		//Draw outline of modeBox
 		gl::color(1.0, 0.9, 0.5);
-		//gl::lineWidth(10);
-		//gl::drawSolidCircle(vec2(0,0), 10);
-		//gl::drawSolidCircle(vec2(1920,1080), 100);
-
 		gl::drawStrokedRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight), 5);
 		gl::color(0.0, 0.0, 0.0);
 
@@ -635,9 +696,8 @@ void UserInterface::drawUi(){
 		case Shape::Shape::Line:
 			modeLine();
 			break;
-
-
 		}
+
 
 		//auto maxTouches = System::getMaxMultiTouchPoints();
 		if ((*deviceHandler).multiTouchStatus()){
@@ -751,7 +811,7 @@ void UserInterface::drawUi(){
 		}
 		if (shapeButtons){
 
-			for (int i = 0; i < 4; i++){
+			for (int i = 0; i < 5; i++){
 
 				gl::color(0.9, 0.85, 0.65);
 				gl::drawStrokedRect(Rectf(50, 50 * (i)+50, 100, 50 * i + 100), 10);
@@ -833,6 +893,9 @@ void UserInterface::drawUi(){
 	//gl::color(1.0, 1.0, 1.0);
 	//if (uiFboFlag) gl::draw(uiFbo->getColorTexture());
 	if (deviceButtons){
+
+		gl::lineWidth(5);
+
 		TextLayout layout1;
 		layout1.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
 		layout1.setFont(Font("Arial", 50));

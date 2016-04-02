@@ -2,6 +2,7 @@
 #define DEVICEHANDLER_H
 
 #include "libusb.h"
+#include "UserInterface.h"
 #include <stdio.h>
 
 struct DeviceHandler{
@@ -27,18 +28,29 @@ struct DeviceHandler{
 
 
 	int deviceConnection();
+	int getDefaultMode();
 	int leapStatus();
 	int multiTouchStatus();
 	int eyeXStatus();
-	
+	int realSenseStatus();
+
 	void toggleLeap();
 	void toggleMultiTouch();
 	void toggleEyeX();
+	void toggleRealSense();
 	void toggleLeapDraw();
 	void toggleLeapGesture();
 
 	bool leapDraw();
 	bool leapGesture();
+
+	int setIdealMode();
+	int setNoMultitouchMode();
+	int setNoLeapMode();
+	int setNoEyeX();
+	int setOnlyLeapMode();
+	int setOnlyEyeXMode();
+	int setOnlyMultiTouchMode();
 	
 
 
@@ -55,17 +67,19 @@ private:
 	int eyeXConnectedFlag;
 	int stateCounter;
 	int vendorList[3];
-
+	
 	//Mode Flags
 	int leapConnected;
 	int multiTouchConnected;
 	int eyeXConnected;
+	int realSenseConnected;
 	bool leapDrawEnabled;
 	bool leapGestureEnabled;
 	bool eyeXEnabled;
 	bool overrideLeap;
 	bool overrideMultiTouch;
 	bool overrideEyeX;
+
 };
 
 bool DeviceHandler::leapDraw(){
@@ -83,14 +97,14 @@ void DeviceHandler::toggleLeap(){
 }
 void DeviceHandler::toggleLeapDraw(){
 
-
 	leapDrawEnabled = !leapDrawEnabled;
 }
 void DeviceHandler::toggleLeapGesture(){
 
-
 	leapGestureEnabled = !leapGestureEnabled;
+
 }
+void DeviceHandler::toggleRealSense(){}
 void DeviceHandler::toggleMultiTouch(){
 	overrideMultiTouch = true;
 	multiTouchConnected = !multiTouchConnected;
@@ -156,7 +170,7 @@ int DeviceHandler::deviceConnection(){
 	stateCounter = stateCounter + (setMultiTouchState());
 
 	stateCounter = stateCounter + (setEyeXState());
-	
+
 	resetFlags();
 
 	libusb_free_device_list(devs, 1);
@@ -166,6 +180,33 @@ int DeviceHandler::deviceConnection(){
 
 	return stateCounter
 ;
+}
+
+int DeviceHandler::getDefaultMode(){
+
+	//All three devices connected
+	if (multiTouchConnected && leapConnected & eyeXConnected){ //&& eyeXConnectedFlag){
+		return setIdealMode();
+	}
+	else if (leapConnected && eyeXConnected){
+		return setNoMultitouchMode();
+	}
+	else if (multiTouchConnected && eyeXConnected){
+		return setNoLeapMode();
+	}
+	else if (multiTouchConnected && leapConnected){
+		return setNoEyeX();
+	}
+	else if (leapConnected){
+		return setOnlyLeapMode();
+	}
+	else if (multiTouchConnected){
+		return setOnlyMultiTouchMode();
+	}
+	else{
+		return setOnlyEyeXMode();
+	}
+	
 }
 
 int DeviceHandler::leapStatus(){
@@ -178,6 +219,10 @@ int DeviceHandler::multiTouchStatus(){
 
 int DeviceHandler::eyeXStatus(){
 	return eyeXConnected;
+}
+
+int DeviceHandler::realSenseStatus(){
+	return realSenseConnected;
 }
 
 int DeviceHandler::setLeapState(){
@@ -260,5 +305,41 @@ void DeviceHandler::resetFlags(){
 	multiTouchConnectedFlag = 0;
 	eyeXConnectedFlag = 0;
 }
+
+int DeviceHandler::setIdealMode(){
+
+	//Turn off leapDraw
+	toggleLeapDraw();
+	return 1;
+
+}
+int DeviceHandler::setNoMultitouchMode(){
+	return 2;
+}
+int DeviceHandler::setNoLeapMode(){
+	toggleLeapDraw();
+	toggleLeapGesture();
+	return 3;
+}
+int DeviceHandler::setNoEyeX(){
+
+	toggleLeapDraw();
+	return 4;
+}
+int DeviceHandler::setOnlyLeapMode(){
+	return 5;
+}
+int DeviceHandler::setOnlyEyeXMode(){
+	toggleLeapDraw();
+	toggleLeapGesture();
+	return 6;
+}
+int DeviceHandler::setOnlyMultiTouchMode(){
+
+	toggleLeapDraw();
+	toggleLeapGesture();
+	return 7;
+}
+
 
 #endif

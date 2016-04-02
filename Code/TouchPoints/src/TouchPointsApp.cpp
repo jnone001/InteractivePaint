@@ -206,7 +206,7 @@ public:
 	void	leapDraw(Leap::Frame frame);
 	void 	gestRecognition(Leap::Frame frame, Leap::Controller controller);
 
-	
+	void setDefaultMode(int mode);
 
 	//List of drawUI Flags
 	bool modeButtons = true;
@@ -215,7 +215,7 @@ public:
 	bool uiFboFlag = false;
 	bool layerVisualization = false;
 
-
+	
 
 	void modeChangeFlagTrue();
 
@@ -661,12 +661,14 @@ void TouchPointsApp::setup()
 	realSenseHandler.intializeFaceSensing();
 	//realSenseHandler.streamData();
 
-
-
 	//Set up UI
 	deviceHandler.deviceConnection();
 	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
+	deviceHandler.deviceConnection();
+	int resultMode = deviceHandler.getDefaultMode();
+	setDefaultMode(resultMode);
+	
 
 
 	//Sets up eyeX context
@@ -1114,7 +1116,6 @@ void TouchPointsApp::drawRadial(){
 
 }
 
-/*Proxy menu Function*/
 void TouchPointsApp::drawProx(){
 
 	(*proxFbo).bindFramebuffer();
@@ -1404,9 +1405,15 @@ bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, Tou
 
 void TouchPointsApp::touchesBegan(TouchEvent event)
 {
-	if (!deviceHandler.multiTouchStatus())
-		return;
+
+
 	for (const auto &touch : event.getTouches()) {
+
+		if (!deviceHandler.multiTouchStatus())
+		{
+			ui.inInteractiveUi(touch.getX(), touch.getY());
+			return;
+		}
 
 		if (radialActive){
 			int x = touch.getX();
@@ -1518,6 +1525,31 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 	}
 }
 
+void TouchPointsApp::setDefaultMode(int mode){
+
+	bool temp = false;
+
+	switch (mode){
+	case 1:
+		break;
+	case 2:
+		ui.changeModeButtons(temp);
+		break;
+	case 3:
+		break;
+	case 4:
+		break;
+	case 5:
+		ui.changeModeButtons(temp);
+		break;
+	case 6:
+		ui.changeModeButtons(temp);
+		break;
+	case 7:
+		break;
+	}
+}
+
 void TouchPointsApp::mouseDown(MouseEvent event)
 {
 }
@@ -1527,26 +1559,26 @@ void TouchPointsApp::update(){
 
 	//bool testvar2 = System::hasMultiTouch();
 	//auto testvar3 = System::getMaxMultiTouchPoints();
-	/*
+	
 	if (deviceHandler.deviceConnection()){
 		ui.setModeChangeFlag();
 	}
-	*/
-	
 
 	
+	if (deviceHandler.realSenseStatus()){
 
-	realSenseHandler.streamData();
 
-	if (realSenseHandler.getBrowGestureFlag()){
-		illustrator.undoDraw(ui.getBackgroundColor());
-		realSenseHandler.resetBrowGestureFlag();
-	}
-	if (realSenseHandler.getKissGestureFlag()){
-		illustrator.undoDraw(ui.getBackgroundColor());
-		realSenseHandler.resetKissGestureFlag();
-	}
-	
+		realSenseHandler.streamData();
+
+		if (realSenseHandler.getBrowGestureFlag()){
+			illustrator.undoDraw(ui.getBackgroundColor());
+			realSenseHandler.resetBrowGestureFlag();
+		}
+		if (realSenseHandler.getKissGestureFlag()){
+			illustrator.undoDraw(ui.getBackgroundColor());
+			realSenseHandler.resetKissGestureFlag();
+		}
+	}	
 }
 
 void TouchPointsApp::draw()
@@ -1581,7 +1613,7 @@ void TouchPointsApp::draw()
 				gestRecognition(currentFrame, leapContr);
 			}
 
-			
+
 		}
 		lockCurrentFrame = false;
 	}
@@ -1635,7 +1667,7 @@ void TouchPointsApp::draw()
 	gl::color(1.0, 1.0, 1.0, 1.0);
 
 	/*Draws the frame buffer for UI*/
-	if (eyeXRunning){
+	if (deviceHandler.eyeXStatus()){
 
 
 		if (gazePositionX < 400 && gazePositionY < 100){
@@ -1647,9 +1679,7 @@ void TouchPointsApp::draw()
 			ui.changeModeButtons(tempBool);
 		}
 
-		
-
-		if (gazePositionX > windowWidth*.8 && gazePositionY > windowHeight*.8)
+		if (gazePositionX > windowWidth*.75 && gazePositionY > windowHeight*.75)
 		{
 			gl::draw(uiFbo->getColorTexture());
 		}
