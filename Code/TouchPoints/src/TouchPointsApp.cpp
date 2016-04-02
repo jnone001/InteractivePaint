@@ -664,6 +664,7 @@ void TouchPointsApp::setup()
 
 
 	//Set up UI
+	deviceHandler.deviceConnection();
 	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
 
@@ -1526,11 +1527,11 @@ void TouchPointsApp::update(){
 
 	//bool testvar2 = System::hasMultiTouch();
 	//auto testvar3 = System::getMaxMultiTouchPoints();
-	
+	/*
 	if (deviceHandler.deviceConnection()){
 		ui.setModeChangeFlag();
 	}
-
+	*/
 	
 
 	
