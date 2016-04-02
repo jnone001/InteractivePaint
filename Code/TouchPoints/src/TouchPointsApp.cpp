@@ -102,11 +102,11 @@ int resolutionY;
 
 
 #define SWIPE_GESTURE 8
-#define windowWidth  getWindowSize().x
-#define windowHeight getWindowSize().y
+//#define windowWidth  getWindowSize().x
+//#define windowHeight getWindowSize().y
 
-//#define windowWidth  1919
-//#define windowHeight 1079
+#define windowWidth  1919
+#define windowHeight 1079
 
 #define FRAME_RATE 120
 
@@ -206,7 +206,7 @@ public:
 	void	leapDraw(Leap::Frame frame);
 	void 	gestRecognition(Leap::Frame frame, Leap::Controller controller);
 
-	
+	void setDefaultMode(int mode);
 
 	//List of drawUI Flags
 	bool modeButtons = true;
@@ -215,7 +215,7 @@ public:
 	bool uiFboFlag = false;
 	bool layerVisualization = false;
 
-
+	
 
 	void modeChangeFlagTrue();
 
@@ -661,11 +661,13 @@ void TouchPointsApp::setup()
 	realSenseHandler.intializeFaceSensing();
 	//realSenseHandler.streamData();
 
-
-
 	//Set up UI
 	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
+	deviceHandler.deviceConnection();
+	int resultMode = deviceHandler.getDefaultMode();
+	setDefaultMode(resultMode);
+	
 
 
 	//Sets up eyeX context
@@ -1113,7 +1115,6 @@ void TouchPointsApp::drawRadial(){
 
 }
 
-/*Proxy menu Function*/
 void TouchPointsApp::drawProx(){
 
 	(*proxFbo).bindFramebuffer();
@@ -1517,6 +1518,31 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 	}
 }
 
+void TouchPointsApp::setDefaultMode(int mode){
+
+	bool temp = false;
+
+	switch (mode){
+	case 1:
+		break;
+	case 2:
+		ui.changeModeButtons(temp);
+		break;
+	case 3:
+		break;
+	case 4:
+		break;
+	case 5:
+		ui.changeModeButtons(temp);
+		break;
+	case 6:
+		ui.changeModeButtons(temp);
+		break;
+	case 7:
+		break;
+	}
+}
+
 void TouchPointsApp::mouseDown(MouseEvent event)
 {
 }
@@ -1531,21 +1557,19 @@ void TouchPointsApp::update(){
 		ui.setModeChangeFlag();
 	}
 
-	
+	if (deviceHandler.realSenseStatus()){
 
-	
+		realSenseHandler.streamData();
 
-	realSenseHandler.streamData();
-
-	if (realSenseHandler.getBrowGestureFlag()){
-		illustrator.undoDraw(ui.getBackgroundColor());
-		realSenseHandler.resetBrowGestureFlag();
-	}
-	if (realSenseHandler.getKissGestureFlag()){
-		illustrator.undoDraw(ui.getBackgroundColor());
-		realSenseHandler.resetKissGestureFlag();
-	}
-	
+		if (realSenseHandler.getBrowGestureFlag()){
+			illustrator.undoDraw(ui.getBackgroundColor());
+			realSenseHandler.resetBrowGestureFlag();
+		}
+		if (realSenseHandler.getKissGestureFlag()){
+			illustrator.undoDraw(ui.getBackgroundColor());
+			realSenseHandler.resetKissGestureFlag();
+		}
+	}	
 }
 
 void TouchPointsApp::draw()
