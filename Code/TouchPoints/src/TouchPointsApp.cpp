@@ -215,6 +215,10 @@ public:
 	bool uiFboFlag = false;
 	bool layerVisualization = false;
 
+	//Variables to keep track of performance. It is cleared once every second.
+	int frames = 0;
+	int fps = 0;
+
 	
 
 	void modeChangeFlagTrue();
@@ -240,6 +244,8 @@ private:
 	RealSenseHandler realSenseHandler;
 	//UndoLine undoLine;
 
+	//Keeps time for the last time we checked for connected or disconnected devices
+	std::chrono::milliseconds lastDeviceCheck;
 
 
 	//Leap Motion Controller
@@ -350,6 +356,9 @@ void LeapListener::onDisconnect(const Leap::Controller& controller){
 
 void prepareSettings(TouchPointsApp::Settings *settings)
 {
+	settings->setFullScreen(true);
+	settings->setTitle("InteractivePaint");
+	//setFullScreen(1);
 	// By default, multi-touch is disabled on desktop and enabled on mobile platforms.
 	// You enable multi-touch from the SettingsFn that fires before the app is constructed.
 	settings->setMultiTouchEnabled(true);
@@ -663,6 +672,7 @@ void TouchPointsApp::setup()
 
 	//Set up UI
 	deviceHandler.deviceConnection();
+	lastDeviceCheck = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
 	deviceHandler.deviceConnection();
@@ -1556,15 +1566,31 @@ void TouchPointsApp::mouseDown(MouseEvent event)
 
 void TouchPointsApp::update(){
 
+	//Increment the frame counter
+	frames++;
 
-	//bool testvar2 = System::hasMultiTouch();
-	//auto testvar3 = System::getMaxMultiTouchPoints();
-	
-	if (deviceHandler.deviceConnection()){
-		ui.setModeChangeFlag();
+
+	//Gets current clock time in milliseconds
+	std::chrono::milliseconds currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
+
+	//This is how often we will check our device connection in milliseconds.
+	std::chrono::milliseconds checkTime{ 2000 };
+	if (currentTime - lastDeviceCheck >= checkTime){
+		//Updates FPS - Ensure frames is being divided by how many seconds it takes to get into this loop.
+		fps = frames/2;
+		frames = 0;
+		
+		//Resets our lastDeviceCheck time.
+		lastDeviceCheck = currentTime;
+
+		//Checks if any device statuses have changed.
+		if (deviceHandler.deviceConnection()){
+			ui.setModeChangeFlag();
+		}
 	}
-
 	
+	//Checks the real sense device and updates anything associated with it.
 	if (deviceHandler.realSenseStatus()){
 
 
@@ -1578,23 +1604,40 @@ void TouchPointsApp::update(){
 			illustrator.undoDraw(ui.getBackgroundColor());
 			realSenseHandler.resetKissGestureFlag();
 		}
-	}	
+	}
+	
+	//Updates the active shapes being drawn by the user
+	gl::color(1.0, 1.0, 1.0, 1.0);
+	(*activeFbo).bindFramebuffer();
+	glClearColor(1.0, 1.0, 1.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	//Draws all active Shapes (non-permanent);
+	illustrator.drawActiveShapes();
+	(*activeFbo).unbindFramebuffer();
+	
 }
+
+
 
 void TouchPointsApp::draw()
 {
 
-	//gl::enableAlphaBlending();
-
-
-	//Add a vector instead of the 3 ref to arrays.
-	//gl::clear(ColorA(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 0.0));
-	//gl::clear(ColorA(ui.getBackgroundColor(), 0.0));
-	//gl::color(1.0, 1.0, 1.0);
-	//gl::drawStrokedCircle(vec2(windowWidth *.5, windowHeight*.5), 200.0f, 50.0f);
+	//Clears the Application Context to the background color with a 0 Alpha Value (transparent)
 	Color myBG = ui.getBackgroundColor();
 	glClearColor(myBG.r, myBG.g, myBG.b, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
+
+
+	/* Small script that checks FPS
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawSolidCircle(vec2(960, 540), (float)fps * 2);
+
+	gl::color(1.0, 0.0, 0.0);
+	gl::drawStrokedCircle(vec2(960, 540), 15.0f * 2);
+	gl::drawStrokedCircle(vec2(960, 540), 30.0f * 2);
+	gl::drawStrokedCircle(vec2(960, 540), 45.0f * 2);
+	gl::drawStrokedCircle(vec2(960, 540), 60.0f * 2);
+	*/
 
 	//Currently leapDraw before drawing layers to prevent flickering. 
 	//However, this makes it impossible to see green 'hands' on top of images.
@@ -1618,8 +1661,10 @@ void TouchPointsApp::draw()
 		lockCurrentFrame = false;
 	}
 
-	int x = 0;
 
+
+	//Loop Which Draws our Layers
+	int x = 0;
 	for (auto frames : layerList){
 		gl::color(1.0, 1.0, 1.0, ui.getLayerAlpha(x));
 		gl::draw(frames->getColorTexture());
@@ -1632,33 +1677,22 @@ void TouchPointsApp::draw()
 
 
 #ifdef EYEX
-	gl::color(1.0, 1.0, 1.0, .4);
-	vec2 gaze1(gazePositionX - 10, gazePositionY);
-	vec2 gaze2(gazePositionX + 10, gazePositionY);
 
-	gl::drawStrokedCircle(gaze1, 10.0f, 10.0f);
-	gl::drawStrokedCircle(gaze2, 10.0f, 10.0f);
 
 #endif
 
-	/*Draws image that provides feedback */
-	/*
-	if (imageFlag){
-	//Area center = calcCenter(imageTexture);
-	drawImageTexture();
-	//gl::draw(imageFbo->getColorTexture(), center);
-	gl::color(ColorA(0.0, 0.0, 0.0, 1.0));
-	imageFbo->blitToScreen(Area(0, 0, 1920, 1080), Area(windowWidth / 2 - 100, windowHeight / 2 + 100, windowWidth / 2 + 55, windowHeight / 2 - 55), GL_NEAREST, GL_COLOR_BUFFER_BIT);
-	}
-	*/
+	/*Draws icons that provides feedback */
 	imageHandler.displayIcon();
+	//Draws all the UI elements (Currently only updated the uiFbo which stores data for the mode box), drawing is done below.
 	ui.drawUi();
 
+	//Draws radial menu
 	if (radialActive){
 		gl::color(1.0, 1.0, 1.0, 1.0);
 		gl::draw(radialFbo->getColorTexture());
 	}
 
+	//Draws proximity menu
 	if (proxActive){
 		gl::draw(proxFbo->getColorTexture());
 	}
@@ -1669,8 +1703,14 @@ void TouchPointsApp::draw()
 	/*Draws the frame buffer for UI*/
 	if (deviceHandler.eyeXStatus()){
 
+		gl::color(1.0, 1.0, 1.0, .4);
+		vec2 gaze1(gazePositionX - 10, gazePositionY);
+		vec2 gaze2(gazePositionX + 10, gazePositionY);
 
-		if (gazePositionX < 400 && gazePositionY < 100){
+		gl::drawStrokedCircle(gaze1, 10.0f, 10.0f);
+		gl::drawStrokedCircle(gaze2, 10.0f, 10.0f);
+
+		if (gazePositionX < 600 && gazePositionY < 100){
 			bool tempBool = true;
 			ui.changeModeButtons(tempBool);
 		}
@@ -1686,15 +1726,8 @@ void TouchPointsApp::draw()
 	}
 	else if (ui.getUiFboFlag()) gl::draw(uiFbo->getColorTexture());
 
-	gl::color(1.0, 1.0, 1.0, 1.0);
-	(*activeFbo).bindFramebuffer();
-	glClearColor(1.0, 1.0, 1.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT);
-	//Draws all active Shapes (non-permanent);
-	illustrator.drawActiveShapes();
 
-	(*activeFbo).unbindFramebuffer();
-
+	//Draws all the active shapes being drawn by the user
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	gl::draw(activeFbo->getColorTexture());
 

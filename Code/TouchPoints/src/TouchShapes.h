@@ -87,16 +87,40 @@ struct TouchPoint : public TouchShape
 
 
 		gl::lineWidth(mSize);
-		//auto allPoints = mLine.getPoints();
 		gl::color(mColor);
+		//auto allPoints = mLine.getPoints();
+		
+		
+		for (auto points : pointList){
+
+			gl::drawSolidCircle(points, mSize);
+
+		}
+		/*Halves the draw calls. Drastic Performance Increase.
+		int x = 0;
+		for (auto points : pointList){
+			if (x % 2 == 0){
+				x++;
+				continue;
+			}
+			gl::drawSolidCircle(points, mSize);
+			x++;
+		}
+		*/
+
+		/* Batch Test Code
+		geom::SourceMods combination;
 
 		for (auto points : pointList){
-			gl::drawSolidCircle(points, mSize);
+			//gl::drawSolidCircle(points, mSize);
+			auto line = geom::Circle().center(points).radius(mSize);
+			combination &= line >> geom::Constant(geom::COLOR, mColor);
 		}
-
-
-
-
+		auto lambert = gl::ShaderDef().lambert().color();
+		gl::GlslProgRef shader = gl::getStockShader(lambert);
+		auto myBatch = gl::Batch::create(combination, shader);
+		myBatch->draw();
+		*/
 		/*
 		gl::begin(GL_LINE_STRIP);
 		for (const vec2 &point : pointList) {
@@ -115,6 +139,8 @@ struct TouchPoint : public TouchShape
 
 		for (const auto &touch : event.getTouches())
 		*/
+
+		//gl::draw(mLine);
 	}
 
 
