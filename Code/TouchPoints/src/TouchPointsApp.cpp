@@ -102,11 +102,11 @@ int resolutionY;
 
 
 #define SWIPE_GESTURE 8
-#define windowWidth  getWindowSize().x
-#define windowHeight getWindowSize().y
+//#define windowWidth  getWindowSize().x
+//#define windowHeight getWindowSize().y
 
-//#define windowWidth  1919
-//#define windowHeight 1079
+#define windowWidth  1919
+#define windowHeight 1079
 
 #define FRAME_RATE 120
 
@@ -356,8 +356,10 @@ void LeapListener::onDisconnect(const Leap::Controller& controller){
 void prepareSettings(TouchPointsApp::Settings *settings)
 {
 	settings->setFullScreen(true);
+
 	settings->setTitle("InteractivePaint");
 	//setFullScreen(1);
+
 	// By default, multi-touch is disabled on desktop and enabled on mobile platforms.
 	// You enable multi-touch from the SettingsFn that fires before the app is constructed.
 	settings->setMultiTouchEnabled(true);
@@ -670,8 +672,10 @@ void TouchPointsApp::setup()
 	//realSenseHandler.streamData();
 
 	//Set up UI
+
 	deviceHandler.deviceConnection();
 	lastDeviceCheck = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+
 	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
 	deviceHandler.deviceConnection();
@@ -1573,6 +1577,7 @@ void TouchPointsApp::update(){
 	std::chrono::milliseconds currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
 
+
 	//This is how often we will check our device connection in milliseconds.
 	std::chrono::milliseconds checkTime{ 2000 };
 	if (currentTime - lastDeviceCheck >= checkTime){
@@ -1590,7 +1595,6 @@ void TouchPointsApp::update(){
 	}
 	
 	//Checks the real sense device and updates anything associated with it.
-	
 	if (deviceHandler.realSenseStatus()){
 
 
