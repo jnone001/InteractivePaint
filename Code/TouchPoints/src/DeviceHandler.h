@@ -36,10 +36,13 @@ struct DeviceHandler{
 	int eyeXStatus();
 	int realSenseStatus();
 
-	void toggleLeap();
+	
 	void toggleMultiTouch();
 	void toggleEyeX();
+	//
 	void toggleRealSense();
+	//Leap Device and Functionality
+	void toggleLeap();
 	void toggleLeapDraw();
 	void toggleLeapGesture();
 

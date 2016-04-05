@@ -107,16 +107,18 @@ void ImageHandler::saveCanvas(vec2 windowSize){
 	saveImageFbo = gl::Fbo::create(windowSize.x, windowSize.y, format);
 
 	(*saveImageFbo).bindFramebuffer();
-
+	glClearColor(1.0, 1.0, 1.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	int x = 0;
 	for (auto frames : *mLayerList){
 		gl::color(1.0, 1.0, 1.0, (*layerAlpha)[x]);
 		gl::draw(frames->getColorTexture());
+		x++;
 	}
 	(*saveImageFbo).unbindFramebuffer();
-	//writeImage(getHomeDirectory() / "cinder" / "Saved_Images" / (toString(imageNum) + imageType), copyWindowSurface());
-	writeImage(cinder::getHomeDirectory() / "cinder" / "Saved_Images" / (cinder::toString(imageNum) + "." + imageType), (saveImageFbo->getColorTexture())->createSource());
+	//writeImage(getHomeDirectory() / "Interactive Paint" / "Saved_Images" / (toString(imageNum) + imageType), copyWindowSurface());
+	writeImage(cinder::getHomeDirectory() / "Interactive_Paint" / "Saved_Images" / (cinder::toString(imageNum) + "." + imageType), (saveImageFbo->getColorTexture())->createSource());
 	imageNum++;
 	loadIcon("Save.png");
 	cout << "Image " << imageNum << "Saved!";
