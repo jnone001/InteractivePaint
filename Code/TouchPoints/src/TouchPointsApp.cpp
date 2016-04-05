@@ -1599,17 +1599,24 @@ void TouchPointsApp::update(){
 
 	if (deviceHandler.realSenseStatus()){
 
-
 		realSenseHandler.streamData();
 
 		if (realSenseHandler.getBrowGestureFlag()){
-			illustrator.undoDraw(ui.getBackgroundColor());
-			realSenseHandler.resetBrowGestureFlag();
+			illustrator.undoDraw(ui.getBackgroundColor());	
 		}
 		if (realSenseHandler.getKissGestureFlag()){
-			illustrator.undoDraw(ui.getBackgroundColor());
-			realSenseHandler.resetKissGestureFlag();
+			ui.toggleUiFlag();
 		}
+		if (realSenseHandler.getTongueGestureFlag()){
+			mySymmetry.toggleSymmetry();
+		}
+		if (realSenseHandler.getCheekGestureFlag()){
+			leapColorChange();
+		}
+		if (realSenseHandler.getSmileGestureFlag()){
+			leapShapeChange();
+		}
+		realSenseHandler.resetGesturesFlag();
 	}
 	
 	//Updates the active shapes being drawn by the user
