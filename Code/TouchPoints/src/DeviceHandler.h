@@ -12,6 +12,7 @@ struct DeviceHandler{
 		leapConnected = 0;
 		multiTouchConnected = 0;
 		eyeXConnected = 0;
+		realSenseConnected = 0;
 		leapConnectedFlag = 0;
 		multiTouchConnectedFlag = 0;
 		eyeXConnectedFlag = 0;
@@ -19,6 +20,7 @@ struct DeviceHandler{
 		vendorList[0] = 61826;
 		vendorList[1] = 8746;
 		vendorList[2] = 8452;
+		vendorList[3] = 1054;
 		overrideLeap = false;
 		overrideMultiTouch = false;
 		overrideEyeX = false;
@@ -58,6 +60,7 @@ private:
 	int setLeapState();
 	int setMultiTouchState();
 	int setEyeXState();
+	int setRealSenseState();
 	void resetFlags();
 
 
@@ -65,8 +68,10 @@ private:
 	int leapConnectedFlag;
 	int multiTouchConnectedFlag;
 	int eyeXConnectedFlag;
+	int realSenseConnectedFlag;
 	int stateCounter;
-	int vendorList[3];
+	int vendorList[4];
+	//int vendorList[3];
 	
 	//Mode Flags
 	int leapConnected;
@@ -85,7 +90,6 @@ private:
 bool DeviceHandler::leapDraw(){
 	return leapDrawEnabled;
 }
-
 bool DeviceHandler::leapGesture(){
 	return leapGestureEnabled;
 }
@@ -104,7 +108,9 @@ void DeviceHandler::toggleLeapGesture(){
 	leapGestureEnabled = !leapGestureEnabled;
 
 }
+/*
 void DeviceHandler::toggleRealSense(){}
+*/
 void DeviceHandler::toggleMultiTouch(){
 	overrideMultiTouch = true;
 	multiTouchConnected = !multiTouchConnected;
@@ -160,7 +166,10 @@ int DeviceHandler::deviceConnection(){
 		if (vendorid == vendorList[2]){
 			eyeXConnectedFlag = 1;
 		}
-
+		if (vendorid == vendorList[3])
+		{
+			realSenseConnectedFlag = 1;
+		}
 	}
 
 	stateCounter = 0;
@@ -171,6 +180,8 @@ int DeviceHandler::deviceConnection(){
 
 	stateCounter = stateCounter + (setEyeXState());
 
+	stateCounter = stateCounter + (setRealSenseState());
+
 	resetFlags();
 
 	libusb_free_device_list(devs, 1);
@@ -178,8 +189,7 @@ int DeviceHandler::deviceConnection(){
 
 	libusb_exit(NULL);
 
-	return stateCounter
-;
+	return stateCounter;
 }
 
 int DeviceHandler::getDefaultMode(){
@@ -300,10 +310,36 @@ int DeviceHandler::setEyeXState(){
 	}
 }
 
+int DeviceHandler::setRealSenseState(){
+
+	if (realSenseConnectedFlag == 1){
+		if (realSenseConnected == 0){
+			if (overrideEyeX){
+				return 0;
+			}
+			realSenseConnected = 1;
+			return 1;
+		}
+		else{
+			return 0;
+		}
+	}
+	else{
+		if (realSenseConnected == 1){
+			realSenseConnected = 0;
+			return 1;
+		}
+		else{
+			return 0;
+		}
+	}
+}
+
 void DeviceHandler::resetFlags(){
 	leapConnectedFlag = 0;
 	multiTouchConnectedFlag = 0;
 	eyeXConnectedFlag = 0;
+	realSenseConnectedFlag = 0;
 }
 
 int DeviceHandler::setIdealMode(){

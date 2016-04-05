@@ -712,6 +712,10 @@ void UserInterface::drawUi(){
 			gl::color(1.0, 0.0, 0.0);
 			gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight * .81, windowWidth*.89, windowHeight *.83));
 		}
+		if ((*deviceHandler).realSenseStatus()){
+			gl::color(1.0, 1.0, 0.0);
+			gl::drawSolidRect(Rectf(windowWidth*.90, windowHeight * .81, windowWidth*.92, windowHeight *.83));
+		}
 		(*uiFbo).unbindFramebuffer();
 		//uiFboFlag = false;
 	}

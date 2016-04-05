@@ -102,11 +102,11 @@ int resolutionY;
 
 
 #define SWIPE_GESTURE 8
-#define windowWidth  getWindowSize().x
-#define windowHeight getWindowSize().y
+//#define windowWidth  getWindowSize().x
+//#define windowHeight getWindowSize().y
 
-//#define windowWidth  1919
-//#define windowHeight 1079
+#define windowWidth  1919
+#define windowHeight 1079
 
 #define FRAME_RATE 120
 
@@ -350,6 +350,8 @@ void LeapListener::onDisconnect(const Leap::Controller& controller){
 
 void prepareSettings(TouchPointsApp::Settings *settings)
 {
+	settings->setFullScreen(true);
+
 	// By default, multi-touch is disabled on desktop and enabled on mobile platforms.
 	// You enable multi-touch from the SettingsFn that fires before the app is constructed.
 	settings->setMultiTouchEnabled(true);
@@ -662,7 +664,7 @@ void TouchPointsApp::setup()
 	//realSenseHandler.streamData();
 
 	//Set up UI
-	deviceHandler.deviceConnection();
+	//deviceHandler.deviceConnection();
 	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
 	deviceHandler.deviceConnection();
