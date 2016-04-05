@@ -1598,6 +1598,7 @@ void TouchPointsApp::update(){
 	//Checks the real sense device and updates anything associated with it.
 
 	if (deviceHandler.realSenseStatus()){
+		//Test
 
 		realSenseHandler.streamData();
 

@@ -27,6 +27,7 @@ struct RealSenseHandler{
 
 	RealSenseHandler(){
 
+
 		kissGestureFlag = false;
 		browGestureFlag = false;
 		cheekGestureFlag = false;
