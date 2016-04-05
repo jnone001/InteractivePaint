@@ -287,7 +287,6 @@ private:
 	//Might need a new function for the eraser mode so it can ALWAYS have the correct background color.
 	//Future playback feature may want eraser points in the same list as the other shapes as well.
 
-
 	list<TouchShape*>		  myShapes;
 
 
@@ -1591,6 +1590,7 @@ void TouchPointsApp::update(){
 	}
 	
 	//Checks the real sense device and updates anything associated with it.
+	
 	if (deviceHandler.realSenseStatus()){
 
 
