@@ -102,11 +102,11 @@ int resolutionY;
 
 
 #define SWIPE_GESTURE 8
-//#define windowWidth  getWindowSize().x
-//#define windowHeight getWindowSize().y
+#define windowWidth  getWindowSize().x
+#define windowHeight getWindowSize().y
 
-#define windowWidth  1919
-#define windowHeight 1079
+//#define windowWidth  1919
+//#define windowHeight 1079
 
 #define FRAME_RATE 120
 
@@ -1597,25 +1597,28 @@ void TouchPointsApp::update(){
 	//Checks the real sense device and updates anything associated with it.
 	if (deviceHandler.realSenseStatus()){
 		//Test
+		if (deviceHandler.realSenseExpressions())
+		{
 
-		realSenseHandler.streamData();
+			realSenseHandler.streamData();
 
-		if (realSenseHandler.getBrowGestureFlag()){
-			illustrator.undoDraw(ui.getBackgroundColor());	
+			if (realSenseHandler.getBrowGestureFlag()){
+				illustrator.undoDraw(ui.getBackgroundColor());
+			}
+			if (realSenseHandler.getKissGestureFlag()){
+				ui.toggleUiFlag();
+			}
+			if (realSenseHandler.getTongueGestureFlag()){
+				mySymmetry.toggleSymmetry();
+			}
+			if (realSenseHandler.getCheekGestureFlag()){
+				leapColorChange();
+			}
+			if (realSenseHandler.getSmileGestureFlag()){
+				leapShapeChange();
+			}
+			realSenseHandler.resetGesturesFlag();
 		}
-		if (realSenseHandler.getKissGestureFlag()){
-			ui.toggleUiFlag();
-		}
-		if (realSenseHandler.getTongueGestureFlag()){
-			mySymmetry.toggleSymmetry();
-		}
-		if (realSenseHandler.getCheekGestureFlag()){
-			leapColorChange();
-		}
-		if (realSenseHandler.getSmileGestureFlag()){
-			leapShapeChange();
-		}
-		realSenseHandler.resetGesturesFlag();
 	}
 	
 	//Updates the active shapes being drawn by the user

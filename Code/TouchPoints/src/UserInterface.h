@@ -216,6 +216,14 @@ bool UserInterface::inInteractiveUi(int x, int y)
 		//If the multi-touch is 'disabled' we still allow the user to toggle devices on and off using the multitouch
 		if (deviceButtons){
 			if (x < windowWidth && x > windowWidth *.87){
+				if (y > windowHeight * .59 && y < windowHeight * .62){
+					deviceHandler->toggleRealSense();
+					modeChangeFlag = true;
+				}
+				if (y > windowHeight * .62 && y < windowHeight * .65){
+					deviceHandler->toggleRealSenseExpressions();
+					modeChangeFlag = true;
+				}
 				if (y > windowHeight * .65 && y < windowHeight * .68){
 					deviceHandler->toggleLeap();
 					modeChangeFlag = true;
@@ -428,6 +436,14 @@ bool UserInterface::inInteractiveUi(int x, int y)
 	}
 	if (deviceButtons){
 		if (x < windowWidth && x > windowWidth *.87){
+			if (y > windowHeight * .59 && y < windowHeight * .62){
+				deviceHandler->toggleRealSense();
+				modeChangeFlag = true;
+			}
+			if (y > windowHeight * .62 && y < windowHeight * .65){
+				deviceHandler->toggleRealSenseExpressions();
+				modeChangeFlag = true;
+			}
 			if (y > windowHeight * .65 && y < windowHeight * .68){
 				deviceHandler->toggleLeap();
 				modeChangeFlag = true;
@@ -978,11 +994,11 @@ void UserInterface::drawUi(){
 
 
 
-		if (deviceHandler->multiTouchStatus())
+		if (deviceHandler->realSenseStatus())
 			gl::color(0.0, 1.0, 0.0);
 		else gl::color(0.0, 0.0, 0.0);
 		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.59, windowWidth*.89, windowHeight*.62));
-		if (deviceHandler->multiTouchStatus())
+		if (deviceHandler->realSenseExpressions())
 			gl::color(0.0, 1.0, 0.0);
 		else gl::color(0.0, 0.0, 0.0);
 		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.62, windowWidth*.89, windowHeight*.65));
