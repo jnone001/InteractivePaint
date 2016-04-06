@@ -44,6 +44,7 @@ struct UserInterface{
 		shapeButtons = false;
 		layerVisualization = false;
 		deviceButtons = false;
+		transparentBackground = false;
 
 		//Adds our backgroundColors to the list. 
 		backgroundList.emplace_back(Color(0.0f, 0.0f, 0.0f));
@@ -56,6 +57,7 @@ struct UserInterface{
 		backgroundList.emplace_back(Color(256.0f, 0.0f, 256.0f));
 
 		backgroundColor = backgroundList.front();
+		incrementBackground();
 		layerList = fboLayerList;
 		layerAlpha = fboLayerAlpha;
 		int x = 0;
@@ -83,6 +85,8 @@ struct UserInterface{
 	void changeModeButtons(bool x);
 	void toggleUiFlag();
 	bool getUiFlag();
+	bool isBackgroundTransparent();
+
 
 	void slideButtons(int x, int y);
 	float getLayerAlpha(int layerNumber);
@@ -113,6 +117,7 @@ private:
 	bool layerVisualization;
 	bool uiFlag;
 	bool undoFlag;
+	bool transparentBackground;
 	//bool radialActive = false;
 	//vec2 radialCenter = vec2(0.0f, 0.0f);
 
@@ -124,6 +129,10 @@ private:
 
 
 };
+
+bool UserInterface::isBackgroundTransparent(){
+	return transparentBackground;
+}
 
 void UserInterface::incrementBackground(){
 	//Pops the current color
@@ -193,7 +202,7 @@ void UserInterface::slideButtons(int x, int y){
 		yDist = (*layerList).size() * 200 + 50;
 		int size = 0;
 		for (auto frame : (*layerList)){
-			//gl::color(0.9, 0.85, 0.65);
+			//gl::color(0.75, 0.75, .75, 1.0);
 			//gl::drawStrokedRect(Rectf(400, y - 200, 600, y), 10);
 
 			if (x > 400 && x < 450)
@@ -363,7 +372,7 @@ bool UserInterface::inInteractiveUi(int x, int y)
 		yDist = (*layerList).size() * 200 + 50;
 		int size = 0;
 		for (auto frame : (*layerList)){
-			//gl::color(0.9, 0.85, 0.65);
+			//gl::color(0.75, 0.75, .75, 1.0);
 			//gl::drawStrokedRect(Rectf(400, y - 200, 600, y), 10);
 
 			
@@ -671,9 +680,15 @@ void UserInterface::drawUi(){
 	{
 		modeChangeFlag = false;
 		(*uiFbo).bindFramebuffer();
+
+
 		gl::lineWidth(5);
 		//Clears the framebuffer to redraw
 		gl::clear(ColorA(0.0,0.0,0.0,0.0));
+
+		gl::color(.82,.82,.82 ,1.0);
+		gl::drawSolidRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight));
+		gl::color(0.0, 0.0, 0.0);
 
 		//Draw Device Mode button
 		TextLayout layout1;
@@ -685,12 +700,13 @@ void UserInterface::drawUi(){
 		gl::Texture2dRef mTexture = gl::Texture2d::create(rendered);
 		gl::color(Color::white());
 		gl::draw(mTexture, Rectf(windowWidth*.92, windowHeight*.8, windowWidth, windowHeight*.83));
-		gl::color(0.9, 0.85, 0.65);
+		gl::color(0.75, 0.75, .75, 1.0);
 		gl::drawStrokedRect(Rectf(windowWidth*.92, windowHeight*.8, windowWidth, windowHeight*.83));
 
 		//Draw outline of modeBox
-		gl::color(1.0, 0.9, 0.5);
-		gl::drawStrokedRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight), 5);
+		
+		gl::color(0.75, 0.75, 0.75);
+		gl::drawStrokedRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight), 10);
 		gl::color(0.0, 0.0, 0.0);
 
 		//gl::drawSolidRect(Rectf(windowWidth*.8, windowHeight*.8, windowWidth, windowHeight));
@@ -740,9 +756,10 @@ void UserInterface::drawUi(){
 
 		if (modeButtons){
 
-			
+			gl::color(0.0, 0.0, 0.0, 1.0);
+			gl::drawSolidRect(Rectf(0, 0, 500, 50));
 			//Color Button
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(0, 2, 100, 50), 10);
 			gl::color(1.0, 1.0, 0);
 			gl::drawSolidRect(Rectf(0, 0, 20, 50));
@@ -752,19 +769,19 @@ void UserInterface::drawUi(){
 			gl::drawSolidRect(Rectf(35, 0, 50, 50));
 			
 			//Shapes button
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(50, 2, 100, 50), 10);
 			gl::color(0.0, 1.0, 1.0);
 			gl::drawSolidRect(Rectf(50, 0, 100, 50));
 
 			//FilledShapes button
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(100, 2, 150, 50), 10);
 			gl::color(1.0, 1.0, 1.0);
 			gl::drawSolidRect(Rectf(100, 0, 150, 50));
 
 			//Line Size
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(150, 2, 200, 50), 10);
 			gl::color(0.0, 0.0, 0.0);
 			gl::drawSolidRect(Rectf(150, 0, 200, 50));
@@ -774,7 +791,7 @@ void UserInterface::drawUi(){
 			gl::drawLine(vec2(160, 25), vec2(190, 25));
 			gl::drawLine(vec2(175, 10), vec2(175, 40));
 
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(200, 2, 250, 50), 10);
 			gl::color(0.0, 0.0, 0.0);
 			gl::drawSolidRect(Rectf(200, 0, 250, 50));
@@ -785,18 +802,18 @@ void UserInterface::drawUi(){
 			//gl::drawLine(vec2(225, 10), vec2(225, 40));
 
 			//More transparency button
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(250, 2, 300, 50), 10);
 			gl::color(1.0, 0.0, 1.0, 1.0);
 			gl::drawSolidRect(Rectf(250, 0, 300, 50));
 			//Less transparent button
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(300, 2, 350, 50), 10);
 			gl::color(0.0, 1.0, 0.0, 1.0);
 			gl::drawSolidRect(Rectf(300, 0, 350, 50));
 
 			//Symmetry Button
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(350, 2, 400, 50), 10);
 			gl::drawLine(vec2(375, 2), vec2(375, 15));
 			gl::drawLine(vec2(375, 20), vec2(375, 25));
@@ -804,7 +821,7 @@ void UserInterface::drawUi(){
 			gl::drawLine(vec2(375, 40), vec2(375, 45));
 
 			//Layer Visualization Button
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(400, 2, 450, 50), 10);
 			gl::color(1.0, 1.0, 1.0, 1.0);
 			gl::drawStrokedRect(Rectf(410, 10, 430, 30), 1);
@@ -812,7 +829,7 @@ void UserInterface::drawUi(){
 
 
 			//Undo Button
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(450, 2, 500, 50), 10);
 			
 
@@ -824,7 +841,7 @@ void UserInterface::drawUi(){
 			int i = 0;
 			for (auto myColor : (*mBrush).getColorList())
 			{
-				gl::color(0.9, 0.85, 0.65);
+				gl::color(0.75, 0.75, .75, 1.0);
 				gl::drawStrokedRect(Rectf(0, 50 * (i)+50, 50, 50 * i + 100), 10);
 				gl::color(myColor);
 				gl::drawSolidRect(Rectf(0, 50 * (i)+50, 50, 50 * (i)+100));
@@ -835,9 +852,9 @@ void UserInterface::drawUi(){
 
 			for (int i = 0; i < 5; i++){
 
-				gl::color(0.9, 0.85, 0.65);
+				gl::color(0.75, 0.75, .75, 1.0);
 				gl::drawStrokedRect(Rectf(50, 50 * (i)+50, 100, 50 * i + 100), 10);
-				gl::color(0.0, 0.0, 0.0);
+				gl::color(1.0, 1.0, 1.0);
 				gl::drawSolidRect(Rectf(50, 50 * i + 50, 100, 50 * i + 100));
 			}
 
@@ -884,14 +901,14 @@ void UserInterface::drawUi(){
 			gl::color(backgroundColor.r,backgroundColor.g, backgroundColor.b, 1.0);
 			gl::drawSolidRect(Rectf(400,(y - 200), 800, y));
 
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(400, y - 200, 800, y), 10);
 			gl::color(1.0, 1.0, 1.0, (*layerAlpha)[layerNumber]);
 			//frame->blitToScreen(Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(400, 1080 - (y - 200)), vec2(800, 1080 - y)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
 			gl::draw(frame->getColorTexture(), Rectf(400, (y - 200), 800, y));
 			gl::color(0.0,0.0,0.0,1.0);
 			gl::drawSolidRect(Rectf(400, y - 200, 450, y));
-			gl::color(0.9, 0.85, 0.65);
+			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(400, y - 200, 450, y), 10);
 			gl::color(1.0, 1.0, 1.0, 1.0);
 			
@@ -1026,7 +1043,7 @@ void UserInterface::drawUi(){
 		
 
 
-		gl::color(0.9, 0.85, 0.65);
+		gl::color(0.75, 0.75, .75, 1.0);
 		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.59, windowWidth*.89, windowHeight*.62));
 		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.62, windowWidth*.89, windowHeight*.65));
 		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.65, windowWidth*.89, windowHeight*.68));
@@ -1036,6 +1053,7 @@ void UserInterface::drawUi(){
 		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.77, windowWidth*.89, windowHeight*.8));
 
 	}
+	
 }
 
 #endif

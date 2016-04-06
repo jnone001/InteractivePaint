@@ -40,7 +40,7 @@ struct ImageHandler{
 		layerAlpha = fboLayerAlpha;
 	}
 
-	void saveCanvas(vec2 windowSize);
+	void saveCanvas(vec2 windowSize, ColorA background);
 	void loadIcon(string icon);
 	void displayIcon();
 	void changeImageType(string imageType);
@@ -101,7 +101,7 @@ void ImageHandler::loadIcon(string icon){
 	iconFlag = true;
 }
 
-void ImageHandler::saveCanvas(vec2 windowSize){
+void ImageHandler::saveCanvas(vec2 windowSize, ColorA background){
 	gl::Fbo::Format format;
 	std::shared_ptr<gl::Fbo> saveImageFbo;
 	saveImageFbo = gl::Fbo::create(windowSize.x, windowSize.y, format);
@@ -109,6 +109,8 @@ void ImageHandler::saveCanvas(vec2 windowSize){
 	(*saveImageFbo).bindFramebuffer();
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
+	gl::color(background);
+	gl::drawSolidRect(Rectf(0, 0, windowSize.x, windowSize.y));
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	int x = 0;
 	for (auto frames : *mLayerList){
