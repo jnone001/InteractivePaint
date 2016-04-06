@@ -81,6 +81,7 @@ private:
 	int multiTouchConnected;
 	int eyeXConnected;
 	int realSenseConnected;
+	bool realSenseExpressionsEnabled;
 	bool leapDrawEnabled;
 	bool leapGestureEnabled;
 	bool eyeXEnabled;
@@ -89,6 +90,8 @@ private:
 	bool overrideEyeX;
 
 };
+
+
 
 bool DeviceHandler::leapDraw(){
 	return leapDrawEnabled;
