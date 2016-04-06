@@ -22,4 +22,7 @@ namespace Shape{
 namespace ourColors{
 	enum ourColors{ White, Red, Yellow, Green, Aqua, Blue, Purple, Orange };
 }
+namespace Mode{
+	enum DefaultModes{ MLE, ML, ME, MR, LE, LR, M, L, E , R };
+}
 #endif

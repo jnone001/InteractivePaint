@@ -3,6 +3,7 @@
 
 #include "libusb.h"
 #include "UserInterface.h"
+#include "Enums.h"
 #include <stdio.h>
 
 struct DeviceHandler{
@@ -30,7 +31,7 @@ struct DeviceHandler{
 
 
 	int deviceConnection();
-	int getDefaultMode();
+	Mode::DefaultModes getDefaultMode();
 	int leapStatus();
 	int multiTouchStatus();
 	int eyeXStatus();
@@ -49,15 +50,17 @@ struct DeviceHandler{
 	bool leapDraw();
 	bool leapGesture();
 
-	int setIdealMode();
-	int setNoMultitouchMode();
-	int setNoLeapMode();
-	int setNoEyeX();
-	int setOnlyLeapMode();
-	int setOnlyEyeXMode();
-	int setOnlyMultiTouchMode();
+	Mode::DefaultModes set_MLE_Mode();
+	Mode::DefaultModes set_ML_Mode();
+	Mode::DefaultModes set_ME_Mode();
+	Mode::DefaultModes set_MR_Mode();
+	Mode::DefaultModes set_LE_Mode();
+	Mode::DefaultModes set_LR_Mode();
+	Mode::DefaultModes set_L_Mode();
+	Mode::DefaultModes set_E_Mode();
+	Mode::DefaultModes set_M_Mode();
+	Mode::DefaultModes set_R_Mode();
 	
-
 
 private:
 	int setLeapState();
@@ -195,29 +198,38 @@ int DeviceHandler::deviceConnection(){
 	return stateCounter;
 }
 
-int DeviceHandler::getDefaultMode(){
+Mode::DefaultModes DeviceHandler::getDefaultMode(){
 
 	//All three devices connected
 	if (multiTouchConnected && leapConnected & eyeXConnected){ //&& eyeXConnectedFlag){
-		return setIdealMode();
+		return set_MLE_Mode();
 	}
 	else if (leapConnected && eyeXConnected){
-		return setNoMultitouchMode();
+		return set_LE_Mode();
 	}
 	else if (multiTouchConnected && eyeXConnected){
-		return setNoLeapMode();
+		return set_ME_Mode();
 	}
 	else if (multiTouchConnected && leapConnected){
-		return setNoEyeX();
+		return set_ML_Mode();
+	}
+	else if (multiTouchConnected && realSenseConnected){
+		return set_MR_Mode();
+	}
+	else if (leapConnected && realSenseConnected){
+		return set_LR_Mode();
 	}
 	else if (leapConnected){
-		return setOnlyLeapMode();
+		return set_L_Mode();
 	}
 	else if (multiTouchConnected){
-		return setOnlyMultiTouchMode();
+		return set_M_Mode();
+	}
+	else if (realSenseConnected){
+		return set_R_Mode();
 	}
 	else{
-		return setOnlyEyeXMode();
+		return set_E_Mode();
 	}
 	
 }
@@ -345,39 +357,54 @@ void DeviceHandler::resetFlags(){
 	realSenseConnectedFlag = 0;
 }
 
-int DeviceHandler::setIdealMode(){
+Mode::DefaultModes DeviceHandler::set_MLE_Mode(){
 
 	//Turn off leapDraw
-	toggleLeapDraw();
-	return 1;
+	leapDrawEnabled = false;
+	return Mode::DefaultModes::MLE;
 
 }
-int DeviceHandler::setNoMultitouchMode(){
-	return 2;
-}
-int DeviceHandler::setNoLeapMode(){
-	toggleLeapDraw();
-	toggleLeapGesture();
-	return 3;
-}
-int DeviceHandler::setNoEyeX(){
+Mode::DefaultModes DeviceHandler::set_ML_Mode(){
 
-	toggleLeapDraw();
-	return 4;
+	leapDrawEnabled = false;
+	return Mode::DefaultModes::ML;
 }
-int DeviceHandler::setOnlyLeapMode(){
-	return 5;
+Mode::DefaultModes DeviceHandler::set_ME_Mode(){
+	leapDrawEnabled = false;
+	leapGestureEnabled = false;
+	return Mode::DefaultModes::ME;
 }
-int DeviceHandler::setOnlyEyeXMode(){
-	toggleLeapDraw();
-	toggleLeapGesture();
-	return 6;
+Mode::DefaultModes DeviceHandler::set_MR_Mode(){
+	leapDrawEnabled = false;
+	leapGestureEnabled = false;
+	return Mode::DefaultModes::MR;
 }
-int DeviceHandler::setOnlyMultiTouchMode(){
+Mode::DefaultModes DeviceHandler::set_LE_Mode(){
+	return Mode::DefaultModes::LE;
+}
+Mode::DefaultModes DeviceHandler::set_LR_Mode(){
+	leapGestureEnabled = false;
+	return Mode::DefaultModes::LR;
+}
+Mode::DefaultModes DeviceHandler::set_L_Mode(){
+	return Mode::DefaultModes::L;
+}
+Mode::DefaultModes DeviceHandler::set_E_Mode(){
+	leapDrawEnabled = false;
+	leapGestureEnabled = false;
+	return Mode::DefaultModes::E;
+}
+Mode::DefaultModes DeviceHandler::set_M_Mode(){
 
-	toggleLeapDraw();
-	toggleLeapGesture();
-	return 7;
+	leapDrawEnabled = false;
+	leapGestureEnabled = false;
+	return Mode::DefaultModes::M;
+}
+Mode::DefaultModes DeviceHandler::set_R_Mode(){
+
+	leapDrawEnabled = false;
+	leapGestureEnabled = false;
+	return Mode::DefaultModes::R;
 }
 
 
