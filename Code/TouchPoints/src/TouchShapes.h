@@ -96,6 +96,7 @@ struct TouchPoint : public TouchShape
 			gl::drawSolidCircle(points, mSize);
 
 		}
+		
 		/*Halves the draw calls. Drastic Performance Increase.
 		int x = 0;
 		for (auto points : pointList){

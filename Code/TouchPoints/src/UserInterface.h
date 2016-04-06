@@ -216,6 +216,14 @@ bool UserInterface::inInteractiveUi(int x, int y)
 		//If the multi-touch is 'disabled' we still allow the user to toggle devices on and off using the multitouch
 		if (deviceButtons){
 			if (x < windowWidth && x > windowWidth *.87){
+				if (y > windowHeight * .59 && y < windowHeight * .62){
+					deviceHandler->toggleRealSense();
+					modeChangeFlag = true;
+				}
+				if (y > windowHeight * .62 && y < windowHeight * .65){
+					deviceHandler->toggleRealSenseExpressions();
+					modeChangeFlag = true;
+				}
 				if (y > windowHeight * .65 && y < windowHeight * .68){
 					deviceHandler->toggleLeap();
 					modeChangeFlag = true;
@@ -428,6 +436,14 @@ bool UserInterface::inInteractiveUi(int x, int y)
 	}
 	if (deviceButtons){
 		if (x < windowWidth && x > windowWidth *.87){
+			if (y > windowHeight * .59 && y < windowHeight * .62){
+				deviceHandler->toggleRealSense();
+				modeChangeFlag = true;
+			}
+			if (y > windowHeight * .62 && y < windowHeight * .65){
+				deviceHandler->toggleRealSenseExpressions();
+				modeChangeFlag = true;
+			}
 			if (y > windowHeight * .65 && y < windowHeight * .68){
 				deviceHandler->toggleLeap();
 				modeChangeFlag = true;
@@ -723,6 +739,8 @@ void UserInterface::drawUi(){
 
 
 		if (modeButtons){
+
+			
 			//Color Button
 			gl::color(0.9, 0.85, 0.65);
 			gl::drawStrokedRect(Rectf(0, 2, 100, 50), 10);
@@ -732,7 +750,7 @@ void UserInterface::drawUi(){
 			gl::drawSolidRect(Rectf(20, 0, 35, 50));
 			gl::color(1.0, 0.0, 1.0);
 			gl::drawSolidRect(Rectf(35, 0, 50, 50));
-
+			
 			//Shapes button
 			gl::color(0.9, 0.85, 0.65);
 			gl::drawStrokedRect(Rectf(50, 2, 100, 50), 10);
@@ -951,7 +969,39 @@ void UserInterface::drawUi(){
 		gl::color(Color::white());
 		gl::draw(mTexture, Rectf(windowWidth*.9, windowHeight*.65, windowWidth, windowHeight*.68));
 
+		TextLayout layout6;
+		layout6.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
+		layout6.setFont(Font("Arial", 50));
+		layout6.setColor(Color(1, 1, 1));
+		layout6.addLine(std::string("Real Sense Expressions"));
+		rendered = layout6.render(true, false);
+		mTexture = gl::Texture2d::create(rendered);
+		gl::color(Color::white());
+		gl::draw(mTexture, Rectf(windowWidth*.9, windowHeight*.62, windowWidth, windowHeight*.65));
+
+		TextLayout layout7;
+		layout7.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
+		layout7.setFont(Font("Arial", 50));
+		layout7.setColor(Color(1, 1, 1));
+		layout7.addLine(std::string(" Real Sense"));
+		rendered = layout7.render(true, false);
+		mTexture = gl::Texture2d::create(rendered);
+		gl::color(Color::white());
+		gl::draw(mTexture, Rectf(windowWidth*.9, windowHeight*.59, windowWidth, windowHeight*.62));
+
 		gl::color(0.0,0.0,0.0);
+
+
+
+
+		if (deviceHandler->realSenseStatus())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.59, windowWidth*.89, windowHeight*.62));
+		if (deviceHandler->realSenseExpressions())
+			gl::color(0.0, 1.0, 0.0);
+		else gl::color(0.0, 0.0, 0.0);
+		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.62, windowWidth*.89, windowHeight*.65));
 		if (deviceHandler->leapStatus())
 			gl::color(0.0, 1.0, 0.0);
 		else gl::color(0.0, 0.0, 0.0);
@@ -973,7 +1023,12 @@ void UserInterface::drawUi(){
 		else gl::color(0.0, 0.0, 0.0);
 		gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.77, windowWidth*.89, windowHeight*.8));
 
+		
+
+
 		gl::color(0.9, 0.85, 0.65);
+		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.59, windowWidth*.89, windowHeight*.62));
+		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.62, windowWidth*.89, windowHeight*.65));
 		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.65, windowWidth*.89, windowHeight*.68));
 		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.68, windowWidth*.89, windowHeight*.71));
 		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.71, windowWidth*.89, windowHeight*.74));

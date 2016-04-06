@@ -25,6 +25,7 @@ struct DeviceHandler{
 		overrideLeap = false;
 		overrideMultiTouch = false;
 		overrideEyeX = false;
+		overrideRealSense = false;
 		leapDrawEnabled = true;
 		leapGestureEnabled = true;
 	}
@@ -40,8 +41,11 @@ struct DeviceHandler{
 	
 	void toggleMultiTouch();
 	void toggleEyeX();
-	//
+	//Sense Device and Functionality
 	void toggleRealSense();
+	void toggleRealSenseExpressions();
+
+	bool realSenseExpressions();
 	//Leap Device and Functionality
 	void toggleLeap();
 	void toggleLeapDraw();
@@ -83,25 +87,56 @@ private:
 	int multiTouchConnected;
 	int eyeXConnected;
 	int realSenseConnected;
+	bool realSenseExpressionsEnabled;
 	bool leapDrawEnabled;
 	bool leapGestureEnabled;
 	bool eyeXEnabled;
 	bool overrideLeap;
 	bool overrideMultiTouch;
 	bool overrideEyeX;
+	bool overrideRealSense;
 
 };
 
+
+
 bool DeviceHandler::leapDraw(){
-	return leapDrawEnabled;
+	
+	if (leapConnected){
+		return leapDrawEnabled;
+	}
+	else {
+		return false;
+	}
 }
 bool DeviceHandler::leapGesture(){
-	return leapGestureEnabled;
+	if (leapConnected){
+		return leapGestureEnabled;
+	}
+	else {
+		return false;
+	}
 }
 void DeviceHandler::toggleLeap(){
 
-	overrideLeap = true;
+	if (leapConnected){
+		leapConnected = false;
+		overrideLeap = true;
+	}
+	else {
+		overrideLeap = false;
+		deviceConnection();
+	}
+	//overrideLeap = true;
+	/*
 	leapConnected = !leapConnected;
+	if (leapConnected){
+		overrideLeap = false;
+	}
+	else {
+		overrideLeap = true;
+	}
+	*/
 }
 void DeviceHandler::toggleLeapDraw(){
 
@@ -112,19 +147,70 @@ void DeviceHandler::toggleLeapGesture(){
 	leapGestureEnabled = !leapGestureEnabled;
 
 }
-/*
-void DeviceHandler::toggleRealSense(){}
-*/
-void DeviceHandler::toggleMultiTouch(){
-	overrideMultiTouch = true;
-	multiTouchConnected = !multiTouchConnected;
+void DeviceHandler::toggleRealSense(){
+	//realSenseConnected = !realSenseConnected;
+	if (realSenseConnected){
+		realSenseConnected = false;
+		overrideRealSense = true;
+	}
+	else {
+		overrideRealSense = false;
+		deviceConnection();
+	}
+}
 
+void DeviceHandler::toggleRealSenseExpressions(){
+	realSenseExpressionsEnabled = !realSenseExpressionsEnabled;
+}
+
+
+bool DeviceHandler::realSenseExpressions(){
+	if (realSenseConnected){
+		return realSenseExpressionsEnabled;
+	}
+	else {
+		return false;
+	}
+	
+}
+void DeviceHandler::toggleMultiTouch(){
+	if (multiTouchConnected){
+		multiTouchConnected = false;
+		overrideMultiTouch = true;
+	}
+	else {
+		overrideMultiTouch = false;
+		deviceConnection();
+	}
+	/*
+	multiTouchConnected = !multiTouchConnected;
+	if (multiTouchConnected){
+		overrideMultiTouch = false;
+	}
+	else {
+		overrideMultiTouch = true;
+	}
+	*/
 }
 void DeviceHandler::toggleEyeX(){
-	overrideEyeX = true;
 
+	if (eyeXConnected){
+		eyeXConnected = false;
+		overrideEyeX = true;
+	}
+	else {
+		overrideEyeX = false;
+		deviceConnection();
+	}
+	/*
 	eyeXConnected = !eyeXConnected;
-
+	if (eyeXConnected){
+		overrideEyeX = false;
+	}
+	else {
+		overrideEyeX = true;
+	}
+	*/
 	
 }
 
@@ -252,11 +338,12 @@ int DeviceHandler::realSenseStatus(){
 
 int DeviceHandler::setLeapState(){
 
+	if (overrideLeap){
+		return 0;
+	}
+
 	if (leapConnectedFlag == 1){
 		if (leapConnected == 0){
-			if (overrideLeap){
-				return 0;
-			}
 			leapConnected = 1;
 			return 1;
 		}
@@ -277,11 +364,13 @@ int DeviceHandler::setLeapState(){
 
 int DeviceHandler::setMultiTouchState(){
 
+	if (overrideMultiTouch){
+		return 0;
+	}
+
 	if( multiTouchConnectedFlag == 1){
 		if (multiTouchConnected == 0){
-			if (overrideMultiTouch){
-				return 0;
-			}
+
 			multiTouchConnected = 1;
 			return 1;
 		}
@@ -302,11 +391,13 @@ int DeviceHandler::setMultiTouchState(){
 
 int DeviceHandler::setEyeXState(){
 
+	if (overrideEyeX){
+		return 0;
+	}
+
 	if (eyeXConnectedFlag == 1){
 		if (eyeXConnected == 0){
-			if (overrideEyeX){
-				return 0;
-			}
+
 			eyeXConnected = 1;
 			return 1;
 		}
@@ -327,11 +418,12 @@ int DeviceHandler::setEyeXState(){
 
 int DeviceHandler::setRealSenseState(){
 
+	if (overrideRealSense){
+		return 0;
+	}
+
 	if (realSenseConnectedFlag == 1){
 		if (realSenseConnected == 0){
-			if (overrideEyeX){
-				return 0;
-			}
 			realSenseConnected = 1;
 			return 1;
 		}

@@ -102,11 +102,11 @@ int resolutionY;
 
 
 #define SWIPE_GESTURE 8
-//#define windowWidth  getWindowSize().x
-//#define windowHeight getWindowSize().y
+#define windowWidth  getWindowSize().x
+#define windowHeight getWindowSize().y
 
-#define windowWidth  1919
-#define windowHeight 1079
+//#define windowWidth  1919
+//#define windowHeight 1079
 
 #define FRAME_RATE 120
 
@@ -286,7 +286,6 @@ private:
 	//Keep the 'eraser' points though because they need to be drawn separately last!
 	//Might need a new function for the eraser mode so it can ALWAYS have the correct background color.
 	//Future playback feature may want eraser points in the same list as the other shapes as well.
-
 
 	list<TouchShape*>		  myShapes;
 
@@ -1602,28 +1601,30 @@ void TouchPointsApp::update(){
 	}
 	
 	//Checks the real sense device and updates anything associated with it.
-
 	if (deviceHandler.realSenseStatus()){
 		//Test
+		if (deviceHandler.realSenseExpressions())
+		{
 
-		realSenseHandler.streamData();
+			realSenseHandler.streamData();
 
-		if (realSenseHandler.getBrowGestureFlag()){
-			illustrator.undoDraw(ui.getBackgroundColor());	
+			if (realSenseHandler.getBrowGestureFlag()){
+				illustrator.undoDraw(ui.getBackgroundColor());
+			}
+			if (realSenseHandler.getKissGestureFlag()){
+				ui.toggleUiFlag();
+			}
+			if (realSenseHandler.getTongueGestureFlag()){
+				mySymmetry.toggleSymmetry();
+			}
+			if (realSenseHandler.getCheekGestureFlag()){
+				leapColorChange();
+			}
+			if (realSenseHandler.getSmileGestureFlag()){
+				leapShapeChange();
+			}
+			realSenseHandler.resetGesturesFlag();
 		}
-		if (realSenseHandler.getKissGestureFlag()){
-			ui.toggleUiFlag();
-		}
-		if (realSenseHandler.getTongueGestureFlag()){
-			mySymmetry.toggleSymmetry();
-		}
-		if (realSenseHandler.getCheekGestureFlag()){
-			leapColorChange();
-		}
-		if (realSenseHandler.getSmileGestureFlag()){
-			leapShapeChange();
-		}
-		realSenseHandler.resetGesturesFlag();
 	}
 	
 	//Updates the active shapes being drawn by the user
