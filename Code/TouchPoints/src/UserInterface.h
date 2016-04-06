@@ -65,8 +65,6 @@ struct UserInterface{
 			(*layerAlpha).emplace_back(1.0f);
 		}
 		
-
-
 		
 
 	}
@@ -86,6 +84,9 @@ struct UserInterface{
 	void toggleUiFlag();
 	bool getUiFlag();
 	bool isBackgroundTransparent();
+	std::shared_ptr<gl::Fbo> getTransparentBackground();
+	//UI Setup does all the drawing that cannot be done inside a libcinder 'setup' call, such as drawing to Framebuffers.
+	void uiSetup();
 
 
 	void slideButtons(int x, int y);
@@ -101,6 +102,9 @@ private:
 	Illustrator* illustrator;
 	DeviceHandler * deviceHandler;
 	std::shared_ptr<gl::Fbo> uiFbo;
+
+	//Stores the 'Checkerboard pattern for background'
+	std::shared_ptr<gl::Fbo> transparentBackgroundFbo;
 
 	int windowWidth;
 	int windowHeight;
@@ -129,6 +133,24 @@ private:
 
 
 };
+
+void UserInterface::uiSetup(){
+
+	//Loads the asset for transparent Background
+	gl::Fbo::Format format;
+	transparentBackgroundFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+	transparentBackgroundFbo->bindFramebuffer();
+	cinder::gl::TextureRef tempText = gl::Texture::create(loadImage(loadAsset("TransparentBackground.png")));
+	gl::draw(tempText, Rectf(0, 0, windowWidth, windowHeight));
+	transparentBackgroundFbo->unbindFramebuffer();
+	gl::color(1.0, 1.0, 1.0, 0.5);
+	gl::draw(transparentBackgroundFbo->getColorTexture());
+
+}
+
+std::shared_ptr<gl::Fbo> UserInterface::getTransparentBackground(){
+	return transparentBackgroundFbo;
+}
 
 bool UserInterface::isBackgroundTransparent(){
 	return transparentBackground;

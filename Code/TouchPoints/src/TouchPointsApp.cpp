@@ -235,6 +235,8 @@ public:
 
 
 private:
+	//Setup
+	bool setupComplete = false;
 	//Needs organizing
 	Brush brush;
 	Illustrator illustrator;
@@ -1581,6 +1583,10 @@ void TouchPointsApp::mouseDown(MouseEvent event)
 void TouchPointsApp::update(){
 
 	
+	if (!setupComplete){
+		ui.uiSetup();
+		setupComplete = true;
+	}
 	//Increment the frame counter
 	frames++;
 
@@ -1693,7 +1699,7 @@ void TouchPointsApp::draw()
 	//Draw Checkerboard pattern if background is transparent
 	if (ui.isBackgroundTransparent())
 	{
-
+		/*
 		backgroundFbo->bindFramebuffer();
 		//gl::clear(ColorA(1.0f, 0.0f, 0.0f, 0.0f));
 		//gl::color(Color(1.0, 1.0, 1.0));
@@ -1701,7 +1707,9 @@ void TouchPointsApp::draw()
 		gl::draw(tempText, Rectf(0, 0, windowWidth, windowHeight));
 		backgroundFbo->unbindFramebuffer();
 		gl::color(1.0, 1.0, 1.0, 0.5);
-		gl::draw(backgroundFbo->getColorTexture());
+		*/
+		gl::color(1.0, 1.0, 1.0, 0.5);
+		gl::draw(ui.getTransparentBackground()->getColorTexture());
 	}
 	//Loop Which Draws our Layers
 	int x = 0;
@@ -1771,8 +1779,10 @@ void TouchPointsApp::draw()
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	gl::draw(activeFbo->getColorTexture());
 
+	/*
 	auto mFont = Font("Quicksand Book Regular", 36.0f);
 	gl::drawString("Framerate: " + toString((int)getAverageFps()), vec2(windowWidth*.90, windowHeight *.01), ColorA(0.0,0.0,0.0,1.0), mFont);
+	*/
 }
 
 CINDER_APP(TouchPointsApp, RendererGl, prepareSettings)
