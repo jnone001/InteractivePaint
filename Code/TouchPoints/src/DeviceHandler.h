@@ -20,7 +20,7 @@ struct DeviceHandler{
 		vendorList[0] = 61826;
 		vendorList[1] = 8746;
 		vendorList[2] = 8452;
-		vendorList[3] = 1054;
+		vendorList[3] = 16537; //1054;
 		overrideLeap = false;
 		overrideMultiTouch = false;
 		overrideEyeX = false;
@@ -74,8 +74,7 @@ private:
 	int realSenseConnectedFlag;
 	int stateCounter;
 	int vendorList[4];
-	//int vendorList[3];
-	
+
 	//Mode Flags
 	int leapConnected;
 	int multiTouchConnected;
@@ -99,7 +98,6 @@ bool DeviceHandler::leapDraw(){
 bool DeviceHandler::leapGesture(){
 	return leapGestureEnabled;
 }
-
 void DeviceHandler::toggleLeap(){
 
 	overrideLeap = true;
@@ -161,7 +159,9 @@ int DeviceHandler::deviceConnection(){
 			//Error
 			return -1;
 		}
+
 		uint16_t vendorid = desc.idVendor;
+		uint16_t productid = desc.idProduct;
 
 		if (vendorid == vendorList[0]){
 			leapConnectedFlag = 1;
@@ -172,7 +172,7 @@ int DeviceHandler::deviceConnection(){
 		if (vendorid == vendorList[2]){
 			eyeXConnectedFlag = 1;
 		}
-		if (vendorid == vendorList[3])
+		if (productid == vendorList[3])
 		{
 			realSenseConnectedFlag = 1;
 		}

@@ -29,13 +29,27 @@ struct RealSenseHandler{
 
 	RealSenseHandler(){
 
+
 		kissGestureFlag = false;
 		browGestureFlag = false;
+		cheekGestureFlag = false;
+		smileGestureFlag = false; 
+		tongueGestureFlag = false;
+
 		browLFlag = false;
 		browRFlag = false;
+		cheekLFlag = false;
+		cheekRFlag = false;
+		smileFlag = false;
+		tongueFlag = false;
+
 		int kissCount = 0; 
 		int browLCount = 0;
 		int browRCount = 0;
+		int cheekLCount = 0;
+		int cheekRCount = 0;
+		int smileCount = 0;
+		int tongueCount = 0;
 
 		senseManager = PXCSenseManager::CreateInstance();
 		senseManager->EnableStream(PXCCapture::STREAM_TYPE_COLOR, 640, 480);
@@ -48,10 +62,20 @@ struct RealSenseHandler{
 
 	void intializeFaceSensing();
 	void streamData();
+
 	pxcBool kissDetection(PXCFaceData::ExpressionsData *expressionData);
 	pxcBool eyebrowDetection(PXCFaceData::ExpressionsData *expressionData);
+	pxcBool cheekDetection(PXCFaceData::ExpressionsData *expressionData);
+	pxcBool tongueDetection(PXCFaceData::ExpressionsData *expressionData);
+	pxcBool smileDetection(PXCFaceData::ExpressionsData *expressionData);
+
 	bool getKissGestureFlag();
 	bool getBrowGestureFlag();
+	bool getCheekGestureFlag();
+	bool getTongueGestureFlag();
+	bool getSmileGestureFlag();
+
+	void resetGesturesFlag();
 	void resetBrowGestureFlag();
 	void resetKissGestureFlag();
 
@@ -64,13 +88,24 @@ private:
 
 	bool kissFlag;
 	bool browLFlag;
-	bool browRFlag; 
+	bool browRFlag;
+	bool tongueFlag;
+	bool cheekLFlag;
+	bool cheekRFlag;
+	bool smileFlag;
 	bool kissGestureFlag;
 	bool browGestureFlag;
+	bool cheekGestureFlag;
+	bool tongueGestureFlag;
+	bool smileGestureFlag;
 
 	int kissCount; 
 	int browLCount;
-	int browRCount; 
+	int browRCount;
+	int cheekLCount; 
+	int cheekRCount;
+	int smileCount;
+	int tongueCount;
 };
 
 void RealSenseHandler::intializeFaceSensing(){
@@ -113,8 +148,10 @@ void RealSenseHandler::streamData(){
 				{
 
 					kissGestureFlag = kissDetection(expressionData);
-
 					browGestureFlag = eyebrowDetection(expressionData);
+					cheekGestureFlag = cheekDetection(expressionData);
+					tongueGestureFlag = tongueDetection(expressionData);
+					smileGestureFlag = smileDetection(expressionData);
 
 				}
 			}
@@ -125,11 +162,11 @@ void RealSenseHandler::streamData(){
 
 pxcBool RealSenseHandler::kissDetection(PXCFaceData::ExpressionsData *expressionData){
 
-	PXCFaceData::ExpressionsData::FaceExpressionResult expressionResult;
-	pxcBool kissResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_KISS, &expressionResult);
+	PXCFaceData::ExpressionsData::FaceExpressionResult expressionResultKiss;
+	pxcBool kissResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_KISS, &expressionResultKiss);
 
 	if (kissResult){
-		pxcI32 value = expressionResult.intensity;
+		pxcI32 value = expressionResultKiss.intensity;
 		if (value == 100){
 
 			kissCount++;
@@ -147,7 +184,6 @@ pxcBool RealSenseHandler::kissDetection(PXCFaceData::ExpressionsData *expression
 	}
 	return false;
 }
-
 pxcBool RealSenseHandler::eyebrowDetection(PXCFaceData::ExpressionsData *expressionData){
 
 	PXCFaceData::ExpressionsData::FaceExpressionResult expressionBrowL;
@@ -193,21 +229,129 @@ pxcBool RealSenseHandler::eyebrowDetection(PXCFaceData::ExpressionsData *express
 		return false;
 	}
 }
+pxcBool RealSenseHandler::cheekDetection(PXCFaceData::ExpressionsData *expressionData){
+
+	PXCFaceData::ExpressionsData::FaceExpressionResult expressionCheekL;
+	pxcBool cheekLResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_PUFF_LEFT, &expressionCheekL);
+	if (cheekLResult){
+		pxcI32 value = expressionCheekL.intensity;
+		if (value == 100){
+			cheekLCount++;
+			if (cheekLCount > 15)
+			{
+				browLCount = 0;
+				cheekLFlag = true;
+				
+			}
+		}
+		else{
+			cheekLCount = 0;
+		}
+	}
+
+	PXCFaceData::ExpressionsData::FaceExpressionResult expressionCheekR;
+	pxcBool cheekRResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_PUFF_RIGHT, &expressionCheekR);
+	if (cheekRResult){
+		pxcI32 value = expressionCheekR.intensity;
+		if (value == 100){
+			cheekRCount++;
+			if (cheekRCount > 15)
+			{
+				cheekRFlag = true;
+				cheekRCount = 0;
+			}
+		}
+		else{
+			cheekRCount = 0;
+		}
+	}
+
+	if (cheekLFlag && cheekRFlag){
+		cheekLFlag = false;
+		cheekRFlag = false;
+		return true;
+	}
+	else{
+		return false;
+	}
+}
+pxcBool RealSenseHandler::tongueDetection(PXCFaceData::ExpressionsData *expressionData){
+
+	PXCFaceData::ExpressionsData::FaceExpressionResult expressionResultTongue;
+	pxcBool tongueResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_TONGUE_OUT, &expressionResultTongue);
+
+	if (tongueResult){
+		pxcI32 value = expressionResultTongue.intensity;
+		if (value == 100){
+
+			tongueCount++;
+
+			if (tongueCount > 15)
+			{
+				tongueCount = 0;
+				return true;
+			}
+
+		}
+		else{
+			tongueCount = 0;
+		}
+	}
+	return false;
+}
+pxcBool RealSenseHandler::smileDetection(PXCFaceData::ExpressionsData *expressionData){
+	PXCFaceData::ExpressionsData::FaceExpressionResult expressionResultSmile;
+	pxcBool smileResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_SMILE, &expressionResultSmile);
+
+	if (smileResult){
+		pxcI32 value = expressionResultSmile.intensity;
+		if (value > 25){
+
+			smileCount++;
+
+			if (smileCount > 15)
+			{
+				smileCount = 0;
+				return true;
+			}
+
+		}
+		else{
+			smileCount = 0;
+		}
+	}
+	return false;
+}
 
 bool RealSenseHandler::getKissGestureFlag(){
 	return kissGestureFlag;
 }
-
 bool RealSenseHandler::getBrowGestureFlag(){
 	return browGestureFlag;
+}
+bool RealSenseHandler::getCheekGestureFlag(){
+	return cheekGestureFlag; 
+}
+bool RealSenseHandler::getTongueGestureFlag(){
+	return tongueGestureFlag;
+}
+bool RealSenseHandler::getSmileGestureFlag(){
+	return smileGestureFlag;
 }
 
 void RealSenseHandler::resetBrowGestureFlag(){
 	browGestureFlag = false;
+	
 }
-
 void RealSenseHandler::resetKissGestureFlag(){
 	kissGestureFlag = false;
+}
+void RealSenseHandler::resetGesturesFlag(){
+	browGestureFlag = false;
+	kissGestureFlag = false;
+	cheekGestureFlag = false;
+	tongueGestureFlag = false;
+	smileGestureFlag = false;
 }
 
 
