@@ -54,12 +54,17 @@ struct DeviceHandler{
 	bool leapDraw();
 	bool leapGesture();
 
+	Mode::DefaultModes set_MLER_Mode();
 	Mode::DefaultModes set_MLE_Mode();
+	Mode::DefaultModes set_MLR_Mode();
+	Mode::DefaultModes set_MER_Mode();
+	Mode::DefaultModes set_LER_Mode();
 	Mode::DefaultModes set_ML_Mode();
 	Mode::DefaultModes set_ME_Mode();
 	Mode::DefaultModes set_MR_Mode();
 	Mode::DefaultModes set_LE_Mode();
 	Mode::DefaultModes set_LR_Mode();
+	Mode::DefaultModes set_ER_Mode();
 	Mode::DefaultModes set_L_Mode();
 	Mode::DefaultModes set_E_Mode();
 	Mode::DefaultModes set_M_Mode();
@@ -117,6 +122,16 @@ bool DeviceHandler::leapGesture(){
 		return false;
 	}
 }
+bool DeviceHandler::realSenseExpressions(){
+	if (realSenseConnected){
+		return realSenseExpressionsEnabled;
+	}
+	else {
+		return false;
+	}
+
+}
+
 void DeviceHandler::toggleLeap(){
 
 	if (leapConnected){
@@ -158,20 +173,8 @@ void DeviceHandler::toggleRealSense(){
 		deviceConnection();
 	}
 }
-
 void DeviceHandler::toggleRealSenseExpressions(){
 	realSenseExpressionsEnabled = !realSenseExpressionsEnabled;
-}
-
-
-bool DeviceHandler::realSenseExpressions(){
-	if (realSenseConnected){
-		return realSenseExpressionsEnabled;
-	}
-	else {
-		return false;
-	}
-	
 }
 void DeviceHandler::toggleMultiTouch(){
 	if (multiTouchConnected){
@@ -213,6 +216,7 @@ void DeviceHandler::toggleEyeX(){
 	*/
 	
 }
+
 
 int DeviceHandler::deviceConnection(){
 
@@ -286,9 +290,20 @@ int DeviceHandler::deviceConnection(){
 
 Mode::DefaultModes DeviceHandler::getDefaultMode(){
 
-	//All three devices connected
-	if (multiTouchConnected && leapConnected & eyeXConnected){ //&& eyeXConnectedFlag){
+	if (multiTouchConnected && leapConnected && eyeXConnected && realSenseConnected){
+		return set_MLER_Mode();
+	}
+	else if (multiTouchConnected && leapConnected && eyeXConnected){ //&& eyeXConnectedFlag){
 		return set_MLE_Mode();
+	}
+	else if (multiTouchConnected && leapConnected && realSenseConnected){
+		return set_MLR_Mode();
+	}
+	else if (multiTouchConnected && eyeXConnected && realSenseConnected){
+		return set_MER_Mode();
+	}
+	else if (leapConnected && eyeXConnected && realSenseConnected){
+		return set_LER_Mode();
 	}
 	else if (leapConnected && eyeXConnected){
 		return set_LE_Mode();
@@ -304,6 +319,9 @@ Mode::DefaultModes DeviceHandler::getDefaultMode(){
 	}
 	else if (leapConnected && realSenseConnected){
 		return set_LR_Mode();
+	}
+	else if (eyeXConnected && realSenseConnected){
+		return set_ER_Mode();
 	}
 	else if (leapConnected){
 		return set_L_Mode();
@@ -449,12 +467,36 @@ void DeviceHandler::resetFlags(){
 	realSenseConnectedFlag = 0;
 }
 
+Mode::DefaultModes DeviceHandler::set_MLER_Mode(){
+	realSenseExpressionsEnabled = true;
+	leapGestureEnabled = false;
+	leapDrawEnabled = false;
+	return Mode::DefaultModes::MLER;
+}
 Mode::DefaultModes DeviceHandler::set_MLE_Mode(){
 
 	//Turn off leapDraw
 	leapDrawEnabled = false;
 	return Mode::DefaultModes::MLE;
 
+}
+Mode::DefaultModes DeviceHandler::set_MLR_Mode(){
+	realSenseExpressionsEnabled = true;
+	leapGestureEnabled = false;
+	leapDrawEnabled = false;
+	
+	return Mode::DefaultModes::MLE;
+}
+Mode::DefaultModes DeviceHandler::set_MER_Mode(){
+	realSenseExpressionsEnabled = true;
+	leapDrawEnabled = false;
+	leapGestureEnabled = false;
+	return Mode::DefaultModes::MER;
+}
+Mode::DefaultModes DeviceHandler::set_LER_Mode(){
+	realSenseExpressionsEnabled = false;
+	leapGestureEnabled = false;
+	return Mode::DefaultModes::LER;
 }
 Mode::DefaultModes DeviceHandler::set_ML_Mode(){
 
@@ -467,6 +509,7 @@ Mode::DefaultModes DeviceHandler::set_ME_Mode(){
 	return Mode::DefaultModes::ME;
 }
 Mode::DefaultModes DeviceHandler::set_MR_Mode(){
+	realSenseExpressionsEnabled = true;
 	leapDrawEnabled = false;
 	leapGestureEnabled = false;
 	return Mode::DefaultModes::MR;
@@ -475,7 +518,14 @@ Mode::DefaultModes DeviceHandler::set_LE_Mode(){
 	return Mode::DefaultModes::LE;
 }
 Mode::DefaultModes DeviceHandler::set_LR_Mode(){
+	realSenseExpressionsEnabled = true;
 	leapGestureEnabled = false;
+	return Mode::DefaultModes::LR;
+}
+Mode::DefaultModes DeviceHandler::set_ER_Mode(){
+	realSenseExpressionsEnabled = true;
+	leapGestureEnabled = false;
+	leapDrawEnabled = false;
 	return Mode::DefaultModes::LR;
 }
 Mode::DefaultModes DeviceHandler::set_L_Mode(){
@@ -493,7 +543,7 @@ Mode::DefaultModes DeviceHandler::set_M_Mode(){
 	return Mode::DefaultModes::M;
 }
 Mode::DefaultModes DeviceHandler::set_R_Mode(){
-
+	realSenseExpressionsEnabled = true;
 	leapDrawEnabled = false;
 	leapGestureEnabled = false;
 	return Mode::DefaultModes::R;

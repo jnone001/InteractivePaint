@@ -1545,6 +1545,13 @@ void TouchPointsApp::setDefaultMode(Mode::DefaultModes mode){
 	switch (mode){
 	case Mode::DefaultModes::MLE:
 		break;
+	case Mode::DefaultModes::MLR:
+		break;
+	case Mode::DefaultModes::MER:
+		break;
+	case Mode::DefaultModes::LER:
+		ui.changeModeButtons(temp);
+		break;
 	case Mode::DefaultModes::ML:
 		break;
 	case Mode::DefaultModes::ME:
@@ -1555,6 +1562,8 @@ void TouchPointsApp::setDefaultMode(Mode::DefaultModes mode){
 		ui.changeModeButtons(temp);
 		break;
 	case Mode::DefaultModes::LR:
+		ui.changeModeButtons(temp);
+	case Mode::DefaultModes::ER:
 		ui.changeModeButtons(temp);
 	case Mode::DefaultModes::M:
 		break;
@@ -1637,8 +1646,6 @@ void TouchPointsApp::update(){
 	(*activeFbo).unbindFramebuffer();
 	
 }
-
-
 
 void TouchPointsApp::draw()
 {

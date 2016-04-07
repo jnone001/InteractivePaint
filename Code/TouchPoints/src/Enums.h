@@ -23,6 +23,6 @@ namespace ourColors{
 	enum ourColors{ White, Red, Yellow, Green, Aqua, Blue, Purple, Orange };
 }
 namespace Mode{
-	enum DefaultModes{ MLE, ML, ME, MR, LE, LR, M, L, E , R };
+	enum DefaultModes{ MLER, MLE, MLR, MER, LER, ML, ME, MR, LE, LR, ER, M, L, E , R };
 }
 #endif
