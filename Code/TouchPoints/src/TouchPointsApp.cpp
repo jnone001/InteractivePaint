@@ -235,6 +235,8 @@ public:
 
 
 private:
+	//Setup
+	bool setupComplete = false;
 	//Needs organizing
 	Brush brush;
 	Illustrator illustrator;
@@ -317,6 +319,9 @@ private:
 	std::shared_ptr<gl::Fbo>		activeFbo;
 	std::shared_ptr<gl::Fbo>		iconFbo;
 	std::shared_ptr<gl::Fbo>		saveImageFbo;
+
+
+	std::shared_ptr<gl::Fbo>		backgroundFbo;
 
 	std::vector<std::shared_ptr<gl::Fbo>> layerList;
 	std::vector<float> layerAlpha;
@@ -628,6 +633,11 @@ void TouchPointsApp::setup()
 	radialFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	//Set up fbo for proxy menu
 	proxFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+	
+	
+	//Background FBO Testing
+	backgroundFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+
 
 	//Enable all Leap Gestures
 	TouchPointsApp::enableGest(leapContr);
@@ -656,7 +666,7 @@ void TouchPointsApp::setup()
 	//Set up Brush
 	bool tempFalse = false;
 	bool tempTrue = true;
-	ColorA newColor = ColorA(1.0f, 1.0f, 1.0f, 1.0f);
+	ColorA newColor = ColorA(0.0f, 0.0f, 0.0f, 1.0f);
 	float tempFloat = 1.0f;
 	int tempInt = 1;
 	Shape::Shape myShape = Shape::Shape::Line;
@@ -844,7 +854,10 @@ void TouchPointsApp::gestRecognition(Leap::Frame frame, Leap::Controller control
 
 void TouchPointsApp::leapSave(){
 
-	imageHandler.saveCanvas(vec2(windowWidth, windowHeight));
+	if (ui.isBackgroundTransparent()){
+		imageHandler.saveCanvas(vec2(windowWidth, windowHeight), ColorA(ui.getBackgroundColor(), 0.0));
+	}
+	else imageHandler.saveCanvas(vec2(windowWidth, windowHeight), ColorA(ui.getBackgroundColor(), 1.0));
 }
 
 void TouchPointsApp::leapDraw(Leap::Frame frame){
@@ -1273,7 +1286,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	else if (event.getChar() == 'n'){
 		//saveImage(".png");
 		//imageFlag = true;
-		imageHandler.saveCanvas(vec2(windowWidth, windowHeight));
+		leapSave();
 	}
 	else if (event.getChar() == 'j') {
 		//saveImage(".jpeg");
@@ -1584,6 +1597,11 @@ void TouchPointsApp::mouseDown(MouseEvent event)
 
 void TouchPointsApp::update(){
 
+	
+	if (!setupComplete){
+		ui.uiSetup();
+		setupComplete = true;
+	}
 	//Increment the frame counter
 	frames++;
 
@@ -1667,6 +1685,7 @@ void TouchPointsApp::draw()
 	gl::drawStrokedCircle(vec2(960, 540), 60.0f * 2);
 	*/
 
+
 	//Currently leapDraw before drawing layers to prevent flickering. 
 	//However, this makes it impossible to see green 'hands' on top of images.
 	if (deviceHandler.leapStatus()){
@@ -1690,7 +1709,21 @@ void TouchPointsApp::draw()
 	}
 
 
-
+	//Draw Checkerboard pattern if background is transparent
+	if (ui.isBackgroundTransparent())
+	{
+		/*
+		backgroundFbo->bindFramebuffer();
+		//gl::clear(ColorA(1.0f, 0.0f, 0.0f, 0.0f));
+		//gl::color(Color(1.0, 1.0, 1.0));
+		cinder::gl::TextureRef tempText = gl::Texture::create(loadImage(loadAsset("TransparentBackground.png")));
+		gl::draw(tempText, Rectf(0, 0, windowWidth, windowHeight));
+		backgroundFbo->unbindFramebuffer();
+		gl::color(1.0, 1.0, 1.0, 0.5);
+		*/
+		gl::color(1.0, 1.0, 1.0, 0.5);
+		gl::draw(ui.getTransparentBackground()->getColorTexture());
+	}
 	//Loop Which Draws our Layers
 	int x = 0;
 	for (auto frames : layerList){
@@ -1759,7 +1792,10 @@ void TouchPointsApp::draw()
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	gl::draw(activeFbo->getColorTexture());
 
-
+	/*
+	auto mFont = Font("Quicksand Book Regular", 36.0f);
+	gl::drawString("Framerate: " + toString((int)getAverageFps()), vec2(windowWidth*.90, windowHeight *.01), ColorA(0.0,0.0,0.0,1.0), mFont);
+	*/
 }
 
 CINDER_APP(TouchPointsApp, RendererGl, prepareSettings)

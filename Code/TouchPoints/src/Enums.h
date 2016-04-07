@@ -1,6 +1,6 @@
 #ifndef ENUMS_H
 #define ENUMS_H
-#define COLOR_ZERO "White.png"
+#define COLOR_ZERO "Black.png"
 #define COLOR_ONE "Red.png"
 #define COLOR_TWO "Yellow.png"
 #define COLOR_THREE "Green.png"
@@ -20,7 +20,7 @@ namespace Shape{
 	enum Shape { Line, Circle, Rectangle, Triangle };
 }
 namespace ourColors{
-	enum ourColors{ White, Red, Yellow, Green, Aqua, Blue, Purple, Orange };
+	enum ourColors{ Black, Red, Yellow, Green, Aqua, Blue, Purple, Orange, White };
 }
 namespace Mode{
 	enum DefaultModes{ MLER, MLE, MLR, MER, LER, ML, ME, MR, LE, LR, ER, M, L, E , R };

@@ -34,9 +34,9 @@ struct Brush{
 		mMySymmetry = mySymmetry;
 		mEraserMode = eraserMode;
 		mAlphaColor = alphaColor;
-		mStaticColor = ourColors::ourColors::White;
+		mStaticColor = ourColors::ourColors::Black;
 		//Fills our colorList with all our colors
-		Color newColor1(256.0f, 256.0f, 256.0f);
+		Color newColor1(0.0f, 0.0f, 0.0f);
 		colorList.emplace_back(newColor1);
 		Color newColor2(256.0f, 0.0f, 0.0f);
 		colorList.emplace_back(newColor2);
@@ -267,6 +267,11 @@ void Brush::changeStaticColor(ourColors::ourColors staticColor){
 	{
 		mStaticColor = ourColors::ourColors::Orange;
 		mColor = ColorA(1.0, 0.3, 0.0, mAlphaColor);
+	}
+	if (staticColor == ourColors::ourColors::Black)
+	{
+		mStaticColor = ourColors::ourColors::Black;
+		mColor = ColorA(0.0,0.0,0.0, mAlphaColor);
 	}
 
 }
