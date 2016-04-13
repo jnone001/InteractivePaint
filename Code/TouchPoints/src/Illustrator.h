@@ -603,7 +603,7 @@ void Illustrator::saveCurrentFbo(){
 	}
 	//Check if the active drawing is occuring
 
-	if (myTimeMachine[(*mLayerList).back()].size() == 10){
+	if (myTimeMachine[(*mLayerList).back()].size() == 100){
 		myTimeMachine[(*mLayerList).back()].pop_back();
 	}
 
