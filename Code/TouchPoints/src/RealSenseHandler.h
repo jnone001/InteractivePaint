@@ -22,7 +22,9 @@
 #include "pxcaddref.h"
 #include "pxcversion.h"
 
-
+#include "pxchandconfiguration.h"
+#include "pxchanddata.h"
+#include "pxchandmodule.h"
 
 using namespace std;
 

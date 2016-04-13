@@ -192,7 +192,7 @@ public:
 
 	//Ui Functions
 	void	drawUi();
-	bool	inInteractiveUi(int x, int y);
+	bool	inInteractiveUi(int x, int y, uint32_t id);
 	void	drawRadial();
 	//Proxyfucntions
 	void	drawProx();
@@ -1069,26 +1069,28 @@ void TouchPointsApp::drawRadial(){
 	gl::color(1.0, 0.9, 0.5);
 	gl::drawStrokedCircle(radialCenter, 30.0f, 2.0f);
 
-	gl::color(1.0, 1.0, 1.0, 0.8);
+	gl::color(.24, .24, .24, 0.8);
+
 
 	gl::drawSolidCircle(radialCenter, 29.0f);
 
 	//Draws outer ring
-	gl::color(1.0, 1.0, 1.0);
+	gl::color(.24, .24, .24, 0.8);
 	gl::drawStrokedCircle(radialCenter, 100.0f, 60.0f);
 
 
-	gl::color(1.0, 1.0, 1.0, 0.5);
+	gl::color(0.0, 0.0, 0.0, 0.5);
 	gl::drawStrokedCircle(radialCenter, 131.0f, 2.0f, 300);
 
 
-	gl::color(1.0, 1.0, 1.0, 0.8);
+	gl::color(0.0,0.0,0.0, 0.8);
 	gl::drawStrokedCircle(radialCenter, 69.0f, 2.0f, 300);
 
 
 
 	//Draw left icon
 
+	gl::color(1.0, 1.0, 1.0, 1.0);
 	imageTexture = gl::Texture::create(loadImage(loadAsset("AllColor.png")));
 	(*iconFbo).bindFramebuffer();
 	gl::clear(ColorA(1.0, 1.0, 1.0, 1.0));
@@ -1338,7 +1340,11 @@ void TouchPointsApp::keyDown(KeyEvent event)
 #endif
 	else if (event.getChar() == 'l')
 	{
-		illustrator.saveCurrentFbo();
+		leapShapeChange();
+	}
+	else if (event.getChar() == 'k')
+	{
+		leapColorChange();
 	}
 
 }
@@ -1438,7 +1444,7 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 
 		if (!deviceHandler.multiTouchStatus())
 		{
-			ui.inInteractiveUi(touch.getX(), touch.getY());
+			ui.inInteractiveUi(touch.getX(), touch.getY(), touch.getId());
 			return;
 		}
 
@@ -1472,8 +1478,8 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 				continue;
 			}
 		}
-		if (ui.inInteractiveUi(touch.getX(), touch.getY())){
-
+		if (ui.inInteractiveUi(touch.getX(), touch.getY(), touch.getId())){
+			return;
 		}
 		else {
 			list<TouchEvent::Touch> tempList;
@@ -1499,7 +1505,7 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 		return;
 
 	for (const auto &touch : event.getTouches()) {
-		ui.slideButtons(touch.getX(), touch.getY());
+		ui.slideButtons(touch);
 		if (bufferTouches.find(touch.getId()) == bufferTouches.end()){
 			illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
 		}
@@ -1515,8 +1521,7 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 				bufferTouches.erase(touch.getId());
 			}
 			*/
-			//On finger movement, we know it is no longer a gesture. 
-			//So we remove it from 'buffer' touches and begin drawing
+
 			//'Extended Touch' Gesture
 			if (touch.getPos() == touch.getPrevPos() && touch.getTime() > myTouch.getTime() + .75)
 			{
@@ -1524,6 +1529,8 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 				bufferTouches[touch.getId()].clear();
 				bufferTouches[touch.getId()].emplace_front(touch);
 			}else 
+				//On finger movement, we know it is no longer a gesture. 
+				//So we remove it from 'buffer' touches and begin drawing
 			if ((touch.getPos().x > myTouch.getX() + 25 || touch.getX() < myTouch.getX() - 25) || (touch.getY() > myTouch.getY() + 25 || touch.getY() < myTouch.getY() - 25))
 			{
 				illustrator.beginTouchShapes(touch.getId(), bufferTouches[touch.getId()].front().getPos());
@@ -1549,6 +1556,7 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 	for (const auto &touch : event.getTouches()) {
 		bufferTouches.erase(touch.getId());
 		illustrator.endTouchShapes(touch.getId());
+		ui.endButtonPress(touch);
 	}
 }
 
@@ -1651,31 +1659,33 @@ void TouchPointsApp::update(){
 		//Test
 		if (deviceHandler.realSenseExpressions())
 		{
+			if (illustrator.getActiveDrawings() == 0){
+				realSenseHandler.streamData();
 
-			realSenseHandler.streamData();
-
-			if (realSenseHandler.getBrowGestureFlag()){
-				illustrator.undoDraw(ui.getBackgroundColor());
+				if (realSenseHandler.getBrowGestureFlag()){
+					illustrator.undoDraw(ui.getBackgroundColor());
+				}
+				if (realSenseHandler.getKissGestureFlag()){
+					ui.toggleUiFlag();
+				}
+				if (realSenseHandler.getTongueGestureFlag()){
+					mySymmetry.toggleSymmetry();
+				}
+				if (realSenseHandler.getCheekGestureFlag()){
+					leapColorChange();
+				}
+				if (realSenseHandler.getSmileGestureFlag()){
+					leapShapeChange();
+				}
+				realSenseHandler.resetGesturesFlag();
 			}
-			if (realSenseHandler.getKissGestureFlag()){
-				ui.toggleUiFlag();
-			}
-			if (realSenseHandler.getTongueGestureFlag()){
-				mySymmetry.toggleSymmetry();
-			}
-			if (realSenseHandler.getCheekGestureFlag()){
-				leapColorChange();
-			}
-			if (realSenseHandler.getSmileGestureFlag()){
-				leapShapeChange();
-			}
-			realSenseHandler.resetGesturesFlag();
 		}
 	}
 	
 	//Updates the active shapes being drawn by the user
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	(*activeFbo).bindFramebuffer();
+	//Clears Previous Active Shapes
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 	//Draws all active Shapes (non-permanent);
@@ -1740,7 +1750,7 @@ void TouchPointsApp::draw()
 		backgroundFbo->unbindFramebuffer();
 		gl::color(1.0, 1.0, 1.0, 0.5);
 		*/
-		gl::color(1.0, 1.0, 1.0, 0.5);
+		gl::color(.5, .5, .5, 1.0);
 		gl::draw(ui.getTransparentBackground()->getColorTexture());
 	}
 	//Loop Which Draws our Layers
@@ -1783,13 +1793,15 @@ void TouchPointsApp::draw()
 	/*Draws the frame buffer for UI*/
 	if (deviceHandler.eyeXStatus()){
 
-		gl::color(1.0, 1.0, 1.0, .4);
+		gl::color(0.0, 0.0, 0.0, .4);
+		/*
 		vec2 gaze1(gazePositionX - 10, gazePositionY);
 		vec2 gaze2(gazePositionX + 10, gazePositionY);
 
 		gl::drawStrokedCircle(gaze1, 10.0f, 10.0f);
 		gl::drawStrokedCircle(gaze2, 10.0f, 10.0f);
-
+		*/
+		gl::color(1.0, 1.0, 1.0, 1.0);
 		if (gazePositionX < 600 && gazePositionY < 100){
 			bool tempBool = true;
 			ui.changeModeButtons(tempBool);

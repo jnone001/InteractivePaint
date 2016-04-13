@@ -8,6 +8,7 @@
 #include "libusb.h"
 #include <stdio.h>
 #include "DeviceHandler.h"
+#include "TouchKeyboard.h"
 
 
 
@@ -64,7 +65,7 @@ struct UserInterface{
 		for (auto layers : *layerList){
 			(*layerAlpha).emplace_back(1.0f);
 		}
-		
+		//keyboard = TouchKeyboard();
 		
 
 	}
@@ -74,7 +75,7 @@ struct UserInterface{
 	void modeTriangle();
 	void modeLine();
 	void drawUi();
-	bool inInteractiveUi(int x, int y);
+	bool inInteractiveUi(int x, int y, uint32_t id);
 	Color getBackgroundColor();
 	void setModeChangeFlag();
 	void UserInterface::changeBackgroundColor(Color background);
@@ -89,9 +90,10 @@ struct UserInterface{
 	void uiSetup();
 
 
-	void slideButtons(int x, int y);
+	void slideButtons(TouchEvent::Touch touch);
 	float getLayerAlpha(int layerNumber);
 	void incrementBackground();
+	void endButtonPress(TouchEvent::Touch touch);
 
 	//Functions to get brush values
 
@@ -101,6 +103,7 @@ private:
 	Brush* mBrush;
 	Illustrator* illustrator;
 	DeviceHandler * deviceHandler;
+	TouchKeyboard	keyboard;
 	std::shared_ptr<gl::Fbo> uiFbo;
 
 	//Stores the 'Checkerboard pattern for background'
@@ -134,6 +137,13 @@ private:
 
 };
 
+void UserInterface::endButtonPress(TouchEvent::Touch touch){
+	if (keyboard.getMovingKeyboard()){
+		if (keyboard.checkMovingId(touch.getId()))
+			keyboard.finishMoving();
+	}
+}
+
 void UserInterface::uiSetup(){
 
 	//Loads the asset for transparent Background
@@ -145,6 +155,7 @@ void UserInterface::uiSetup(){
 	transparentBackgroundFbo->unbindFramebuffer();
 	gl::color(1.0, 1.0, 1.0, 0.5);
 	gl::draw(transparentBackgroundFbo->getColorTexture());
+	keyboard.createKeyboard();
 
 }
 
@@ -157,8 +168,25 @@ bool UserInterface::isBackgroundTransparent(){
 }
 
 void UserInterface::incrementBackground(){
-	//Pops the current color
+	
+	//Checks the current color
 	Color tempColor = backgroundList.front();
+	
+	//If the background istransparent we disable it and change color
+	if (transparentBackground){
+		transparentBackground = false;
+		backgroundList.pop_front();
+		//Assign the new background color to the new front of list.
+		backgroundColor = backgroundList.front();
+		//Place the old background color back into the list
+		backgroundList.emplace_back(tempColor);
+		return;
+	}
+
+	if (tempColor == Color(256.0,256.0,256.0)){
+		transparentBackground = true;
+		return;
+	}
 	backgroundList.pop_front();
 	//Assign the new background color to the new front of list.
 	backgroundColor = backgroundList.front();
@@ -218,7 +246,9 @@ Color UserInterface::getBackgroundColor(){
 void UserInterface::changeBackgroundColor(Color background){
 	backgroundColor = background;
 }
-void UserInterface::slideButtons(int x, int y){
+void UserInterface::slideButtons(TouchEvent::Touch touch){
+	int x = touch.getX();
+	int y = touch.getY();
 	if (layerVisualization){
 		int yDist = (*layerList).size();
 		yDist = (*layerList).size() * 200 + 50;
@@ -239,10 +269,21 @@ void UserInterface::slideButtons(int x, int y){
 			size = size + 1;
 		}
 	}
+	if (keyboard.keyboardStatus()){
+
+
+		if (keyboard.getMovingKeyboard()){
+			if (keyboard.checkMovingId(touch.getId()))
+			{
+				keyboard.setAnchor(vec2(x, y));
+			}
+		}
+	}
 }
-bool UserInterface::inInteractiveUi(int x, int y)
+bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 {
 
+	
 	if (deviceHandler->multiTouchStatus() == false){
 		//If the multi-touch is 'disabled' we still allow the user to toggle devices on and off using the multitouch
 		if (deviceButtons){
@@ -250,20 +291,25 @@ bool UserInterface::inInteractiveUi(int x, int y)
 				if (y > windowHeight * .59 && y < windowHeight * .62){
 					deviceHandler->toggleRealSense();
 					modeChangeFlag = true;
+					return true;
 				}
 				if (y > windowHeight * .62 && y < windowHeight * .65){
 					deviceHandler->toggleRealSenseExpressions();
 					modeChangeFlag = true;
+					return true;
 				}
 				if (y > windowHeight * .65 && y < windowHeight * .68){
 					deviceHandler->toggleLeap();
 					modeChangeFlag = true;
+					return true;
 				}
 				if (y > windowHeight * .68 && y < windowHeight * .71){
 					deviceHandler->toggleLeapDraw();
+					return true;
 				}
 				if (y > windowHeight * .71 && y < windowHeight * .74){
 					deviceHandler->toggleLeapGesture();
+					return true;
 				}
 				if (y > windowHeight * .74 && y < windowHeight * .77){
 					deviceHandler->toggleEyeX();
@@ -271,10 +317,12 @@ bool UserInterface::inInteractiveUi(int x, int y)
 						modeButtons = true;
 					}
 					modeChangeFlag = true;
+					return true;
 				}
 				if (y > windowHeight * .77 && y < windowHeight * .8){
 					deviceHandler->toggleMultiTouch();
 					modeChangeFlag = true;
+					return true;
 				}
 			}
 
@@ -315,16 +363,33 @@ bool UserInterface::inInteractiveUi(int x, int y)
 	
 	if ((*illustrator).getActiveDrawings() == 0){
 
+		if (keyboard.keyboardStatus()){
+
+			//Checks if the user presses a keyboard key
+			if (keyboard.onKeyboardSurface(vec2(x, y))){
+				return true;
+			}
+			vec2 anchor = keyboard.getAnchor();
+			//If the keyboard is on we want to check if the user is trying to drag it
+			if (((anchor.x + 25 + 40 + 10 * 75) >= x && x >= (anchor.x - 120)) && ((anchor.y + 25 + 4 * 75) >= y && y >= (anchor.y - 25))){
+				bool tempBool = true;
+				keyboard.setMovingKeyboard(tempBool);
+				keyboard.setMovingId(id);
+				return true;
+			}
+		}
 		if (uiFboFlag){
+			//Device Modes button
 			if (x > windowWidth*.92 && x < windowWidth && y > windowHeight*.8 && y < windowHeight*.83){
 				deviceButtons = !deviceButtons;
+				return true;
 			}
 		}
 
 		if (modeButtons){
-			//Color change button.
+			
 			if (uiFboFlag){
-
+				//Color change button.
 				if (x < 50 && y < 50)
 				{
 					colorButtons = !colorButtons;
@@ -371,6 +436,10 @@ bool UserInterface::inInteractiveUi(int x, int y)
 				}
 				else if (x < 500 && y < 50 ){
 					(*illustrator).undoDraw(backgroundColor);
+					return true;
+				}
+				else if (x < 550 && y < 50){
+					incrementBackground();
 					return true;
 				}
 			}
@@ -470,20 +539,25 @@ bool UserInterface::inInteractiveUi(int x, int y)
 			if (y > windowHeight * .59 && y < windowHeight * .62){
 				deviceHandler->toggleRealSense();
 				modeChangeFlag = true;
+				return true;
 			}
 			if (y > windowHeight * .62 && y < windowHeight * .65){
 				deviceHandler->toggleRealSenseExpressions();
 				modeChangeFlag = true;
+				return true;
 			}
 			if (y > windowHeight * .65 && y < windowHeight * .68){
 				deviceHandler->toggleLeap();
 				modeChangeFlag = true;
+				return true;
 			}
 			if (y > windowHeight * .68 && y < windowHeight * .71){
 				deviceHandler->toggleLeapDraw();
+				return true;
 			}
 			if (y > windowHeight * .71 && y < windowHeight * .74){
 				deviceHandler->toggleLeapGesture();
+				return true;
 			}
 			if (y > windowHeight * .74 && y < windowHeight * .77){
 				deviceHandler->toggleEyeX();
@@ -491,13 +565,13 @@ bool UserInterface::inInteractiveUi(int x, int y)
 					modeButtons = true;
 				}
 				modeChangeFlag = true;
+				return true;
 			}
 			if (y > windowHeight * .77 && y < windowHeight * .8){
 				deviceHandler->toggleMultiTouch();
 				modeChangeFlag = true;
+				return true;
 			}
-
-
 
 
 		}
@@ -695,7 +769,11 @@ void UserInterface::modeLine(){
 void UserInterface::drawUi(){
 	//(*uiFbo).unbindTexture();
 
-
+	//Draws keyboard if it is on
+	if (keyboard.keyboardStatus()){
+		gl::color(1.0, 1.0, 1.0, 1.0);
+		gl::draw(keyboard.getKeyboardFbo()->getColorTexture());
+	}
 	//gl::clear(GL_BACK);
 	//if (gazePositionX > 1920 && gazePositionY > 1080)
 	if (modeChangeFlag)//Draws to the UI FBO. Currently only houses 'modebox' in the fbo.
@@ -809,7 +887,7 @@ void UserInterface::drawUi(){
 			gl::drawSolidRect(Rectf(150, 0, 200, 50));
 
 			gl::color(1.0, 1.0, 1.0);
-			gl::lineWidth(5);
+			gl::lineWidth(2);
 			gl::drawLine(vec2(160, 25), vec2(190, 25));
 			gl::drawLine(vec2(175, 10), vec2(175, 40));
 
@@ -853,6 +931,9 @@ void UserInterface::drawUi(){
 			//Undo Button
 			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(450, 2, 500, 50), 10);
+			//Undo Button
+			gl::color(0.75, 0.75, .75, 1.0);
+			gl::drawStrokedRect(Rectf(500, 2, 550, 50), 10);
 			
 
 
@@ -906,8 +987,8 @@ void UserInterface::drawUi(){
 	}
 	if ((*(*mBrush).getSymmetry()).getSymmetryOn()){
 		for (int i = 0; i < 50; i = i + 2){
-			gl::lineWidth(3);
-			gl::color(1.0, 1.0, 1.0);
+			gl::lineWidth(4);
+			gl::color(0.75, 0.75, 0.75);
 			gl::drawLine(vec2(windowWidth / 2, windowHeight - i * 50), vec2(windowWidth / 2, windowHeight - (i + 1) * 50));
 		}
 	}
@@ -1074,6 +1155,10 @@ void UserInterface::drawUi(){
 		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.74, windowWidth*.89, windowHeight*.77));
 		gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.77, windowWidth*.89, windowHeight*.8));
 
+	}
+
+	if (keyboard.getMovingKeyboard()){
+		gl::draw((keyboard.getMovingKeyboardFbo()->getColorTexture()));
 	}
 	
 }
