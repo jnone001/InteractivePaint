@@ -3,6 +3,9 @@
 
 #include "pxcsession.h"
 #include "pxcfacedata.h"
+#include "pxchandconfiguration.h"
+#include "pxchanddata.h"
+#include "pxchandmodule.h"
 #include "pxcfaceconfiguration.h"
 #include <windows.h>
 #include "pxcdefs.h"
@@ -24,12 +27,11 @@
 using namespace std;
 
 #define MAX_FACES 1
+#define NUM_HANDS 2
 
 struct RealSenseHandler{
 
 	RealSenseHandler(){
-
-
 		kissGestureFlag = false;
 		browGestureFlag = false;
 		cheekGestureFlag = false;
@@ -51,16 +53,41 @@ struct RealSenseHandler{
 		int smileCount = 0;
 		int tongueCount = 0;
 
+		pxcStatus sts;
+
 		senseManager = PXCSenseManager::CreateInstance();
-		senseManager->EnableStream(PXCCapture::STREAM_TYPE_COLOR, 640, 480);
-		senseManager->EnableFace();
+		senseManager->EnableStream(PXCCapture::STREAM_TYPE_COLOR, 640, 480); 
+		//senseManager->EnableStream(PXCCapture::STREAM_TYPE_DEPTH, 640, 480);
+		//senseManager->EnableFace();
+		
+		sts = senseManager->EnableFace();
+		if (sts < PXC_STATUS_NO_ERROR) {
+			wprintf_s(L"Unable to enable Hand Tracking\n");
+		}
+		
+		sts = senseManager->EnableHand();
+		if (sts < PXC_STATUS_NO_ERROR) {
+			wprintf_s(L"Unable to enable Hand Tracking\n");
+		}
+
 		faceAnalyzer = senseManager->QueryFace();
+
+		handAnalyzer = senseManager->QueryHand();
+		if (!senseManager){
+			wprintf_s(L"Unable to retrieve hand results\n");
+		}
+
+
 		senseManager->Init();
-		outputData = faceAnalyzer->CreateOutput();
-		config = faceAnalyzer->CreateActiveConfiguration();
+		faceOutputData = faceAnalyzer->CreateOutput();
+		handOutputData = handAnalyzer->CreateOutput();
+		handConfig = handAnalyzer->CreateActiveConfiguration();
+		faceConfig = faceAnalyzer->CreateActiveConfiguration();
+		
 	}
 
 	void intializeFaceSensing();
+	void intializeHandSensing();
 	void streamData();
 
 	pxcBool kissDetection(PXCFaceData::ExpressionsData *expressionData);
@@ -81,10 +108,13 @@ struct RealSenseHandler{
 
 private:
 
-	PXCSenseManager *senseManager;
+	PXCSenseManager *senseManager = 0;
 	PXCFaceModule *faceAnalyzer;
-	PXCFaceData *outputData;
-	PXCFaceConfiguration *config;
+	PXCHandModule* handAnalyzer = 0;
+	PXCFaceData *faceOutputData;
+	PXCHandData *handOutputData;
+	PXCFaceConfiguration *faceConfig;
+	PXCHandConfiguration *handConfig;
 
 	bool kissFlag;
 	bool browLFlag;
@@ -99,10 +129,10 @@ private:
 	bool tongueGestureFlag;
 	bool smileGestureFlag;
 
-	int kissCount; 
+	int kissCount;
 	int browLCount;
 	int browRCount;
-	int cheekLCount; 
+	int cheekLCount;
 	int cheekRCount;
 	int smileCount;
 	int tongueCount;
@@ -110,12 +140,17 @@ private:
 
 void RealSenseHandler::intializeFaceSensing(){
 
-	config->SetTrackingMode(PXCFaceConfiguration::TrackingModeType::FACE_MODE_COLOR_PLUS_DEPTH);
-	config->QueryExpressions()->Enable();
-	config->QueryExpressions()->EnableAllExpressions();
-	config->QueryExpressions()->properties.maxTrackedFaces = MAX_FACES;
-	config->ApplyChanges();
+	faceConfig->SetTrackingMode(PXCFaceConfiguration::TrackingModeType::FACE_MODE_COLOR_PLUS_DEPTH);
+	faceConfig->QueryExpressions()->Enable();
+	faceConfig->QueryExpressions()->EnableAllExpressions();
+	faceConfig->QueryExpressions()->properties.maxTrackedFaces = MAX_FACES;
+	faceConfig->ApplyChanges();
 
+}
+
+void RealSenseHandler::intializeHandSensing(){
+	handConfig->SetTrackingMode(PXCHandData::TRACKING_MODE_FULL_HAND);
+	handConfig->ApplyChanges();
 }
 
 void RealSenseHandler::streamData(){
@@ -124,21 +159,24 @@ void RealSenseHandler::streamData(){
 	if (senseManager->AcquireFrame(true) >= PXC_STATUS_NO_ERROR){
 
 
-		outputData->Update();
+		faceOutputData->Update();
+		handOutputData->Update();
 
-		/* Detection Structs */
+		/* Face Detection Struct */
 		PXCFaceData::ExpressionsData *expressionData = nullptr;
-		//PXCFaceData::ExpressionsData::FaceExpressionResult expressionResult;
+		/* Hand Detection Struct */
+		PXCHandData::JointData nodes[NUM_HANDS][PXCHandData::NUMBER_OF_JOINTS] = {};
 
-		// iterate through hands
-		pxcU16 numOfFaces = outputData->QueryNumberOfDetectedFaces();
+		pxcU16 numOfFaces = faceOutputData->QueryNumberOfDetectedFaces();
+		pxcU16 numOfHands = handOutputData->QueryNumberOfHands();
+		pxcU16 handID;
 
-
+		/* Face Data Analysis*/
 		for (pxcU16 i = 0; i <= numOfFaces; i++)
 		{
 
 			// get face data by index
-			PXCFaceData::Face *trackedFace = outputData->QueryFaceByIndex(i);
+			PXCFaceData::Face *trackedFace = faceOutputData->QueryFaceByIndex(i);
 			if (trackedFace != NULL)
 			{
 
@@ -156,6 +194,18 @@ void RealSenseHandler::streamData(){
 				}
 			}
 		}
+
+		/* Hand Data Analysis */
+		for (pxcU16 i = 0; i <= numOfHands; i++){
+			//Retrieve first hand that has appeared 
+			PXCHandData::IHand *handData;
+			if (handOutputData->QueryHandData(PXCHandData::ACCESS_ORDER_BY_TIME, i, handData) == PXC_STATUS_NO_ERROR){
+				for (pxcU16 j = 0; j < PXCHandData::NUMBER_OF_JOINTS; j++){
+					handData->QueryTrackedJoint((PXCHandData::JointType)j, nodes[i][j]);
+				}
+			}
+		}
+
 		senseManager->ReleaseFrame();
 	}
 }
