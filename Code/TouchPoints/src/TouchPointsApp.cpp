@@ -206,7 +206,7 @@ public:
 	void	leapDraw(Leap::Frame frame);
 	void 	gestRecognition(Leap::Frame frame, Leap::Controller controller);
 
-	void setDefaultMode(int mode);
+	void setDefaultMode(Mode::DefaultModes mode);
 
 	//List of drawUI Flags
 	bool modeButtons = true;
@@ -689,7 +689,7 @@ void TouchPointsApp::setup()
 	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
 	deviceHandler.deviceConnection();
-	int resultMode = deviceHandler.getDefaultMode();
+	Mode::DefaultModes resultMode = deviceHandler.getDefaultMode();
 	setDefaultMode(resultMode);
 	
 
@@ -1559,28 +1559,43 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 	}
 }
 
-void TouchPointsApp::setDefaultMode(int mode){
+void TouchPointsApp::setDefaultMode(Mode::DefaultModes mode){
 
 	bool temp = false;
 
 	switch (mode){
-	case 1:
+	case Mode::DefaultModes::MLE:
 		break;
-	case 2:
+	case Mode::DefaultModes::MLR:
+		break;
+	case Mode::DefaultModes::MER:
+		break;
+	case Mode::DefaultModes::LER:
 		ui.changeModeButtons(temp);
 		break;
-	case 3:
+	case Mode::DefaultModes::ML:
 		break;
-	case 4:
+	case Mode::DefaultModes::ME:
 		break;
-	case 5:
+	case Mode::DefaultModes::MR:
+		break;
+	case Mode::DefaultModes::LE:
 		ui.changeModeButtons(temp);
 		break;
-	case 6:
+	case Mode::DefaultModes::LR:
+		ui.changeModeButtons(temp);
+	case Mode::DefaultModes::ER:
+		ui.changeModeButtons(temp);
+	case Mode::DefaultModes::M:
+		break;
+	case Mode::DefaultModes::L:
 		ui.changeModeButtons(temp);
 		break;
-	case 7:
+	case Mode::DefaultModes::E:
+		ui.changeModeButtons(temp);
 		break;
+	case Mode::DefaultModes::R:
+		ui.changeModeButtons(temp);
 	}
 }
 
@@ -1659,8 +1674,6 @@ void TouchPointsApp::update(){
 	(*activeFbo).unbindFramebuffer();
 	
 }
-
-
 
 void TouchPointsApp::draw()
 {
