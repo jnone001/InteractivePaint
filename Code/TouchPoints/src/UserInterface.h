@@ -65,7 +65,7 @@ struct UserInterface{
 		for (auto layers : *layerList){
 			(*layerAlpha).emplace_back(1.0f);
 		}
-		//keyboard = TouchKeyboard();
+		keyboard = TouchKeyboard(mWindowWidth, mWindowHeight);
 		
 
 	}
@@ -363,20 +363,47 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 	
 	if ((*illustrator).getActiveDrawings() == 0){
 
+		if (keyboard.getSettingText()){
+			illustrator->saveCurrentFbo();
+			keyboard.setTextAnchor(vec2(x, y));
+			keyboard.turnOnKeyboard();
+			return true;
+		}
+
+		//Checks keyboard input if its on
 		if (keyboard.keyboardStatus()){
 
 			//Checks if the user presses a keyboard key
-			if (keyboard.onKeyboardSurface(vec2(x, y))){
+			if (keyboard.onKeyboardButtons(vec2(x, y))){
+				//Checks if the keyboard is 'done' and needs to be cleaned up.
+				if (keyboard.needsCleanup()){
+					//Writes the keyboard text to the current Fbo.
+					layerList->back()->bindFramebuffer();
+					gl::color(1.0, 1.0, 1.0, 1.0);
+					gl::draw(keyboard.getTextFbo()->getColorTexture());
+					layerList->back()->unbindFramebuffer();
+
+					//Cleans up the keyboard by disabling it and deleting the string
+					keyboard.endText();
+				}
 				return true;
 			}
-			vec2 anchor = keyboard.getAnchor();
 			//If the keyboard is on we want to check if the user is trying to drag it
-			if (((anchor.x + 25 + 40 + 10 * 75) >= x && x >= (anchor.x - 120)) && ((anchor.y + 25 + 4 * 75) >= y && y >= (anchor.y - 25))){
+			if (keyboard.onKeyboardSurface(vec2(x,y)) ){
 				bool tempBool = true;
 				keyboard.setMovingKeyboard(tempBool);
-				keyboard.setMovingId(id);
+				keyboard.setMovingId(id, vec2(x,y));
 				return true;
 			}
+
+			//If they are clicking outside the keyboard they want to 'shut it down'
+			//Finish cleaning up the keyboard.
+			layerList->back()->bindFramebuffer();
+			gl::color(1.0, 1.0, 1.0, 1.0);
+			gl::draw(keyboard.getTextFbo()->getColorTexture());
+			layerList->back()->unbindFramebuffer();
+			keyboard.endText();
+			return true;
 		}
 		if (uiFboFlag){
 			//Device Modes button
@@ -440,6 +467,11 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 				}
 				else if (x < 550 && y < 50){
 					incrementBackground();
+					return true;
+				}
+				else if(x < 600 && y < 50){
+					
+					keyboard.beginSettingTextAnchor();
 					return true;
 				}
 			}
@@ -769,11 +801,8 @@ void UserInterface::modeLine(){
 void UserInterface::drawUi(){
 	//(*uiFbo).unbindTexture();
 
-	//Draws keyboard if it is on
-	if (keyboard.keyboardStatus()){
-		gl::color(1.0, 1.0, 1.0, 1.0);
-		gl::draw(keyboard.getKeyboardFbo()->getColorTexture());
-	}
+
+	gl::color(1.0, 1.0, 1.0, 1.0);
 	//gl::clear(GL_BACK);
 	//if (gazePositionX > 1920 && gazePositionY > 1080)
 	if (modeChangeFlag)//Draws to the UI FBO. Currently only houses 'modebox' in the fbo.
@@ -929,11 +958,22 @@ void UserInterface::drawUi(){
 
 
 			//Undo Button
+			gl::color(0.0, 0.0, 0.0, 1.0);
+			gl::drawSolidRect(Rectf(450, 2, 500, 50));
 			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(450, 2, 500, 50), 10);
-			//Undo Button
+			
+			//Background button
+			gl::color(0.0, 0.0, 0.0, 1.0);
+			gl::drawSolidRect(Rectf(500, 2, 550, 50));
 			gl::color(0.75, 0.75, .75, 1.0);
 			gl::drawStrokedRect(Rectf(500, 2, 550, 50), 10);
+			
+			//Text Button
+			gl::color(0.0, 0.0, 0.0, 1.0);
+			gl::drawSolidRect(Rectf(550, 2, 600, 50));
+			gl::color(0.75, 0.75, .75, 1.0);
+			gl::drawStrokedRect(Rectf(550, 2, 600, 50), 10);
 			
 
 
@@ -1157,6 +1197,18 @@ void UserInterface::drawUi(){
 
 	}
 
+	//Draws keyboard if it is on
+	if (keyboard.keyboardStatus()){
+		gl::color(1.0, 1.0, 1.0, 1.0);
+		gl::draw(keyboard.getKeyboardFbo()->getColorTexture());
+		gl::draw(keyboard.getTextFbo()->getColorTexture());
+
+		gl::color(0.0, 0.0, 0.0, 0.5);
+		vec2 textAnchor = keyboard.getTextAnchor();
+		gl::lineWidth(5);
+		gl::drawLine(vec2(textAnchor.x, textAnchor.y + 80), vec2(textAnchor.x, textAnchor.y +40));
+	}
+	gl::color(1.0, 1.0, 1.0, 1.0);
 	if (keyboard.getMovingKeyboard()){
 		gl::draw((keyboard.getMovingKeyboardFbo()->getColorTexture()));
 	}
