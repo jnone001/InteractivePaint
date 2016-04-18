@@ -215,6 +215,8 @@ public:
 	bool uiFboFlag = false;
 	bool layerVisualization = false;
 
+	bool startUpFlag = true;
+
 	//Variables to keep track of performance. It is cleared once every second.
 	int frames = 0;
 	int fps = 0;
@@ -333,6 +335,9 @@ private:
 	std::shared_ptr<gl::Fbo>		radialFbo;
 	//Proxy Menu Fbo
 	std::shared_ptr<gl::Fbo>		proxFbo;
+
+	//
+	std::shared_ptr<gl::Fbo>		fingerLocationFbo;
 
 
 };
@@ -642,6 +647,10 @@ void TouchPointsApp::setup()
 	//Enable all Leap Gestures
 	TouchPointsApp::enableGest(leapContr);
 
+	//Set up fingerlocation FBo
+	fingerLocationFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+
+
 	leapContr.config().setFloat("Gesture.Swipe.MinLength", 150.0);
 	leapContr.config().setFloat("Gesture.Swipe.MinVelocity", 500.0);
 	leapContr.config().save();
@@ -677,9 +686,8 @@ void TouchPointsApp::setup()
 	imageHandler = ImageHandler(&layerList, &layerAlpha);
 
 	//RealSense Setup
-	realSenseHandler = RealSenseHandler();
-	realSenseHandler.intializeFaceSensing();
-	realSenseHandler.intializeHandSensing();
+	realSenseHandler = RealSenseHandler(&illustrator);
+	
 	//realSenseHandler.streamData();
 
 	//Set up UI
@@ -749,6 +757,7 @@ void TouchPointsApp::setup()
 	}
 	*/
 #endif
+
 
 }
 
@@ -925,7 +934,6 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 				activePointsMap[points.id()] = true;
 				pointsMap[points.id()] = vec2(leapXCoordinate, leapYCoordinate);
 			}
-
 
 		}
 	}
@@ -1617,8 +1625,11 @@ void TouchPointsApp::mouseDown(MouseEvent event)
 
 void TouchPointsApp::update(){
 
+
+
 	if (!setupComplete){
 		ui.uiSetup();
+		realSenseHandler.realSenseSetup();
 		setupComplete = true;
 	}
 	//Increment the frame counter
@@ -1681,7 +1692,13 @@ void TouchPointsApp::update(){
 			}
 		}
 	}
-	
+
+	if (realSenseHandler.getRealSenseDrawEnabled()){
+
+		realSenseHandler.streamCursorData();
+		realSenseHandler.realSenseDraw(fingerLocationFbo);
+	}
+
 	//Updates the active shapes being drawn by the user
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	(*activeFbo).bindFramebuffer();
@@ -1773,6 +1790,7 @@ void TouchPointsApp::draw()
 
 	/*Draws icons that provides feedback */
 	imageHandler.displayIcon();
+	
 	//Draws all the UI elements (Currently only updated the uiFbo which stores data for the mode box), drawing is done below.
 	ui.drawUi();
 
@@ -1823,10 +1841,15 @@ void TouchPointsApp::draw()
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	gl::draw(activeFbo->getColorTexture());
 
-	
+	if (realSenseHandler.getHoverFlag()){
+		//Draws finger location
+		gl::color(1.0, 1.0, 1.0, 1.0);
+		gl::draw(fingerLocationFbo->getColorTexture());
+	}
+	/*
 	auto mFont = Font("Quicksand Book Regular", 36.0f);
 	gl::drawString("Framerate: " + toString((int)getAverageFps()), vec2(windowWidth*.90, windowHeight *.01), ColorA(0.0,0.0,0.0,1.0), mFont);
-	
+	*/
 }
 
 CINDER_APP(TouchPointsApp, RendererGl, prepareSettings)

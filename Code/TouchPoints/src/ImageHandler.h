@@ -38,6 +38,7 @@ struct ImageHandler{
 		imageType = "png";
 		imageNum = 0;
 		layerAlpha = fboLayerAlpha;
+		startUpFlag = true;
 	}
 
 	void saveCanvas(vec2 windowSize, ColorA background);
@@ -45,6 +46,8 @@ struct ImageHandler{
 	void displayIcon();
 	void changeImageType(string imageType);
 	bool getIconFlag();
+	void displayStartLogo();
+	bool getStartUpFlag();
 
 
 
@@ -52,6 +55,7 @@ private:
 	std::vector<std::shared_ptr<gl::Fbo>>* mLayerList;
 	std::vector<float>* layerAlpha;
 	bool iconFlag;
+	bool startUpFlag;
 	float fadeTime;
 	string imageType;
 	int imageNum;
@@ -91,6 +95,35 @@ void ImageHandler::displayIcon(){
 	fadeTime -= 0.009;
 	*/
 }
+void ImageHandler::displayStartLogo(){
+	
+
+	gl::color(1.0, 1.0, 1.0, fadeTime);
+	gl::draw(imageTexture, Rectf(getWindowSize().x , getWindowSize().y , getWindowSize().x , getWindowSize().y));
+	//ms is fade time in milliseconds.
+	std::chrono::milliseconds ms{2000};
+	std::chrono::milliseconds dif{ std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - start };
+	long longMs = ms.count();
+	long longDif = dif.count();
+	fadeTime = 1.0f*(longMs - longDif) / longMs;
+
+	if (fadeTime == 0.0){
+		startUpFlag = false;
+		iconFlag = false;
+	}
+	
+	//fadeTime -= 0.009;
+
+	/*
+	if (fadeTime <= 0.1){
+	iconFlag = false;
+	//		processing = false;
+	fadeTime = 1;
+	}
+
+	fadeTime -= 0.009;
+	*/
+}
 void ImageHandler::changeImageType(string newImageType){
 	imageType = newImageType;
 }
@@ -124,6 +157,9 @@ void ImageHandler::saveCanvas(vec2 windowSize, ColorA background){
 	imageNum++;
 	loadIcon("Save.png");
 	cout << "Image " << imageNum << "Saved!";
+}
+bool ImageHandler::getStartUpFlag(){
+	return startUpFlag;
 }
 
 
