@@ -1804,10 +1804,11 @@ void TouchPointsApp::draw()
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	gl::draw(activeFbo->getColorTexture());
 
-	/*
-	auto mFont = Font("Quicksand Book Regular", 36.0f);
-	gl::drawString("Framerate: " + toString((int)getAverageFps()), vec2(windowWidth*.90, windowHeight *.01), ColorA(0.0,0.0,0.0,1.0), mFont);
-	*/
+	if (ui.getFps()){
+		auto mFont = Font("Quicksand Book Regular", 36.0f);
+		gl::drawString("Framerate: " + toString((int)getAverageFps()), vec2(windowWidth*.90, windowHeight *.01), ColorA(0.0, 0.0, 0.0, 1.0), mFont);
+	}
+	
 }
 
 CINDER_APP(TouchPointsApp, RendererGl, prepareSettings)
