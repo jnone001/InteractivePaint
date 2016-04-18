@@ -45,7 +45,7 @@ struct UserInterface{
 		shapeButtons = false;
 		layerVisualization = false;
 		deviceButtons = false;
-		transparentBackground = false;
+		transparentBackground = true;
 
 		//Adds our backgroundColors to the list. 
 		backgroundList.emplace_back(Color(0.0f, 0.0f, 0.0f));

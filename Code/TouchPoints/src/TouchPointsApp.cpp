@@ -102,11 +102,11 @@ int resolutionY;
 
 
 #define SWIPE_GESTURE 8
-#define windowWidth  getWindowSize().x
-#define windowHeight getWindowSize().y
+//#define windowWidth  getWindowSize().x
+//#define windowHeight getWindowSize().y
 
-//#define windowWidth  1919
-//#define windowHeight 1079
+#define windowWidth  1919
+#define windowHeight 1079
 
 #define FRAME_RATE 120
 
@@ -214,6 +214,8 @@ public:
 	bool shapeButtons = false;
 	bool uiFboFlag = false;
 	bool layerVisualization = false;
+
+	bool startUpFlag = true;
 
 	//Variables to keep track of performance. It is cleared once every second.
 	int frames = 0;
@@ -333,6 +335,9 @@ private:
 	std::shared_ptr<gl::Fbo>		radialFbo;
 	//Proxy Menu Fbo
 	std::shared_ptr<gl::Fbo>		proxFbo;
+
+	//
+	std::shared_ptr<gl::Fbo>		fingerLocationFbo;
 
 
 };
@@ -613,7 +618,7 @@ void TouchPointsApp::setup()
 	CI_LOG_I("MT: " << System::hasMultiTouch() << " Max points: " << System::getMaxMultiTouchPoints());
 	glEnable(GL_LINE_SMOOTH);
 	//setWindowSize(windowWidth, windowHeight);
-	setFullScreen(1);
+	//setFullScreen(1);
 
 	//Sets window size and initializes framebuffers (layers).
 	setWindowSize(windowWidth, windowHeight);
@@ -641,6 +646,10 @@ void TouchPointsApp::setup()
 
 	//Enable all Leap Gestures
 	TouchPointsApp::enableGest(leapContr);
+
+	//Set up fingerlocation FBo
+	fingerLocationFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+
 
 	leapContr.config().setFloat("Gesture.Swipe.MinLength", 150.0);
 	leapContr.config().setFloat("Gesture.Swipe.MinVelocity", 500.0);
@@ -677,8 +686,8 @@ void TouchPointsApp::setup()
 	imageHandler = ImageHandler(&layerList, &layerAlpha);
 
 	//RealSense Setup
-	realSenseHandler = RealSenseHandler();
-	realSenseHandler.intializeFaceSensing();
+	realSenseHandler = RealSenseHandler(&illustrator);
+	
 	//realSenseHandler.streamData();
 
 	//Set up UI
@@ -748,6 +757,7 @@ void TouchPointsApp::setup()
 	}
 	*/
 #endif
+
 
 }
 
@@ -924,7 +934,6 @@ void TouchPointsApp::leapDraw(Leap::Frame frame){
 				activePointsMap[points.id()] = true;
 				pointsMap[points.id()] = vec2(leapXCoordinate, leapYCoordinate);
 			}
-
 
 		}
 	}
@@ -1562,31 +1571,41 @@ void TouchPointsApp::touchesEnded(TouchEvent event)
 void TouchPointsApp::setDefaultMode(Mode::DefaultModes mode){
 
 	bool temp = false;
+	bool temp2 = true;
 
 	switch (mode){
 	case Mode::DefaultModes::MLE:
+		ui.changeModeButtons(temp2);
 		break;
 	case Mode::DefaultModes::MLR:
+		ui.changeModeButtons(temp2);
 		break;
 	case Mode::DefaultModes::MER:
+		ui.changeModeButtons(temp2);
 		break;
 	case Mode::DefaultModes::LER:
 		ui.changeModeButtons(temp);
 		break;
 	case Mode::DefaultModes::ML:
+		ui.changeModeButtons(temp2);
 		break;
 	case Mode::DefaultModes::ME:
+		ui.changeModeButtons(temp2);
 		break;
 	case Mode::DefaultModes::MR:
+		ui.changeModeButtons(temp2);
 		break;
 	case Mode::DefaultModes::LE:
 		ui.changeModeButtons(temp);
 		break;
 	case Mode::DefaultModes::LR:
 		ui.changeModeButtons(temp);
+		break;
 	case Mode::DefaultModes::ER:
 		ui.changeModeButtons(temp);
+		break;
 	case Mode::DefaultModes::M:
+		ui.changeModeButtons(temp2);
 		break;
 	case Mode::DefaultModes::L:
 		ui.changeModeButtons(temp);
@@ -1596,6 +1615,7 @@ void TouchPointsApp::setDefaultMode(Mode::DefaultModes mode){
 		break;
 	case Mode::DefaultModes::R:
 		ui.changeModeButtons(temp);
+		break;
 	}
 }
 
@@ -1605,9 +1625,11 @@ void TouchPointsApp::mouseDown(MouseEvent event)
 
 void TouchPointsApp::update(){
 
-	
+
+
 	if (!setupComplete){
 		ui.uiSetup();
+		realSenseHandler.realSenseSetup();
 		setupComplete = true;
 	}
 	//Increment the frame counter
@@ -1633,7 +1655,15 @@ void TouchPointsApp::update(){
 		if (deviceHandler.deviceConnection()){
 			ui.setModeChangeFlag();
 		}
+		//Checks to see if default mode needs to be reset
+		if (deviceHandler.getUpdateDefaultFlag()){
+			deviceHandler.updateDefaultMode();
+			Mode::DefaultModes resultMode = deviceHandler.getDefaultMode();
+			setDefaultMode(resultMode);
+		}
 	}
+
+	
 	
 	//Checks the real sense device and updates anything associated with it.
 	if (deviceHandler.realSenseStatus()){
@@ -1662,7 +1692,13 @@ void TouchPointsApp::update(){
 			}
 		}
 	}
-	
+
+	if (realSenseHandler.getRealSenseDrawEnabled()){
+
+		realSenseHandler.streamCursorData();
+		realSenseHandler.realSenseDraw(fingerLocationFbo);
+	}
+
 	//Updates the active shapes being drawn by the user
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	(*activeFbo).bindFramebuffer();
@@ -1754,6 +1790,7 @@ void TouchPointsApp::draw()
 
 	/*Draws icons that provides feedback */
 	imageHandler.displayIcon();
+	
 	//Draws all the UI elements (Currently only updated the uiFbo which stores data for the mode box), drawing is done below.
 	ui.drawUi();
 
@@ -1809,6 +1846,13 @@ void TouchPointsApp::draw()
 		gl::drawString("Framerate: " + toString((int)getAverageFps()), vec2(windowWidth*.90, windowHeight *.01), ColorA(0.0, 0.0, 0.0, 1.0), mFont);
 	}
 	
+
+	if (realSenseHandler.getHoverFlag()){
+		//Draws finger location
+		gl::color(1.0, 1.0, 1.0, 1.0);
+		gl::draw(fingerLocationFbo->getColorTexture());
+	}
+
 }
 
 CINDER_APP(TouchPointsApp, RendererGl, prepareSettings)
