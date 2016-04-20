@@ -41,6 +41,7 @@ struct UserInterface{
 		*/
 		uiFboFlag = true;
 		modeButtons = true;
+		brushButtons = false;
 		colorButtons = false;
 		shapeButtons = false;
 		layerVisualization = false;
@@ -90,6 +91,7 @@ struct UserInterface{
 	//UI Setup does all the drawing that cannot be done inside a libcinder 'setup' call, such as drawing to Framebuffers.
 	void uiSetup();
 	void drawDeviceButtonsFbo();
+	void drawBrushButtonsFbo();
 
 
 	void slideButtons(TouchEvent::Touch touch);
@@ -110,6 +112,7 @@ private:
 	//Frame Buffers for the UI. Mostly Fbo's that held button draw calls.
 	std::shared_ptr<gl::Fbo> uiFbo;
 	std::shared_ptr<gl::Fbo> modeButtonsFbo;
+	std::shared_ptr<gl::Fbo> brushButtonsFbo;
 	std::shared_ptr<gl::Fbo> deviceButtonsFbo;
 	std::shared_ptr<gl::Fbo> shapeButtonsFbo;
 	std::shared_ptr<gl::Fbo> colorButtonsFbo;
@@ -126,6 +129,7 @@ private:
 	bool eyeXRunning;
 	bool uiFboFlag;
 	bool modeButtons;
+	bool brushButtons;
 	bool colorButtons;
 	bool shapeButtons;
 	bool deviceButtons;
@@ -280,6 +284,126 @@ void UserInterface::drawDeviceButtonsFbo(){
 	deviceButtonsFbo->unbindFramebuffer();
 }
 
+void UserInterface::drawBrushButtonsFbo(){
+
+	glClearColor(1.0, 1.0, 1.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	brushButtonsFbo->bindFramebuffer();
+
+	//gl::color(0.0, 0.0, 0.0, 1.0);
+	//gl::drawSolidRect(Rectf(0, 0, 500, 50));
+
+	/*LineSize Button*/
+	gl::color(0.75, 0.75, .75, 1.0);
+	gl::drawStrokedRect(Rectf(100, 50, 200, 100), 5);
+
+	gl::color(0.0, 0.0, 0.0, 1.0);
+	gl::drawSolidRect(Rectf(100, 50, 200, 100));
+	TextLayout layout1;
+	layout1.clear(ColorA(0.0f, 0.0f, 0.0f, 0.0f));
+	layout1.setFont(Font("Arial", 50));
+	layout1.setColor(Color(1, 1, 1));
+	layout1.addLine(std::string("Line Size"));
+	Surface8u rendered = layout1.render(true, false);
+	gl::Texture2dRef mTexture = gl::Texture2d::create(rendered);
+	gl::color(Color::white());
+	gl::draw(mTexture, Rectf(Rectf(100, 50, 200, 100)));
+	
+	//Plus Button 
+	gl::color(0.75, 0.75, .75, 1.0);
+	gl::drawStrokedRect(Rectf(200, 50, 250, 100), 5);
+	gl::color(0.0, 0.0, 0.0, 1.0);
+	gl::drawSolidRect(Rectf(200, 50, 250, 100));
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::lineWidth(2);
+	gl::drawLine(vec2(210, 75), vec2(240, 75));
+	gl::drawLine(vec2(225, 60), vec2(225, 90));
+
+	//Minus Button
+	gl::color(0.75, 0.75, .75, 1.0);
+	gl::drawStrokedRect(Rectf(250, 50, 300, 100), 5);
+	gl::color(0.0, 0.0, 0.0, 1.0);
+	gl::drawSolidRect(Rectf(250, 50, 300, 100));
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::lineWidth(2);
+	gl::drawLine(vec2(260, 75), vec2(290, 75));
+
+	/*Transparency Button*/
+	gl::color(0.75, 0.75, .75, 1.0);
+	gl::drawStrokedRect(Rectf(100, 100, 200, 150), 5);
+
+	gl::color(0.0, 0.0, 0.0, 1.0);
+	gl::drawSolidRect(Rectf(100, 100, 200, 150));
+	TextLayout layout2;
+	layout2.clear(ColorA(0.0f, 0.0f, 0.0f, 0.0f));
+	layout2.setFont(Font("Arial", 50));
+	layout2.setColor(Color(1, 1, 1));
+	layout2.addLine(std::string("Transparency"));
+	Surface8u rendered2 = layout2.render(true, false);
+	gl::Texture2dRef mTexture2 = gl::Texture2d::create(rendered2);
+	gl::color(Color::white());
+	gl::draw(mTexture2, Rectf(Rectf(100, 100, 200, 150)));
+
+	//Plus Button 
+	gl::color(0.75, 0.75, .75, 1.0);
+	gl::drawStrokedRect(Rectf(200, 100, 250, 150), 5);
+	gl::color(0.0, 0.0, 0.0, 1.0);
+	gl::drawSolidRect(Rectf(200, 100, 250, 150));
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::lineWidth(2);
+	gl::drawLine(vec2(210, 125), vec2(240, 125));
+	gl::drawLine(vec2(225, 110), vec2(225, 140));
+
+	//Minus Button
+	gl::color(0.75, 0.75, .75, 1.0);
+	gl::drawStrokedRect(Rectf(250, 100, 300, 150), 5);
+	gl::color(0.0, 0.0, 0.0, 1.0);
+	gl::drawSolidRect(Rectf(250, 100, 300, 150));
+
+	gl::color(1.0, 1.0, 1.0);
+	gl::lineWidth(2);
+	gl::drawLine(vec2(260, 125), vec2(290, 125));
+
+	/*Filled Shapes Button*/
+
+	/*Fill Shapes*/
+	gl::color(0.75, 0.75, .75, 1.0);
+	gl::drawStrokedRect(Rectf(100, 150, 200, 200), 5);
+
+	gl::color(0.0, 0.0, 0.0, 1.0);
+	gl::drawSolidRect(Rectf(100, 150, 200, 200));
+	TextLayout layout3;
+	layout3.clear(ColorA(0.0f, 0.0f, 0.0f, 0.0f));
+	layout3.setFont(Font("Arial", 50));
+	layout3.setColor(Color(1, 1, 1));
+	layout3.addLine(std::string("Fill Shapes"));
+	Surface8u rendered3 = layout3.render(true, false);
+	gl::Texture2dRef mTexture3 = gl::Texture2d::create(rendered3);
+	gl::color(Color::white());
+	gl::draw(mTexture3, Rectf(Rectf(100, 150, 200, 200)));
+	
+	//Enable and Disabled Button
+	if ((*mBrush).getFilledShapes()){
+		gl::color(0.75, 0.75, .75, 1.0);
+		gl::drawStrokedRect(Rectf(200, 150, 250, 200), 5);
+		gl::color(0.0, 1.0, 0.0, 1.0);
+		gl::drawSolidRect(Rectf(200, 150, 250, 200));
+	}
+	else{
+		gl::color(0.75, 0.75, .75, 1.0);
+		gl::drawStrokedRect(Rectf(200, 150, 250, 200), 5);
+		gl::color(0.0, 0.0, 0.0, 1.0);
+		gl::drawSolidRect(Rectf(200, 150, 250, 200));
+	}
+	
+	brushButtonsFbo->unbindFramebuffer();
+
+}
+
 bool UserInterface::getFps(){
 	return FPS;
 }
@@ -356,97 +480,63 @@ void UserInterface::uiSetup(){
 	modeButtonsFbo->bindFramebuffer();
 
 	gl::color(0.0, 0.0, 0.0, 1.0);
-	gl::drawSolidRect(Rectf(0, 0, 500, 50));
+	gl::drawSolidRect(Rectf(0, 0, 350, 50));
+
 	//Color Button
+	gl::color(1.0, 1.0, 0);
+	gl::drawSolidRect(Rectf(0, 2, 20, 50));
+	gl::color(0.0, 1.0, 0.0);
+	gl::drawSolidRect(Rectf(20, 2, 35, 50));
+	gl::color(1.0, 0.0, 1.0);
+	gl::drawSolidRect(Rectf(35, 2, 50, 50));
 	gl::color(0.75, 0.75, .75, 1.0);
 	gl::drawStrokedRect(Rectf(0, 2, 100, 50), 10);
-	gl::color(1.0, 1.0, 0);
-	gl::drawSolidRect(Rectf(0, 0, 20, 50));
-	gl::color(0.0, 1.0, 0.0);
-	gl::drawSolidRect(Rectf(20, 0, 35, 50));
-	gl::color(1.0, 0.0, 1.0);
-	gl::drawSolidRect(Rectf(35, 0, 50, 50));
-
+	
 	//Shapes button
+	gl::color(0.0, 1.0, 1.0);
+	gl::drawSolidRect(Rectf(50, 2, 100, 50));
 	gl::color(0.75, 0.75, .75, 1.0);
 	gl::drawStrokedRect(Rectf(50, 2, 100, 50), 10);
-	gl::color(0.0, 1.0, 1.0);
-	gl::drawSolidRect(Rectf(50, 0, 100, 50));
 
-	//FilledShapes button
+	//Brush button
+	gl::color(1.0, 1.0, 1.0);
+	gl::drawSolidRect(Rectf(100, 2, 150, 50));
 	gl::color(0.75, 0.75, .75, 1.0);
 	gl::drawStrokedRect(Rectf(100, 2, 150, 50), 10);
-	gl::color(1.0, 1.0, 1.0);
-	gl::drawSolidRect(Rectf(100, 0, 150, 50));
-
-	//Line Size
-	gl::color(0.75, 0.75, .75, 1.0);
-	gl::drawStrokedRect(Rectf(150, 2, 200, 50), 10);
-	gl::color(0.0, 0.0, 0.0);
-	gl::drawSolidRect(Rectf(150, 0, 200, 50));
-
-	gl::color(1.0, 1.0, 1.0);
-	gl::lineWidth(2);
-	gl::drawLine(vec2(160, 25), vec2(190, 25));
-	gl::drawLine(vec2(175, 10), vec2(175, 40));
-
-	gl::color(0.75, 0.75, .75, 1.0);
-	gl::drawStrokedRect(Rectf(200, 2, 250, 50), 10);
-	gl::color(0.0, 0.0, 0.0);
-	gl::drawSolidRect(Rectf(200, 0, 250, 50));
-
-	gl::color(1.0, 1.0, 1.0);
-	//gl::lineWidth((*mBrush).getLineSize());
-	gl::drawLine(vec2(210, 25), vec2(240, 25));
-	//gl::drawLine(vec2(225, 10), vec2(225, 40));
-
-	//More transparency button
-	gl::color(0.75, 0.75, .75, 1.0);
-	gl::drawStrokedRect(Rectf(250, 2, 300, 50), 10);
-	gl::color(1.0, 0.0, 1.0, 1.0);
-	gl::drawSolidRect(Rectf(250, 0, 300, 50));
-	//Less transparent button
-	gl::color(0.75, 0.75, .75, 1.0);
-	gl::drawStrokedRect(Rectf(300, 2, 350, 50), 10);
-	gl::color(0.0, 1.0, 0.0, 1.0);
-	gl::drawSolidRect(Rectf(300, 0, 350, 50));
-
+	
 	//Symmetry Button
 	gl::color(0.75, 0.75, .75, 1.0);
-	gl::drawStrokedRect(Rectf(350, 2, 400, 50), 10);
-	gl::drawLine(vec2(375, 2), vec2(375, 15));
-	gl::drawLine(vec2(375, 20), vec2(375, 25));
-	gl::drawLine(vec2(375, 30), vec2(375, 35));
-	gl::drawLine(vec2(375, 40), vec2(375, 45));
+	gl::drawStrokedRect(Rectf(150, 2, 200, 50), 10);
+	gl::drawLine(vec2(175, 2), vec2(175, 15));
+	gl::drawLine(vec2(175, 20), vec2(175, 25));
+	gl::drawLine(vec2(175, 30), vec2(175, 35));
+	gl::drawLine(vec2(175, 40), vec2(175, 45));
 
 	//Layer Visualization Button
 	gl::color(0.75, 0.75, .75, 1.0);
-	gl::drawStrokedRect(Rectf(400, 2, 450, 50), 10);
+	gl::drawStrokedRect(Rectf(200, 2, 250, 50), 10);
 	gl::color(1.0, 1.0, 1.0, 1.0);
-	gl::drawStrokedRect(Rectf(410, 10, 430, 30), 1);
-	gl::drawStrokedRect(Rectf(420, 20, 440, 40), 1);
-
-
-	//Undo Button
-	gl::color(0.0, 0.0, 0.0, 1.0);
-	gl::drawSolidRect(Rectf(450, 2, 500, 50));
-	gl::color(0.75, 0.75, .75, 1.0);
-	gl::drawStrokedRect(Rectf(450, 2, 500, 50), 10);
-
-	//Background button
-	gl::color(0.0, 0.0, 0.0, 1.0);
-	gl::drawSolidRect(Rectf(500, 2, 550, 50));
-	gl::color(0.75, 0.75, .75, 1.0);
-	gl::drawStrokedRect(Rectf(500, 2, 550, 50), 10);
+	gl::drawStrokedRect(Rectf(210, 10, 230, 30), 1);
+	gl::drawStrokedRect(Rectf(220, 20, 240, 40), 1);
 
 	//Text Button
 	gl::color(0.0, 0.0, 0.0, 1.0);
-	gl::drawSolidRect(Rectf(550, 2, 600, 50));
+	gl::drawSolidRect(Rectf(250, 2, 300, 50));
 	gl::color(0.75, 0.75, .75, 1.0);
-	gl::drawStrokedRect(Rectf(550, 2, 600, 50), 10);
+	gl::drawStrokedRect(Rectf(250, 2, 300, 50), 10);
+
+	//Undo Button
+	gl::color(0.0, 0.0, 0.0, 1.0);
+	gl::drawSolidRect(Rectf(300, 2, 350, 50));
+	gl::color(0.75, 0.75, .75, 1.0);
+	gl::drawStrokedRect(Rectf(300, 2, 350, 50), 10);
 
 	modeButtonsFbo->unbindFramebuffer();
-
+	
+	brushButtonsFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+	
+	drawBrushButtonsFbo();
+	
 	//Sets up the draw calls for color buttons and writes them to an FBO.
 	colorButtonsFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 
@@ -616,7 +706,7 @@ void UserInterface::slideButtons(TouchEvent::Touch touch){
 			//gl::color(0.75, 0.75, .75, 1.0);
 			//gl::drawStrokedRect(Rectf(400, y - 200, 600, y), 10);
 
-			if (x > 400 && x < 450)
+			if (x > 200 && x < 250)
 			{
 				if (y > yDist - 200 && y < yDist)
 				{
@@ -824,51 +914,26 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 					return true;
 				}
 				else if (x < 150 && y < 50){
-					(*mBrush).changeFilledShapes(!(*mBrush).getFilledShapes());
-					modeChangeFlag = true;
+
+					//(*mBrush).changeFilledShapes(!(*mBrush).getFilledShapes());
+					//modeChangeFlag = true;
+					brushButtons = !brushButtons;
 					return true;
 				}
 				else if (x < 200 && y < 50){
-					(*mBrush).increaseLineSize();
-					//else lineSize = 1;
-					modeChangeFlag = true;
-					return true;
-				}
-				else if (x < 250 && y < 50){
-					(*mBrush).decreaseLineSize();
-					//else lineSize = 15;
-					modeChangeFlag = true;
-					return true;
-				}
-				else if (x < 300 && y < 50){
-					(*mBrush).decreaseAlpha();
-					modeChangeFlag = true;
-					return true;
-				}
-				else if (x < 350 && y < 50){
-					(*mBrush).increaseAlpha();
-					modeChangeFlag = true;
-					return true;
-				}
-				else if (x < 400 && y < 50){
 					(*(*mBrush).getSymmetry()).toggleSymmetry();
 					return true;
 				}
-				else if (x < 450 && y < 50){
+				else if (x < 250 && y < 50){
 					layerVisualization = !layerVisualization;
 					return true;
 				}
-				else if (x < 500 && y < 50 ){
-					(*illustrator).undoDraw(backgroundColor);
-					return true;
-				}
-				else if (x < 550 && y < 50){
-					incrementBackground();
-					return true;
-				}
-				else if(x < 600 && y < 50){
-					
+				else if (x < 300 && y < 50){
 					keyboard.beginSettingTextAnchor();
+					return true;
+				}
+				else if (x < 350 && y < 50){
+					(*illustrator).undoDraw(backgroundColor);
 					return true;
 				}
 			}
@@ -887,6 +952,7 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 			}
 		}
 	}
+
 	if (layerVisualization){
 		int yDist = (*layerList).size();
 		yDist = (*layerList).size() * 200 + 50;
@@ -895,11 +961,9 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 			//gl::color(0.75, 0.75, .75, 1.0);
 			//gl::drawStrokedRect(Rectf(400, y - 200, 600, y), 10);
 
-			
-
-			if (x > 400 && x < 800)
+			if (x > 200 && x < 600)
 			{
-				if (x < 450){
+				if (x < 250){
 					//Signals that the user is pressing layerVisualization 'slide button'
 					return true;
 				}
@@ -925,6 +989,41 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 			size = size + 1;
 		}
 	}
+
+	if (brushButtons){
+		//Line Size Plus button
+		if (x > 200 && x < 250 && y > 51 && y < 100){
+			(*mBrush).increaseLineSize();
+			modeChangeFlag = true;
+			return true;
+		}
+		//Line Size minus button
+		if (x > 250 && x < 300 && y > 50  && y < 100){
+			(*mBrush).decreaseLineSize();
+			modeChangeFlag = true;
+			return true;
+		}
+		//Transparency Plus button
+		if (x > 200 && x < 250 && y > 101 && y < 150){
+			(*mBrush).increaseAlpha();
+			modeChangeFlag = true;
+			return true;
+		}
+		//Transparency minus button
+		if (x > 250 && x < 300 && y > 101 && y < 150){
+			(*mBrush).decreaseAlpha();
+			modeChangeFlag = true;
+			return true;
+		}
+		//Filled Shapes
+		if (x > 200 && x < 250 && y > 151 && y < 200){
+			(*mBrush).changeFilledShapes(!(*mBrush).getFilledShapes());
+			drawBrushButtonsFbo();
+			modeChangeFlag = true;
+			return true;
+		}
+	}
+
 	if (shapeButtons){
 		if (x > 50 && x < 100 && y < 100){
 			(*mBrush).changeShape(Shape::Shape::Line);
@@ -1016,7 +1115,6 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 
 	return false;
 }
-
 
 void UserInterface::modeRectangle(){
 
@@ -1301,7 +1399,11 @@ void UserInterface::drawUi(){
 		if (modeButtons){
 			gl::color(1.0, 1.0, 1.0, 1.0);
 			gl::draw(modeButtonsFbo->getColorTexture());
+		}
 
+		if (brushButtons){
+			gl::color(1.0, 1.0, 1.0, 1.0);
+			gl::draw(brushButtonsFbo->getColorTexture());
 		}
 
 		if (colorButtons){
@@ -1333,28 +1435,28 @@ void UserInterface::drawUi(){
 		int layerNumber = 0;
 		for (auto frame : (*layerList)){
 			gl::color(backgroundColor.r,backgroundColor.g, backgroundColor.b, 1.0);
-			gl::drawSolidRect(Rectf(400,(y - 200), 800, y));
+			gl::drawSolidRect(Rectf(200,(y - 200), 600, y));
 
 			gl::color(0.75, 0.75, .75, 1.0);
-			gl::drawStrokedRect(Rectf(400, y - 200, 800, y), 10);
+			gl::drawStrokedRect(Rectf(200, y - 200, 600, y), 10);
 			gl::color(1.0, 1.0, 1.0, (*layerAlpha)[layerNumber]);
 			//frame->blitToScreen(Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(400, 1080 - (y - 200)), vec2(800, 1080 - y)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
-			gl::draw(frame->getColorTexture(), Rectf(400, (y - 200), 800, y));
+			gl::draw(frame->getColorTexture(), Rectf(200, (y - 200), 600, y));
 			gl::color(0.0,0.0,0.0,1.0);
-			gl::drawSolidRect(Rectf(400, y - 200, 450, y));
+			gl::drawSolidRect(Rectf(200, y - 200, 250, y));
 			gl::color(0.75, 0.75, .75, 1.0);
-			gl::drawStrokedRect(Rectf(400, y - 200, 450, y), 10);
+			gl::drawStrokedRect(Rectf(200, y - 200, 250, y), 10);
 			gl::color(1.0, 1.0, 1.0, 1.0);
 			
 
 			//Draws indicator for alpha level
 			gl::color(0.0, 1.0f, 0.0, 1.0f);
-			gl::drawSolidCircle(vec2(425, (y - 200) + (*layerAlpha)[layerNumber] * (y - (y - 200))), 5.0f);
+			gl::drawSolidCircle(vec2(225, (y - 200) + (*layerAlpha)[layerNumber] * (y - (y - 200))), 5.0f);
 
 			for (int x = 0; x < 8; x++)
 			{
 				gl::color(1.0, 1.0, 1.0, 1.0 - .125 * x);
-				gl::drawSolidRect(Rectf(400, (y - 200) + x*25, 450, (y - 200) + (x + 1) * 25));
+				gl::drawSolidRect(Rectf(200, (y - 200) + x*25, 250, (y - 200) + (x + 1) * 25));
 			}
 			y = y - 200;
 			layerNumber++;
