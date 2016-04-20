@@ -491,7 +491,7 @@ void RealSenseHandler::realSenseDraw(std::shared_ptr<gl::Fbo> &fingerLocation){
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		gl::color(0, 1, 0, 1);
+		gl::color(1, 0.75, 0, 1);
 		gl::drawSolidCircle(vec2(xPosition, yPosition), 40);
 		gl::color(1.0, 0.9, 0.5, 1);
 		gl::drawStrokedCircle(vec2(xPosition, yPosition), 40.0f, 10.0f);
