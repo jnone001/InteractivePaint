@@ -359,14 +359,23 @@ void UserInterface::uiSetup(){
 	gl::drawSolidRect(Rectf(0, 0, 500, 50));
 	//Color Button
 	gl::color(0.75, 0.75, .75, 1.0);
-	gl::drawStrokedRect(Rectf(0, 2, 100, 50), 10);
+	gl::drawStrokedRect(Rectf(0, 2, 50, 50), 10);
+	gl::color(0.3, 0.2, 0.5, 1.0);
+	gl::drawSolidRect(Rectf(0, 2, 50, 50));
+
+	gl::TextureRef texture = gl::Texture::create(loadImage(loadAsset("Colors.png")));
+
+	gl::color(1.0, 1.0, 1.0, 1.0);
+	gl::draw(texture, Rectf(0, 2, 45, 50));
+
+	/*
 	gl::color(1.0, 1.0, 0);
 	gl::drawSolidRect(Rectf(0, 0, 20, 50));
 	gl::color(0.0, 1.0, 0.0);
 	gl::drawSolidRect(Rectf(20, 0, 35, 50));
 	gl::color(1.0, 0.0, 1.0);
 	gl::drawSolidRect(Rectf(35, 0, 50, 50));
-
+	*/
 	//Shapes button
 	gl::color(0.75, 0.75, .75, 1.0);
 	gl::drawStrokedRect(Rectf(50, 2, 100, 50), 10);
