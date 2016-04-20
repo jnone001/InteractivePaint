@@ -1166,11 +1166,10 @@ void TouchPointsApp::drawProx(){
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	gl::color(1.0, 1.0, 1.0);
+	gl::lineWidth(10);
+	gl::color(0.0, 0.0, 0.0,1.0);
 	gl::drawLine(vec2(windowWidth*.5, windowHeight), vec2(windowWidth*.5, 0));
 
-
-	gl::color(1.0, 1.0, 1.0);
 	gl::drawLine(vec2(0, windowHeight*.5), vec2(windowWidth, windowHeight*.5));
 
 	(*proxFbo).unbindFramebuffer();
@@ -1778,18 +1777,12 @@ void TouchPointsApp::draw()
 		x++;
 	}
 
-
-
-
-
-
-#ifdef EYEX
-
-
-#endif
-
+	if (imageHandler.getStartUpFlag()){
+		imageHandler.loadStartIcon(START_LOGO);
+	}
 	/*Draws icons that provides feedback */
 	imageHandler.displayIcon();
+	imageHandler.displayStartIcon();
 	
 	//Draws all the UI elements (Currently only updated the uiFbo which stores data for the mode box), drawing is done below.
 	ui.drawUi();

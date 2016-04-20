@@ -16,7 +16,7 @@
 #define SHAPE_Filled_Circle "FilledCircle.png"
 #define SHAPE_Filled_Rectangle "FilledRectangle.png"
 #define SHAPE_Filled_Triangle "FilledTriangle.png"
-
+#define START_LOGO "interactive-paint-logo.png"
 
 namespace Shape{
 	enum Shape { Line, Circle, Rectangle, Triangle };
