@@ -1099,14 +1099,28 @@ void TouchPointsApp::drawRadial(){
 	//Draw left icon
 
 	gl::color(1.0, 1.0, 1.0, 1.0);
+
+	/*Old Way to Draw Icons to FBO.
 	imageTexture = gl::Texture::create(loadImage(loadAsset("AllColor.png")));
 	(*iconFbo).bindFramebuffer();
 	gl::clear(ColorA(1.0, 1.0, 1.0, 1.0));
 	gl::draw(imageTexture, Rectf(0, 0, 1920, 1080));
 	(*iconFbo).unbindFramebuffer();
+	*/
 	(*radialFbo).bindFramebuffer();
 
-	iconFbo->blitTo(radialFbo, Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(radialCenter.x - 125, windowHeight - radialCenter.y + 25), vec2(radialCenter.x - 75, windowHeight - radialCenter.y - 25)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
+
+	//New way to draw icons to FBO.
+	gl::TextureRef texture = gl::Texture::create(loadImage(loadAsset("Colors.png")));
+
+	gl::color(1.0, 1.0, 1.0, 1.0);
+	
+	gl::draw(texture, Rectf(radialCenter.x - 125, radialCenter.y - 25, radialCenter.x - 75,  radialCenter.y + 25));
+
+
+
+	//Outdated Icon Drawing to FBO.
+	//iconFbo->blitTo(radialFbo, Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(radialCenter.x - 125, windowHeight - radialCenter.y + 25), vec2(radialCenter.x - 75, windowHeight - radialCenter.y - 25)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
 	//iconFbo->blitTo(radialFbo, Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(0,0), vec2(100,100)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
 	/*
 	gl::color(1.0, 0.9, 0.5);
@@ -1116,31 +1130,43 @@ void TouchPointsApp::drawRadial(){
 	gl::drawSolidCircle(vec2(radialCenter.x - 100, radialCenter.y), 29.0f);
 	*/
 	//Draw Right IconimageTexture = gl::Texture::create(loadImage(loadAsset("AllColor.png")));
+	
 
+	texture = gl::Texture::create(loadImage(loadAsset("Shapes.png")));
+
+	gl::color(1.0, 1.0, 1.0, 1.0);
+
+	gl::draw(texture, Rectf(radialCenter.x + 75, radialCenter.y - 25, radialCenter.x + 125, radialCenter.y + 25));
+	
+	
+	
+	/*
 	imageTexture = gl::Texture::create(loadImage(loadAsset("ShapesIcon.png")));
 	(*iconFbo).bindFramebuffer();
 	gl::clear(ColorA(1.0, 1.0, 1.0, 1.0));
 	gl::draw(imageTexture, Rectf(10, 10, 1910, 1070));
 	(*iconFbo).unbindFramebuffer();
 	(*radialFbo).bindFramebuffer();
-
+	
 	iconFbo->blitTo(radialFbo, Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(radialCenter.x + 75, windowHeight - radialCenter.y + 25), vec2(radialCenter.x + 125, windowHeight - radialCenter.y - 25)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
-	/*
-	gl::color(1.0, 0.9, 0.5);
-	gl::drawStrokedCircle(vec2(radialCenter.x + 100, radialCenter.y), 30.0f, 2.0f);
-
-	gl::color(1.0, 1.0, 1.0);
-	gl::drawSolidCircle(vec2(radialCenter.x + 100, radialCenter.y), 29.0f);
 	*/
 
 	//Draw lower Icon
-	gl::color(1.0, 0.9, 0.5);
-	gl::drawStrokedCircle(vec2(radialCenter.x, radialCenter.y - 100), 30.0f, 2.0f);
+	//gl::color(1.0, 0.9, 0.5);
+	//gl::drawStrokedCircle(vec2(radialCenter.x, radialCenter.y - 100), 30.0f, 2.0f);
 
-	gl::color(1.0, 1.0, 1.0);
+	//gl::color(1.0, 1.0, 1.0);
 
-	gl::drawSolidCircle(vec2(radialCenter.x, radialCenter.y - 100), 29.0f);
+	//gl::drawSolidCircle(vec2(radialCenter.x, radialCenter.y - 100), 29.0f);
 	//Draw Upper Icon
+	texture = gl::Texture::create(loadImage(loadAsset("Undo.png")));
+
+	gl::color(1.0, 1.0, 1.0, 1.0);
+
+	gl::draw(texture, Rectf(radialCenter.x - 25, radialCenter.y -130, radialCenter.x + 25, radialCenter.y - 70));
+
+
+	//Draw Lower Icon
 	gl::color(1.0, 0.9, 0.5);
 	gl::drawStrokedCircle(vec2(radialCenter.x, radialCenter.y + 100), 30.0f, 2.0f);
 
@@ -1329,18 +1355,26 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		if (gazePositionX <= resolutionX / 2 && gazePositionY <= resolutionY / 2)
 		{
 			brush.changeShape(Shape::Shape::Line);
+			ui.setModeChangeFlag();
+			imageHandler.loadIcon(SHAPE_LINE);
 		}
 		else if (gazePositionX >= resolutionX / 2 && gazePositionY <= resolutionY / 2)
 		{
 			brush.changeShape(Shape::Shape::Circle);
+			ui.setModeChangeFlag();
+			imageHandler.loadIcon(SHAPE_Circle);
 		}
 		else if (gazePositionX <= resolutionX / 2 && gazePositionY >= resolutionY / 2)
 		{
 			brush.changeShape(Shape::Shape::Rectangle);
+			ui.setModeChangeFlag();
+			imageHandler.loadIcon(SHAPE_Rectangle);
 		}
 		else if (gazePositionX >= resolutionX / 2 && gazePositionY >= resolutionY / 2)
 		{
 			brush.changeShape(Shape::Shape::Triangle);
+			ui.setModeChangeFlag();
+			imageHandler.loadIcon(SHAPE_Triangle);
 		}
 
 	}
@@ -1461,28 +1495,29 @@ void TouchPointsApp::touchesBegan(TouchEvent event)
 			if ((((radialCenter.x - 100) - 30) < x && x < ((radialCenter.x - 100) + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30))){
 				//brush.changeStaticColor();
 				leapColorChange();
-				continue;
+				return;
 			}
 
 			if ((((radialCenter.x + 100) - 30) < x && x < ((radialCenter.x + 100) + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30))){
 				//brush.cycleShape();
 				leapShapeChange();
-				continue;
+				return;
 			}
 
 			if ((((radialCenter.x) - 30) < x && x < ((radialCenter.x) + 30)) && ((radialCenter.y - 100) - 30) < y && y < (radialCenter.y - 100) + 30){
-				mySymmetry.toggleSymmetry();
-				continue;
+				//mySymmetry.toggleSymmetry();
+				illustrator.undoDraw(ui.getBackgroundColor());
+				return;
 			}
 
 			if ((((radialCenter.x) - 30) < x && x < ((radialCenter.x) + 30)) && ((radialCenter.y + 100) - 30) < y && y < (radialCenter.y + 100) + 30){
 				ui.toggleUiFlag();
-				continue;
+				return;
 			}
 
 			if ((radialCenter.x - 30) < x && x < ((radialCenter.x + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30))){
 				radialActive = false;
-				continue;
+				return;
 			}
 		}
 		if (ui.inInteractiveUi(touch.getX(), touch.getY(), touch.getId())){
@@ -1652,6 +1687,7 @@ void TouchPointsApp::update(){
 
 		//Checks if any device statuses have changed.
 		if (deviceHandler.deviceConnection()){
+			ui.drawDeviceButtonsFbo();
 			ui.setModeChangeFlag();
 		}
 		//Checks to see if default mode needs to be reset
@@ -1666,7 +1702,9 @@ void TouchPointsApp::update(){
 	
 	//Checks the real sense device and updates anything associated with it.
 	if (deviceHandler.realSenseStatus()){
-		//Test
+
+		
+		//Checks if expressions is turned on.
 		if (deviceHandler.realSenseExpressions())
 		{
 			if (illustrator.getActiveDrawings() == 0){
@@ -1690,14 +1728,23 @@ void TouchPointsApp::update(){
 				realSenseHandler.resetGesturesFlag();
 			}
 		}
+
+		//Real Sense Draw
+		if (deviceHandler.realSenseDraw()){
+			//Draw functions for real sense.
+			realSenseHandler.streamCursorData();
+			realSenseHandler.realSenseDraw(fingerLocationFbo);
+
+		}
 	}
 
+	/*
 	if (realSenseHandler.getRealSenseDrawEnabled()){
 
 		realSenseHandler.streamCursorData();
 		realSenseHandler.realSenseDraw(fingerLocationFbo);
 	}
-
+	*/
 	//Updates the active shapes being drawn by the user
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	(*activeFbo).bindFramebuffer();
@@ -1804,16 +1851,16 @@ void TouchPointsApp::draw()
 	/*Draws the frame buffer for UI*/
 	if (deviceHandler.eyeXStatus()){
 
-		gl::color(0.0, 0.0, 0.0, .4);
-		/*
+		gl::color(0.0,0.0,0.0,0.4);
+		
 		vec2 gaze1(gazePositionX - 10, gazePositionY);
 		vec2 gaze2(gazePositionX + 10, gazePositionY);
 
 		gl::drawStrokedCircle(gaze1, 10.0f, 10.0f);
 		gl::drawStrokedCircle(gaze2, 10.0f, 10.0f);
-		*/
+		
 		gl::color(1.0, 1.0, 1.0, 1.0);
-		if (gazePositionX < 600 && gazePositionY < 100){
+		if (gazePositionX < 500 && gazePositionY < 100){
 			bool tempBool = true;
 			ui.changeModeButtons(tempBool);
 		}
@@ -1822,7 +1869,7 @@ void TouchPointsApp::draw()
 			ui.changeModeButtons(tempBool);
 		}
 
-		if (gazePositionX > windowWidth*.75 && gazePositionY > windowHeight*.75)
+		if (gazePositionX > windowWidth*.75 && gazePositionY > windowHeight*.6)
 		{
 			gl::draw(uiFbo->getColorTexture());
 		}

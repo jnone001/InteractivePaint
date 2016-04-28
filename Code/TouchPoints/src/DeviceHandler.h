@@ -27,6 +27,7 @@ struct DeviceHandler{
 		overrideMultiTouch = false;
 		overrideEyeX = false;
 		overrideRealSense = false;
+		realSenseDrawEnabled = false;
 		leapDrawEnabled = true;
 		leapGestureEnabled = true;
 		updateDefaultFlag = false;
@@ -46,8 +47,10 @@ struct DeviceHandler{
 	//Sense Device and Functionality
 	void toggleRealSense();
 	void toggleRealSenseExpressions();
+	void toggleRealSenseDraw();
 
 	bool realSenseExpressions();
+	bool realSenseDraw();
 	//Leap Device and Functionality
 	void toggleLeap();
 	void toggleLeapDraw();
@@ -98,6 +101,7 @@ private:
 	int eyeXConnected;
 	int realSenseConnected;
 	bool realSenseExpressionsEnabled;
+	bool realSenseDrawEnabled;
 	bool leapDrawEnabled;
 	bool leapGestureEnabled;
 	bool eyeXEnabled;
@@ -132,6 +136,16 @@ bool DeviceHandler::leapGesture(){
 bool DeviceHandler::realSenseExpressions(){
 	if (realSenseConnected){
 		return realSenseExpressionsEnabled;
+	}
+	else {
+		return false;
+	}
+
+}
+
+bool DeviceHandler::realSenseDraw(){
+	if (realSenseConnected){
+		return realSenseDrawEnabled;
 	}
 	else {
 		return false;
@@ -182,6 +196,10 @@ void DeviceHandler::toggleRealSense(){
 }
 void DeviceHandler::toggleRealSenseExpressions(){
 	realSenseExpressionsEnabled = !realSenseExpressionsEnabled;
+}
+
+void DeviceHandler::toggleRealSenseDraw(){
+	realSenseDrawEnabled = !realSenseDrawEnabled;
 }
 void DeviceHandler::toggleMultiTouch(){
 	if (multiTouchConnected){

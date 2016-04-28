@@ -148,6 +148,7 @@ private:
 
 };
 
+
 void RealSenseHandler::realSenseSetup(){
 	pxcStatus sts;
 

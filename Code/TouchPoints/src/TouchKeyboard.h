@@ -100,10 +100,24 @@ bool TouchKeyboard::needsCleanup(){
 }
 //Clears the string and disables all text writing features.
 void TouchKeyboard::endText(){
+	textFbo->bindFramebuffer();
+	glClearColor(1.0, 1.0, 1.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT);
+	TextLayout layout1;
+	layout1.clear(ColorA(0.2f, 0.2f, 0.2f, 0.0f));
+	layout1.setFont(Font(font, 62));
+	layout1.setColor(Color(0, 0, 0));
+	layout1.addLine(printString);
+	Surface8u rendered = layout1.render(true, false);
+	textTexture = gl::Texture2d::create(rendered);
+	gl::color(Color::white());
+	gl::draw(textTexture, textAnchor);
+	textFbo->unbindFramebuffer();
+
 	printString = "";
 	keyboardOn = false;
 	textCleanup = false;
-	drawText();
+	//drawText();
 }
 //Returns where the text is going to be written
 vec2 TouchKeyboard::getTextAnchor(){
@@ -112,6 +126,7 @@ vec2 TouchKeyboard::getTextAnchor(){
 //Turns on keyboard
 void TouchKeyboard::turnOnKeyboard(){
 	keyboardOn = true;
+	drawText();
 }
 
 //Sets where you want to write the text
@@ -138,7 +153,7 @@ void TouchKeyboard::drawText(){
 	layout1.clear(ColorA(0.2f, 0.2f, 0.2f, 0.0f));
 	layout1.setFont(Font(font, 62));
 	layout1.setColor(Color(0, 0, 0));
-	layout1.addLine(printString);
+	layout1.addLine(printString + "|");
 	Surface8u rendered = layout1.render(true, false);
 	textTexture = gl::Texture2d::create(rendered);
 	gl::color(Color::white());

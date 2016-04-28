@@ -92,6 +92,7 @@ struct UserInterface{
 	void uiSetup();
 	void drawDeviceButtonsFbo();
 	void drawBrushButtonsFbo();
+	void drawShapesButtonsFbo();
 
 
 	void slideButtons(TouchEvent::Touch touch);
@@ -153,6 +154,47 @@ private:
 
 };
 
+void UserInterface::drawShapesButtonsFbo(){
+	shapeButtonsFbo->bindFramebuffer();
+	for (int i = 0; i < 5; i++){
+
+
+		gl::color(1.0, 1.0, 1.0);
+		gl::drawSolidRect(Rectf(50, 50 * i + 50, 100, 50 * i + 100));
+		gl::color(0.75, 0.75, .75, 1.0);
+		gl::drawStrokedRect(Rectf(50, 50 * (i)+50, 100, 50 * i + 100), uiOutlineSize);
+	}
+
+	gl::TextureRef texture = gl::Texture::create(loadImage(loadAsset("Eraser.png")));
+
+	gl::color(1.0, 1.0, 1.0, 1.0);
+	gl::draw(texture, Rectf(55, 255, 95, 295));
+
+	gl::color((*mBrush).getColor());
+	gl::lineWidth(2);
+	gl::drawLine(vec2(55, 95), vec2(95, 55));
+
+	if ((*mBrush).getFilledShapes())
+		gl::drawSolidCircle(vec2(75, 125), 15);
+	else gl::drawStrokedCircle(vec2(75, 125), 15);
+
+	if ((*mBrush).getFilledShapes())
+		gl::drawSolidRect(Rectf(60, 188, 90, 160));
+	else gl::drawStrokedRect(Rectf(60, 188, 90, 160));
+
+
+	if ((*mBrush).getFilledShapes())
+		gl::drawSolidTriangle(vec2(55, 240), vec2(95, 240), vec2(73, 205));
+	else {
+
+		gl::drawLine(vec2(55, 240), vec2(95, 240));
+		gl::drawLine(vec2(95, 240), vec2(73, 205));
+		gl::drawLine(vec2(73, 205), vec2(55, 240));
+	}
+
+	shapeButtonsFbo->unbindFramebuffer();
+}
+
 void UserInterface::drawDeviceButtonsFbo(){
 
 	deviceButtonsFbo->bindFramebuffer();
@@ -163,7 +205,7 @@ void UserInterface::drawDeviceButtonsFbo(){
 
 	gl::lineWidth(5);
 	gl::color(0.0, 0.0, 0.0, 1.0);
-	gl::drawSolidRect(Rectf(windowWidth*.9, windowHeight*.59, windowWidth, windowHeight*.8));
+	gl::drawSolidRect(Rectf(windowWidth*.9, windowHeight*.56, windowWidth, windowHeight*.8));
 	gl::color(1.0, 1.0, 1.0, 1.0);
 
 	TextLayout layout1;
@@ -231,41 +273,60 @@ void UserInterface::drawDeviceButtonsFbo(){
 	layout7.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
 	layout7.setFont(Font("Arial", 50));
 	layout7.setColor(Color(1, 1, 1));
-	layout7.addLine(std::string(" Real Sense"));
+	layout7.addLine(std::string("Real Sense Draw"));
 	rendered = layout7.render(true, false);
 	mTexture = gl::Texture2d::create(rendered);
 	gl::color(Color::white());
 	gl::draw(mTexture, Rectf(windowWidth*.9, windowHeight*.59, windowWidth, windowHeight*.62));
 
+	TextLayout layout8;
+	layout8.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
+	layout8.setFont(Font("Arial", 50));
+	layout8.setColor(Color(1, 1, 1));
+	layout8.addLine(std::string(" Real Sense "));
+	rendered = layout8.render(true, false);
+	mTexture = gl::Texture2d::create(rendered);
+	gl::color(Color::white());
+	gl::draw(mTexture, Rectf(windowWidth*.9, windowHeight*.56, windowWidth, windowHeight*.59));
+
 	gl::color(0.0, 0.0, 0.0);
 
 	
-
-
 	if (deviceHandler->realSenseStatus())
 		gl::color(0.0, 1.0, 0.0);
 	else gl::color(0.0, 0.0, 0.0);
+	gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.56, windowWidth*.89, windowHeight*.59));
+
+	if (deviceHandler->realSenseDraw())
+		gl::color(0.0, 1.0, 0.0);
+	else gl::color(0.0, 0.0, 0.0);
 	gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.59, windowWidth*.89, windowHeight*.62));
+
 	if (deviceHandler->realSenseExpressions())
 		gl::color(0.0, 1.0, 0.0);
 	else gl::color(0.0, 0.0, 0.0);
 	gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.62, windowWidth*.89, windowHeight*.65));
+
 	if (deviceHandler->leapStatus())
 		gl::color(0.0, 1.0, 0.0);
 	else gl::color(0.0, 0.0, 0.0);
 	gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.65, windowWidth*.89, windowHeight*.68));
+
 	if (deviceHandler->leapDraw())
 		gl::color(0.0, 1.0, 0.0);
 	else gl::color(0.0, 0.0, 0.0);
 	gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.68, windowWidth*.89, windowHeight*.71));
+
 	if (deviceHandler->leapGesture())
 		gl::color(0.0, 1.0, 0.0);
 	else gl::color(0.0, 0.0, 0.0);
 	gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.71, windowWidth*.89, windowHeight*.74));
+
 	if (deviceHandler->eyeXStatus())
 		gl::color(0.0, 1.0, 0.0);
 	else gl::color(0.0, 0.0, 0.0);
 	gl::drawSolidRect(Rectf(windowWidth*.87, windowHeight*.74, windowWidth*.89, windowHeight*.77));
+
 	if (deviceHandler->multiTouchStatus())
 		gl::color(0.0, 1.0, 0.0);
 	else gl::color(0.0, 0.0, 0.0);
@@ -276,6 +337,7 @@ void UserInterface::drawDeviceButtonsFbo(){
 
 	gl::color(0.75, 0.75, .75, 1.0);
 	
+	gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.56, windowWidth*.89, windowHeight*.59));
 	gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.59, windowWidth*.89, windowHeight*.62));
 	gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.62, windowWidth*.89, windowHeight*.65));
 	gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.65, windowWidth*.89, windowHeight*.68));
@@ -285,7 +347,7 @@ void UserInterface::drawDeviceButtonsFbo(){
 	gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.77, windowWidth*.89, windowHeight*.8));
 	
 
-	gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.59, windowWidth*.89, windowHeight*.8), uiOutlineSize);
+	gl::drawStrokedRect(Rectf(windowWidth*.87, windowHeight*.56, windowWidth*.89, windowHeight*.8), uiOutlineSize);
 
 	deviceButtonsFbo->unbindFramebuffer();
 }
@@ -657,45 +719,11 @@ void UserInterface::uiSetup(){
 
 	//Draws Shapes Buttons FBO.
 	gl::color(1.0, 1.0, 1.0, 1.0);
-	shapeButtonsFbo = gl::Fbo::create(windowWidth, windowHeight, format);
-	shapeButtonsFbo->bindFramebuffer();
-	for (int i = 0; i < 5; i++){
-
-		
-		gl::color(1.0, 1.0, 1.0);
-		gl::drawSolidRect(Rectf(50, 50 * i + 50, 100, 50 * i + 100));
-		gl::color(0.75, 0.75, .75, 1.0);
-		gl::drawStrokedRect(Rectf(50, 50 * (i)+50, 100, 50 * i + 100), uiOutlineSize);
-	}
-
-	texture = gl::Texture::create(loadImage(loadAsset("Eraser.png")));
-
-	gl::color(1.0, 1.0, 1.0, 1.0);
-	gl::draw(texture, Rectf(55, 255, 95, 295));
-
-	gl::color((*mBrush).getColor());
-	gl::lineWidth(2);
-	gl::drawLine(vec2(55, 95), vec2(95, 55));
-
-	if ((*mBrush).getFilledShapes())
-		gl::drawSolidCircle(vec2(75, 125), 15);
-	else gl::drawStrokedCircle(vec2(75, 125), 15);
-
-	if ((*mBrush).getFilledShapes())
-		gl::drawSolidRect(Rectf(60, 188, 90, 160));
-	else gl::drawStrokedRect(Rectf(60, 188, 90, 160));
-
-
-	if ((*mBrush).getFilledShapes())
-		gl::drawSolidTriangle(vec2(55, 240), vec2(95, 240), vec2(73, 205));
-	else {
-
-		gl::drawLine(vec2(55, 240), vec2(95, 240));
-		gl::drawLine(vec2(95, 240), vec2(73, 205));
-		gl::drawLine(vec2(73, 205), vec2(55, 240));
-	}
 	
-	shapeButtonsFbo->unbindFramebuffer();
+	shapeButtonsFbo = gl::Fbo::create(windowWidth, windowHeight, format);
+
+	drawShapesButtonsFbo();
+	
 
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	//Loads the asset for transparent Background and writes it to the FBO.
@@ -846,8 +874,16 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 		//If the multi-touch is 'disabled' we still allow the user to toggle devices on and off using the multitouch
 		if (deviceButtons){
 			if (x < windowWidth && x > windowWidth *.87){
-				if (y > windowHeight * .59 && y < windowHeight * .62){
+
+				if (y > windowHeight * .56 && y < windowHeight * .59){
 					deviceHandler->toggleRealSense();
+					drawDeviceButtonsFbo();
+					modeChangeFlag = true;
+					return true;
+				}
+
+				if (y > windowHeight * .59 && y < windowHeight * .62){
+					deviceHandler->toggleRealSenseDraw();
 					drawDeviceButtonsFbo();
 					modeChangeFlag = true;
 					return true;
@@ -943,14 +979,15 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 			if (keyboard.onKeyboardButtons(vec2(x, y))){
 				//Checks if the keyboard is 'done' and needs to be cleaned up.
 				if (keyboard.needsCleanup()){
+					//Cleans up the keyboard by disabling it and deleting the string
+					keyboard.endText();
 					//Writes the keyboard text to the current Fbo.
 					layerList->back()->bindFramebuffer();
 					gl::color(1.0, 1.0, 1.0, 1.0);
 					gl::draw(keyboard.getTextFbo()->getColorTexture());
 					layerList->back()->unbindFramebuffer();
 
-					//Cleans up the keyboard by disabling it and deleting the string
-					keyboard.endText();
+					
 				}
 				return true;
 			}
@@ -964,11 +1001,12 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 
 			//If they are clicking outside the keyboard they want to 'shut it down'
 			//Finish cleaning up the keyboard.
+			keyboard.endText();
 			layerList->back()->bindFramebuffer();
 			gl::color(1.0, 1.0, 1.0, 1.0);
 			gl::draw(keyboard.getTextFbo()->getColorTexture());
 			layerList->back()->unbindFramebuffer();
-			keyboard.endText();
+			
 			return true;
 		}
 		
@@ -1054,6 +1092,7 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 				//currColor = i;
 				(*mBrush).changeStaticColor(static_cast<ourColors::ourColors>(i));
 				colorButtons = false;
+				drawShapesButtonsFbo();
 				modeChangeFlag = true;
 				return true;
 			}
@@ -1126,6 +1165,7 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 		if (x > 200 && x < 250 && y > 151 && y < 200){
 			(*mBrush).changeFilledShapes(!(*mBrush).getFilledShapes());
 			drawBrushButtonsFbo();
+			drawShapesButtonsFbo();
 			modeChangeFlag = true;
 			return true;
 		}
@@ -1171,8 +1211,17 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 	}
 	if (deviceButtons){
 		if (x < windowWidth && x > windowWidth *.87){
-			if (y > windowHeight * .59 && y < windowHeight * .62){
+
+
+			if (y > windowHeight * .56 && y < windowHeight * .59){
 				deviceHandler->toggleRealSense();
+				drawDeviceButtonsFbo();
+				modeChangeFlag = true;
+				return true;
+			}
+
+			if (y > windowHeight * .59 && y < windowHeight * .62){
+				deviceHandler->toggleRealSenseDraw();
 				drawDeviceButtonsFbo();
 				modeChangeFlag = true;
 				return true;
@@ -1507,35 +1556,37 @@ void UserInterface::drawUi(){
 		//uiFboFlag = false;
 	}
 	if (uiFboFlag){//Constantly drawn Ui buttons. If ui flag is off, we shut down the ui
+					//Currently shuts down nothing because it needs to be developed in parralel to inInteractiveUi
+	}
 
-		if (settingsButtons){
-			gl::color(1.0, 1.0, 1.0, 1.0);
-			gl::draw(settingsButtonsFbo->getColorTexture());
-
-		}
-
-		if (modeButtons){
-			gl::color(1.0, 1.0, 1.0, 1.0);
-			gl::draw(modeButtonsFbo->getColorTexture());
-		}
-
-		if (brushButtons){
-			gl::color(1.0, 1.0, 1.0, 1.0);
-			gl::draw(brushButtonsFbo->getColorTexture());
-		}
-
-		if (colorButtons){
-			gl::color(1.0, 1.0, 1.0, 1.0);
-			gl::draw(colorButtonsFbo->getColorTexture());
-			
-		}
-		if (shapeButtons){
-
-			gl::color(1.0, 1.0, 1.0, 1.0);
-			gl::draw(shapeButtonsFbo->getColorTexture());
-		}
+	if (settingsButtons){
+		gl::color(1.0, 1.0, 1.0, 1.0);
+		gl::draw(settingsButtonsFbo->getColorTexture());
 
 	}
+
+	if (modeButtons){
+		gl::color(1.0, 1.0, 1.0, 1.0);
+		gl::draw(modeButtonsFbo->getColorTexture());
+	}
+
+	if (brushButtons){
+		gl::color(1.0, 1.0, 1.0, 1.0);
+		gl::draw(brushButtonsFbo->getColorTexture());
+	}
+
+	if (colorButtons){
+		gl::color(1.0, 1.0, 1.0, 1.0);
+		gl::draw(colorButtonsFbo->getColorTexture());
+			
+	}
+	if (shapeButtons){
+
+		gl::color(1.0, 1.0, 1.0, 1.0);
+		gl::draw(shapeButtonsFbo->getColorTexture());
+	}
+
+	
 	if ((*(*mBrush).getSymmetry()).getSymmetryOn()){
 		for (int i = 0; i < 50; i = i + 2){
 			gl::lineWidth(4);
@@ -1597,10 +1648,10 @@ void UserInterface::drawUi(){
 		gl::draw(keyboard.getKeyboardFbo()->getColorTexture());
 		gl::draw(keyboard.getTextFbo()->getColorTexture());
 
-		gl::color(0.0, 0.0, 0.0, 0.5);
-		vec2 textAnchor = keyboard.getTextAnchor();
-		gl::lineWidth(5);
-		gl::drawLine(vec2(textAnchor.x, textAnchor.y + 80), vec2(textAnchor.x, textAnchor.y +40));
+		//gl::color(0.0, 0.0, 0.0, 0.5);
+		//vec2 textAnchor = keyboard.getTextAnchor();
+		//gl::lineWidth(5);
+		//gl::drawLine(vec2(textAnchor.x, textAnchor.y + 80), vec2(textAnchor.x, textAnchor.y +40));
 	}
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	if (keyboard.getMovingKeyboard()){
