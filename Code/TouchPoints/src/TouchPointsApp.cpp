@@ -1351,30 +1351,33 @@ void TouchPointsApp::keyDown(KeyEvent event)
 #ifdef EYEX
 	else if (event.getChar() == ' ')
 	{
+		if (deviceHandler.eyeXStatus()){
 
-		if (gazePositionX <= resolutionX / 2 && gazePositionY <= resolutionY / 2)
-		{
-			brush.changeShape(Shape::Shape::Line);
-			ui.setModeChangeFlag();
-			imageHandler.loadIcon(SHAPE_LINE);
-		}
-		else if (gazePositionX >= resolutionX / 2 && gazePositionY <= resolutionY / 2)
-		{
-			brush.changeShape(Shape::Shape::Circle);
-			ui.setModeChangeFlag();
-			imageHandler.loadIcon(SHAPE_Circle);
-		}
-		else if (gazePositionX <= resolutionX / 2 && gazePositionY >= resolutionY / 2)
-		{
-			brush.changeShape(Shape::Shape::Rectangle);
-			ui.setModeChangeFlag();
-			imageHandler.loadIcon(SHAPE_Rectangle);
-		}
-		else if (gazePositionX >= resolutionX / 2 && gazePositionY >= resolutionY / 2)
-		{
-			brush.changeShape(Shape::Shape::Triangle);
-			ui.setModeChangeFlag();
-			imageHandler.loadIcon(SHAPE_Triangle);
+
+			if (gazePositionX <= resolutionX / 2 && gazePositionY <= resolutionY / 2)
+			{
+				brush.changeShape(Shape::Shape::Line);
+				ui.setModeChangeFlag();
+				imageHandler.loadIcon(SHAPE_LINE);
+			}
+			else if (gazePositionX >= resolutionX / 2 && gazePositionY <= resolutionY / 2)
+			{
+				brush.changeShape(Shape::Shape::Circle);
+				ui.setModeChangeFlag();
+				imageHandler.loadIcon(SHAPE_Circle);
+			}
+			else if (gazePositionX <= resolutionX / 2 && gazePositionY >= resolutionY / 2)
+			{
+				brush.changeShape(Shape::Shape::Rectangle);
+				ui.setModeChangeFlag();
+				imageHandler.loadIcon(SHAPE_Rectangle);
+			}
+			else if (gazePositionX >= resolutionX / 2 && gazePositionY >= resolutionY / 2)
+			{
+				brush.changeShape(Shape::Shape::Triangle);
+				ui.setModeChangeFlag();
+				imageHandler.loadIcon(SHAPE_Triangle);
+			}
 		}
 
 	}
