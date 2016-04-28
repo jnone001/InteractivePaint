@@ -208,7 +208,7 @@ void Illustrator::beginTouchShapes(uint32_t myId, vec2 myPos)
 		//ColorA newColor(backgroundArray[currBackground][0], backgroundArray[currBackground][1], backgroundArray[currBackground][2], 1);
 		myActivePoints.insert(make_pair(myId, TouchPoint(myPos, (*mBrush).getColor(), (*mBrush).getLineSize() * 2)));
 		bool tempBool = false;
-		myActiveCirclesEraser.insert(make_pair(myId, TouchCircle(myPos, (*mBrush).getLineSize() * 2, Color(1.0, 1.0, 1.0), 1, tempBool)));
+		myActiveCirclesEraser.insert(make_pair(myId, TouchCircle(myPos, (*mBrush).getLineSize() * 2, Color(0.0, 0.0, 0.0), 1, tempBool)));
 	}
 	else {
 		switch ((*mBrush).getShape()){
