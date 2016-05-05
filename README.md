@@ -9,6 +9,18 @@ License B: The second license, is a private license available via Dr. Rishe and 
 ![](https://cloud.githubusercontent.com/assets/9858188/15053885/c8e0fb9c-12d2-11e6-8890-e6214fa2a825.png)
 
 
+Multi Modal Interactive Paint is an application designed to showcase various input devices. Currently implemented devices include
+	Multitouch Monitor
+	Tobii EyeX
+	Leap Motion Controller
+	Intel Real Sense Camera
+	
+The application was designed for the OpenHID lab at Florida International University. It will be an application that sets the baseline for testing new devices on their indevelopment Smart Desk, a desk designed for students that will make use of various input devices.
+
+The application is a painting application, allowing users to draw on a canvas using different shapes, colors, as well as more intricate functionality such as layer and alpha color support. 
+
+The software also gives the user some basic control over what they want their active devices to do, for example the Leap Motion can be toggled on to perform Drawing and Hand Gesture Recognition, you can also toggle one of these off so making performing the other simpler. 
+
 User Read Me
 
 Multitouch Read Me
