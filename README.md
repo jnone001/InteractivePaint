@@ -205,10 +205,10 @@ Leap Motion Drawing
 		interaction zone.
 		
 
-		![image](https://cloud.githubusercontent.com/assets/9858188/15054139/f6ea33b8-12d3-11e6-8f88-8321a76c6d4d.png)
+![image](https://cloud.githubusercontent.com/assets/9858188/15054139/f6ea33b8-12d3-11e6-8f88-8321a76c6d4d.png)
 						Leap Motion Drawing in Action!
 
-Leap Motion Gestures
+	Leap Motion Gestures
 		Leap motion device has three different gestures that allows a user to change a current setting of the 
 		program or save an image. 
 		
