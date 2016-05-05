@@ -24,7 +24,7 @@
 //Our own includes
 //#include "TouchShapes.h"
 #include "SymmetryLine.h"
-#include "TouchShapes.h"
+//#include "TouchShapes.h"
 #include "Illustrator.h"
 #include "Enums.h"
 #include "Brush.h"
@@ -1346,7 +1346,7 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		drawRadial();
 	}
 	else if (event.getChar() == 'g'){
-		leapDrawFlag = true;
+		ui.toggleUiFlag();
 	}
 #ifdef EYEX
 	else if (event.getChar() == ' ')
@@ -1390,6 +1390,25 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	{
 		leapColorChange();
 	}
+	else if (event.getChar() == '1'){
+		leapShapeChange();
+	}
+	else if (event.getChar() == '2'){
+		
+		illustrator.undoDraw(ui.getBackgroundColor());
+	}
+	else if (event.getChar() == '3'){
+		leapColorChange();
+	}
+	else if (event.getChar() == '4'){
+		mySymmetry.toggleSymmetry();
+	}
+	else if (event.getChar() == '5'){
+		ui.toggleUiFlag();
+	}
+
+
+
 
 }
 

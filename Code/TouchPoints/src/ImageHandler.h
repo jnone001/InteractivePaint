@@ -75,6 +75,9 @@ private:
 bool ImageHandler::getIconFlag(){
 	return iconFlag;
 }
+
+//Function that will display the currently loaded icon. 
+//Has a fade built in based on how long it's been since the icon was loaded.
 void ImageHandler::displayIcon(){
 	if (iconFlag == false)
 		return;
@@ -89,17 +92,7 @@ void ImageHandler::displayIcon(){
 	if (dif  >= ms){
 		iconFlag = false;
 	}
-	//fadeTime -= 0.009;
 
-	/*
-	if (fadeTime <= 0.1){
-		iconFlag = false;
-//		processing = false;
-		fadeTime = 1;
-	}
-
-	fadeTime -= 0.009;
-	*/
 }
 void ImageHandler::changeImageType(string newImageType){
 	imageType = newImageType;

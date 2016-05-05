@@ -79,7 +79,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\include;C:\SeniorProject\EyeX\include;C:\SeniorProject\Leap\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\include;C:\SeniorProject\cinder_0.9.0_vc2013\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Intel\RSSDK\include;C:\Users\IEatR\libusb\libusb\libusb;..\include;C:\SeniorProject\EyeX\include;C:\SeniorProject\Leap\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\include;C:\SeniorProject\cinder_0.9.0_vc2013\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0601;_WINDOWS;NOMINMAX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -93,14 +93,14 @@
       <AdditionalIncludeDirectories>"..\..\cinder_0.9.0_vc2013\include";..\include</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>cinder-$(PlatformToolset)_d.lib;OpenGL32.lib;Leap.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\SeniorProject\cinder_0.9.0_vc2013\lib\msw\x86;C:\SeniorProject\Leap\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86;C:\SeniorProject\EyeX\lib\x86;..\..\cinder_0.9.0_vc2013\lib\msw\$(PlatformTarget);C:\Program Files (x86)\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cinder-$(PlatformToolset)_d.lib;OpenGL32.lib;Leap.lib;C:\Users\IEatR\libusb\libusb\Win32\Debug\lib\libusb-1.0.lib;libpxcmd_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Intel\RSSDK\lib;C:\SeniorProject\cinder_0.9.0_vc2013\lib\msw\x86;C:\SeniorProject\Leap\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86;C:\SeniorProject\EyeX\lib\x86;..\..\cinder_0.9.0_vc2013\lib\msw\$(PlatformTarget);C:\Program Files (x86)\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
-      <IgnoreSpecificDefaultLibraries>LIBCMT;LIBCPMT</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>LIBCMT;LIBCPMT;LibCmtD</IgnoreSpecificDefaultLibraries>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -188,14 +188,26 @@
   <ItemGroup>
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <ClCompile Include="..\src\TouchPointsApp.cpp" />
     <ClCompile Include="..\src\TouchShapes.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\TouchShapes.h" />
     <ClInclude Include="..\include\Resources.h" />
+    <ClInclude Include="..\src\Brush.h" />
+    <ClInclude Include="..\src\Canvas.h" />
+    <ClInclude Include="..\src\DeviceHandler.h" />
+    <ClInclude Include="..\src\Enums.h" />
+    <ClInclude Include="..\src\Illustrator.h" />
+    <ClInclude Include="..\src\ImageHandler.h" />
+    <ClInclude Include="..\src\RealSenseHandler.h" />
+    <ClInclude Include="..\src\SymmetryLine.h" />
+    <ClInclude Include="..\src\TouchKeyboard.h" />
+    <ClInclude Include="..\src\TouchShapes.h" />
+    <ClInclude Include="..\src\UserInterface.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\resources\Icon.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
