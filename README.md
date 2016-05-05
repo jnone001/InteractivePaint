@@ -4,11 +4,11 @@ License A:  GPL v2 and/or GPL v3
 
 License B: The second license, is a private license available via Dr. Rishe and Dr. Ortega. Write to fortega@cs.fiu.edu for more information. 
 
-# InteractivePaint
+
 
 ![](https://cloud.githubusercontent.com/assets/9858188/15053885/c8e0fb9c-12d2-11e6-8890-e6214fa2a825.png)
 
-ModernTouch4
+
 User Read Me
 
 Multitouch Read Me
@@ -37,6 +37,12 @@ Drawing with the Multitouch device is simple. Simply drag your fingers accross a
 		When in triangle mode, the touch of your finger represents the center of the base.
 		Drag your finger to change the height as well as width of the triangle.
 		Release your finger when the desired height and width is created.
+
+Here is our basic user interface : 
+
+![image](https://cloud.githubusercontent.com/assets/9858188/15054055/99c1cab6-12d3-11e6-9198-7e89836b47d6.png)
+
+
 
 Mode Buttons (Top left of UI) - From left to right
 
@@ -72,6 +78,9 @@ Mode Buttons (Top left of UI) - From left to right
 		
 		The Menu also allows you to drag a green dot up and down a slider. This will allow you to change the Alpha color of that layer.
 		
+		![image](https://cloud.githubusercontent.com/assets/9858188/15054100/d582c9a6-12d3-11e6-9768-23c1b99f5197.png)
+				Layer Visualization Menu
+		
 	'A' Text Icon
 		Tap this icon, and then tap anywhere on the screen to begin writing text.
 		A Touch Keyboard will appear, simply tap any keys to type. 
@@ -81,6 +90,10 @@ Mode Buttons (Top left of UI) - From left to right
 	Undo Button
 		The Undo button simply undoes the last drawing that you performed on the currently active layer.
 	
+Here is an example of some of these menus 
+
+![image](https://cloud.githubusercontent.com/assets/9858188/15054083/c43a0d8a-12d3-11e6-85ed-a8db4aecd0e9.png)
+ 
 		
 Multitouch Gestures 
 
@@ -135,6 +148,9 @@ EyeX Guide -
 	
 	In addition, tapping space with the EyeX enabled will change your shape based on where you are looking.
 	
+	![image](https://cloud.githubusercontent.com/assets/9858188/15054183/27b7a58e-12d4-11e6-9a85-455dd248eb89.png)
+This image displays the Two circles that show where you gaze is being tracked to. In addition it is close enough to the mode box to pull it up.
+	
 	
 Keyboard Shortcuts 
 
@@ -187,6 +203,9 @@ Leap Motion Drawing
 		
 		When a person wants to finish a line drawn he or she must remove their hand from the leap motion device's 
 		interaction zone.
+		
+		![image](https://cloud.githubusercontent.com/assets/9858188/15054139/f6ea33b8-12d3-11e6-8f88-8321a76c6d4d.png)
+						Leap Motion Drawing in Action!
 
 	Leap Motion Gestures
 		Leap motion device has three different gestures that allows a user to change a current setting of the 
