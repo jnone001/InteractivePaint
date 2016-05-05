@@ -275,3 +275,19 @@ Leap Motion Drawing
 	Troublshooting:
 	Make sure the leap motion service is running on the machine perform starting the Interactive Paint Program.
 
+Intel Real Sense Guide
+
+	Drawing - 
+		Drawing can be performed similar to the Leap Motion device. You simply move your hand forward and draw iwth your entire hand. The interface for drawing is very similar, instead of green circles they are simply yellow circles to indicate where the drawing will occur.
+	Facial Recognition
+		The real sense also provides a facial detection service. We implemented 5 Facial Gesture so far including : 
+		
+		Kiss Gesture - Toggles User Interface for Mode box and Mode Buttons
+		
+		Smile Gesture - Changes Shapes
+		
+		Eyebrow Raise Gesture - Calls the undo function
+		
+		Puffy Cheeks Gesture - Changes colors
+		
+		Tongue Out Gesture - Toggles Symmetry Line.
