@@ -78,7 +78,7 @@ Mode Buttons (Top left of UI) - From left to right
 		
 		The Menu also allows you to drag a green dot up and down a slider. This will allow you to change the Alpha color of that layer.
 		
-		![image](https://cloud.githubusercontent.com/assets/9858188/15054100/d582c9a6-12d3-11e6-9768-23c1b99f5197.png)
+![image](https://cloud.githubusercontent.com/assets/9858188/15054100/d582c9a6-12d3-11e6-9768-23c1b99f5197.png)
 				Layer Visualization Menu
 		
 	'A' Text Icon
@@ -204,10 +204,11 @@ Leap Motion Drawing
 		When a person wants to finish a line drawn he or she must remove their hand from the leap motion device's 
 		interaction zone.
 		
+
 		![image](https://cloud.githubusercontent.com/assets/9858188/15054139/f6ea33b8-12d3-11e6-8f88-8321a76c6d4d.png)
 						Leap Motion Drawing in Action!
 
-	Leap Motion Gestures
+Leap Motion Gestures
 		Leap motion device has three different gestures that allows a user to change a current setting of the 
 		program or save an image. 
 		
