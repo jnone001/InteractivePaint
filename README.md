@@ -10,95 +10,12 @@ User Read Me
 
 Multitouch Read Me
 
-	 Without using the Tobii EyeX these UI Boxes should always be showing. 
+	 Without using the Tobii EyeX these UI Boxes should always be showing unless disabled using the Radial Menu.
 	If you are currently using the Tobii EyeX you must have your 'gaze' in the vicinity of the UI to have it display as well as work properly.
-
-Top Left Buttons - From left to right
-
-
-	Color Change Button
-		Toggling this button opens up another menu of all the colors that you can change to. Colors correspond to the color inside the boxes.
-
-	Shape Change Button
-		Toggling this button opens up another menu of buttons that represent all the currently available shapes 
-		Lines
-		Circles (Unfilled or Filled depending on the value of the fill button)
-		Rectangles (Unfilled or Filled depending on the value of the fill button)
-		Triangle (Unfilled or Filled depending on the value of the fill button)
-
-	Toggle Fill Button
-		Turns the 'filled' function on and off for some shapes. Circles, Rectangles, and Triangles can all be 'filled' shapes as opposed to just connected lines.
-	Line Size Increase Button
-		Increases the size of lines as well as non-filled shapes lines.
-	Line Size Decrease Button
-		Decreases the size of lines as well as non-filled shapes lines.
-	Transparency Increase (Purple Button)
-		Increases transparency of any shapes or lines you draw 
-	Transparency Decrease (Green Button)
-		Decreases transparency (makes then more solid) for any shapes or lines you draw.
-	Toggle Symmetry (Dotted line Icon)
-		Toggles a line of symmetry on and off.
-		A dotted white line will split the screen when it is enabled. 
-		Any shapes that you draw will be reflected over this Axis.
-	Layer Visualization (Two 'Pages' Icon)
-		Toggles on and off layer visualization
-		These are the three 'layers' you can draw on. Press either of the bottom two layers to move it to the top.
-		The top layer is the layer you are currently drawing on.
-		
-		
-Multitouch Gestures 
-
-	Double tap the screen
-		Double tapping the screen will open up a radial menu at the fingers location
-			Radial Menu - 
-				Left button cycles through colors
-				Right Button - Cycles through Shapes
-				Top button - Toggles on and off symmetry
-				Bottom button - toggles on and off UI
-				Grey Center Button - Turns off the radial menu.
-	More gestures coming soon!
 	
-
-
-Mode Box - Bottom Right
-
-	This box Enables you to see what settings are currently on. 
-
-	Depending on the mode, the box will display a line if you currently have lines active, a Circle if you have Circles Active (Filled circles if filled circles are active) etc. 
-
-	Eraser mode will display a small hollow white circle with the background color inside.
-	
-	It will also show the shapes in their correct colors as well as line size. 
-
-	Additionality it shows which devices were currently plugged in at launch time of the application. 
-		- Blue box in the top left corner of the mode box represents a present touch screen.
-		- Green box to the right of the blue box represents a leap motion device is present
-		- A Red box further to the right represents the presence of a Tobii EyeX Device. 
-
-Keyboard Shortcuts 
-
-	'Touch Screen' buttons are available as keyboard shortcuts as well.
-	Some additional functionality may be found on the keyboard because we have yet to implement it into the UI.
-
-	'q' and 'w' - Cycle through the various colors. 'q' goes backwards while 'w' goes forward. 
-	'e' - Toggle Eraser Mode - Turns on the 'eraser' which draws the current background color to the canvas 
-		(The 'Mode Box' shows a small white circle that shows the size of the current eraser')
-		In addition you must turn off eraser mode before drawing (Retoggle with the 'e' key)
-	'r' - Toggle Random Color Mode - Draws in randomly generated colors. Must turn it off to continue drawing in specific colors.
-	'z' - Line size decrease - Decreases size of the lines as well as lines that encompass non-filled shapes.
-	'x' - Line size Increase - Increases size of the lines as well as lines that ecompass non-filled shapes.
-	'c' - Clears the current canvas, including both layers. 
-	'v' - Toggles on and off leap motion drawing capabilities
-	'b' - Changes the background color. 
-	'u' - Turns on line drawing
-	'i' - turns on Circle Drawing
-	'o' - turns on rectangle drawing
-	'p' - turns on triangle drawing
-	'f' - toggles filled shapes on and off
-	'v' - Toggles on and off the ability to draw with the leap motion device.
-		
-		
 Drawing - 
+
+Drawing with the Multitouch device is simple. Simply drag your fingers accross any non-interactive UI elements. The multitouch will pick up that your finger is moving and then begin to draw a shape. Drawings can be various shapes. Circles, rectangles, and triangles can also be filled as opposed to hollow shapes. Below is a list of the various shapes implemented thus far. 
 
 	Lines
 	
@@ -117,6 +34,127 @@ Drawing -
 		When in triangle mode, the touch of your finger represents the center of the base.
 		Drag your finger to change the height as well as width of the triangle.
 		Release your finger when the desired height and width is created.
+
+Mode Buttons (Top left of UI) - From left to right
+
+
+	Color Change Button
+		Toggling this button opens up another menu of all the colors that you can change to. Colors correspond to the color inside the boxes.
+
+	Shape Change Button
+		Toggling this button opens up another menu of buttons that represent all the currently available shapes 
+		Lines
+		Circles (Unfilled or Filled depending on the value of the fill button)
+		Rectangles (Unfilled or Filled depending on the value of the fill button)
+		Triangle (Unfilled or Filled depending on the value of the fill button)
+	Brush Buttons - Opens the following buttons
+		Toggle Fill Button
+			Turns the 'filled' function on and off for some shapes. Circles, Rectangles, and Triangles can all be 'filled' shapes as opposed to just connected lines.
+		Line Size Increase Button
+			Increases the size of lines as well as non-filled shapes lines.
+		Line Size Decrease Button
+			Decreases the size of lines as well as non-filled shapes lines.
+		Transparency Increase (Purple Button)
+			Increases transparency of any shapes or lines you draw 
+		Transparency Decrease (Green Button)
+			Decreases transparency (makes then more solid) for any shapes or lines you draw.
+	Toggle Symmetry (Dotted line Icon)
+		Toggles a line of symmetry on and off.
+		A dotted white line will split the screen when it is enabled. 
+		Any shapes that you draw will be reflected over this Axis.
+	Layer Visualization (Two 'Pages' Icon)
+		Toggles on and off layer visualization
+		These are the three 'layers' you can draw on. Press either of the bottom two layers to swap it with the top.
+		The top layer is the layer you are currently drawing on.
+		
+		The Menu also allows you to drag a green dot up and down a slider. This will allow you to change the Alpha color of that layer.
+		
+	'A' Text Icon
+		Tap this icon, and then tap anywhere on the screen to begin writing text.
+		A Touch Keyboard will appear, simply tap any keys to type. 
+		You can drag this keyboard around by touching the edges and moving your finger.
+		In addition you can hit 'Done' or touch anywhere on the screen without the keyboard interface to close it.
+		
+	Undo Button
+		The Undo button simply undoes the last drawing that you performed on the currently active layer.
+	
+		
+Multitouch Gestures 
+
+	Double tap the screen
+		Double tapping the screen will open up a radial menu at the fingers location
+			Radial Menu - 
+				Left button cycles through colors
+				Right Button - Cycles through Shapes
+				Top button - Toggles on and off symmetry
+				Bottom button - toggles on and off UI
+				Grey Center Button - Turns off the radial menu.
+				
+	Extended Touch Gesture 
+		Press your finger on the multitouch and hold it in place. 
+		
+		You should then see icons which cycle through various shapes.
+		
+	Two Finger Tap Gesture
+		Place two fingers together, at about the same height, and tap the screen. Make sure the fingers are separated enough to be detected as two separate taps.
+		
+		This gesture will cycle through colors.
+	
+	
+
+
+Mode Box - Bottom Right of UI
+
+	This box Enables you to see what settings are currently on. 
+
+	Depending on the mode, the box will display a line if you currently have lines active, a Circle if you have Circles Active (Filled circles if filled circles are active) etc. 
+
+	Eraser mode will display a small hollow white circle with the background color inside.
+	
+	It will also show the shapes in their correct colors as well as line size. 
+
+	Additionality it shows which devices were currently plugged in at launch time of the application. 
+		- Blue box in the top left corner of the mode box represents a present touch screen.
+		- Green box to the right of the blue box represents a leap motion device is present
+		- A Red box further to the right represents the presence of a Tobii EyeX Device. 
+		- A Yellow Box indicating the Intel Real Sense Camera is plugged in.
+		
+	The mode box also has a 'Cog' button in the bottom left for settings, this menu contains
+		A toggle button for Frames Per Second 
+		A Cycle Backgrounds button
+
+	In addition it has a 'Device Modes' menu located at the top right. Opening it will provide you various options for the implemented devices. Currently a green box means 'On' while a black box means 'Off'
+
+EyeX Guide -
+	Simply move your gaze around so the EyeX can pick them up. You can see two gray circles jumping around indicating where you gaze is located. 
+	
+	Simply gaze to the top left corner to 'draw' the mode buttons, as well as gaze to the bottom right corner to draw the mode box. 
+	
+	In addition, tapping space with the EyeX enabled will change your shape based on where you are looking.
+	
+	
+Keyboard Shortcuts 
+
+	'Touch Screen' buttons are available as keyboard shortcuts as well.
+	Some additional functionality may be found on the keyboard because we have yet to implement it into the UI.
+
+	'q' and 'w' - Cycle through the various colors. 'q' goes backwards while 'w' goes forward. 
+	'e' - Toggle Eraser Mode - Turns on the 'eraser' which draws the current background color to the canvas 
+		(The 'Mode Box' shows a small white circle that shows the size of the current eraser')
+		In addition you must turn off eraser mode before drawing (Retoggle with the 'e' key)
+	'r' - Toggle Random Color Mode - Draws in randomly generated colors. Must turn it off to continue drawing in specific colors.
+	'z' - Line size decrease - Decreases size of the lines as well as lines that encompass non-filled shapes.
+	'x' - Line size Increase - Increases size of the lines as well as lines that ecompass non-filled shapes.
+	'c' - Clears the current canvas, including both layers. 
+	'u' - Turns on line drawing
+	'i' - turns on Circle Drawing
+	'o' - turns on rectangle drawing
+	'p' - turns on triangle drawing
+	'f' - toggles filled shapes on and off
+
+		
+		
+
 		
 
 
