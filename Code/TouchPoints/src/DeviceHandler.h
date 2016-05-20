@@ -281,9 +281,15 @@ int DeviceHandler::deviceConnection(){
 		if (vendorid == vendorList[0]){
 			leapConnectedFlag = 1;
 		}
-		if (vendorid == vendorList[1]){
+
+		//For now, since there is not an easy way to detect non-usb devices, multitouch support
+		//will always be enabled. To disable it, delete the boolean byPassMultiTouchCheck
+
+		if (vendorid == vendorList[1]) {
 			multiTouchConnectedFlag = 1;
 		}
+
+
 		if (vendorid == vendorList[2]){
 			eyeXConnectedFlag = 1;
 		}

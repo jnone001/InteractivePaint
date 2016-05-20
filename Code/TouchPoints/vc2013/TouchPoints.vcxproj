@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -27,27 +27,27 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v120</PlatformToolset>
+    <PlatformToolset>v140</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -79,7 +79,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Intel\RSSDK\include;C:\Users\IEatR\libusb\libusb\libusb;..\include;C:\SeniorProject\EyeX\include;C:\SeniorProject\Leap\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\include;C:\SeniorProject\cinder_0.9.0_vc2013\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files (x86)\Intel\RSSDK\include;C:\Users\Lab\Documents\InteractivePaint\TobiiEyeXSdk-Cpp-1.7.480\include;C:\Users\Lab\Documents\InteractivePaint\libusb\libusb-master\libusb;C:\Users\Lab\Documents\InteractivePaint\Leap_Motion_SDK_Windows_2.3.1\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\include;C:\Users\Lab\Documents\InteractivePaint\cinder_0.9.0_vc2013\cinder_0.9.0_vc2013\include;C:\Program Files %28x86%29\Intel\RSSDK\include;C:\Users\IEatR\libusb\libusb\libusb;..\include;C:\SeniorProject\EyeX\include;C:\SeniorProject\Leap\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\include;C:\SeniorProject\cinder_0.9.0_vc2013\include</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0601;_WINDOWS;NOMINMAX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -93,8 +93,8 @@
       <AdditionalIncludeDirectories>"..\..\cinder_0.9.0_vc2013\include";..\include</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>cinder-$(PlatformToolset)_d.lib;OpenGL32.lib;Leap.lib;C:\Users\IEatR\libusb\libusb\Win32\Debug\lib\libusb-1.0.lib;libpxcmd_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>C:\Program Files %28x86%29\Intel\RSSDK\lib;C:\SeniorProject\cinder_0.9.0_vc2013\lib\msw\x86;C:\SeniorProject\Leap\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86;C:\SeniorProject\EyeX\lib\x86;..\..\cinder_0.9.0_vc2013\lib\msw\$(PlatformTarget);C:\Program Files (x86)\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86</AdditionalLibraryDirectories>
+      <AdditionalDependencies>cinder-$(PlatformToolset)_d.lib;OpenGL32.lib;Leap.lib;C:\Users\Lab\Documents\InteractivePaint\libusb\libusb-master\Win32\Debug\lib\libusb-1.0.lib;libpxcmd_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files (x86)\Intel\RSSDK\lib;C:\Users\Lab\Documents\InteractivePaint\TobiiEyeXSdk-Cpp-1.7.480\lib\x86;C:\Users\Lab\Documents\InteractivePaint\Leap_Motion_SDK_Windows_2.3.1\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86;C:\Users\Lab\Documents\InteractivePaint\cinder_0.9.0_vc2013\cinder_0.9.0_vc2013\lib\msw\x86;C:\Program Files %28x86%29\Intel\RSSDK\lib;C:\SeniorProject\cinder_0.9.0_vc2013\lib\msw\x86;C:\SeniorProject\Leap\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86;C:\SeniorProject\EyeX\lib\x86;..\..\cinder_0.9.0_vc2013\lib\msw\$(PlatformTarget);C:\Program Files (x86)\LeapDeveloperKit_2.3.1+31549_win\LeapSDK\lib\x86</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>

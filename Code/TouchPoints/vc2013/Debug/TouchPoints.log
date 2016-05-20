@@ -1,9 +1,1 @@
-﻿Build started 5/5/2016 2:06:00 PM.
-     1>Project "C:\Users\IEatR\coderefactor\InteractivePaint\Code\TouchPoints\vc2013\TouchPoints.vcxproj" on node 2 (Build target(s)).
-     1>Link:
-         TouchPoints.vcxproj -> C:\Users\IEatR\coderefactor\InteractivePaint\Code\TouchPoints\vc2013\Debug\TouchPoints.exe
-     1>Done Building Project "C:\Users\IEatR\coderefactor\InteractivePaint\Code\TouchPoints\vc2013\TouchPoints.vcxproj" (Build target(s)).
-
-Build succeeded.
-
-Time Elapsed 00:00:00.45
+﻿  TouchPoints.vcxproj -> C:\Users\Lab\Documents\InteractivePaint\InteractivePaint\Code\TouchPoints\vc2013\Debug\TouchPoints.exe
