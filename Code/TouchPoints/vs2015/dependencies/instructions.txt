@@ -1,1 +1,0 @@
-to get latest dependencies check out "https://tamsenior.visualstudio.com/_git/dependencies" from inside this directory

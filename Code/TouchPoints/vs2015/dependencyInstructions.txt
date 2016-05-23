@@ -1,0 +1,3 @@
+to get latest dependencies check out "https://tamsenior.visualstudio.com/_git/dependencies" from inside this directory
+you will also need to copy the necesary dlls to the debug/release folder, i created a powershell script to handle this for you 
+just run '$ powershell -ExecutionPolicy ByPass -File CopyDebugDlls.ps1' from commandline

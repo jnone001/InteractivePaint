@@ -242,5 +242,4 @@ paket-files/
 *.sln.iml
 
 #dependencies folder
-dependencies/*
-!dependencies/instructions.txt
+dependencies/
