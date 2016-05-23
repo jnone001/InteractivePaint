@@ -1,4 +1,4 @@
-Multi Modal Interactive Paint --
+Multi Modal Interactive Paint Alex K --
 
 	This is an application designed to showcase various input devices. It was built to be fun and interactive for students, while providng a platform for them to learn and learn about various devices implemented by the OpenHID Smart Desk.
 
