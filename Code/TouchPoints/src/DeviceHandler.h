@@ -2,9 +2,7 @@
 #define DEVICEHANDLER_H
 
 #include "libusb.h"
-#include "UserInterface.h"
 #include "Enums.h"
-#include <stdio.h>
 
 struct DeviceHandler
 {

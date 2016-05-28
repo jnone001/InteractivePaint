@@ -451,7 +451,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("1");
 				drawText();
 				return true;
-				break;
 			case 1:
 				if (shiftOn)
 				{
@@ -460,7 +459,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("2");
 				drawText();
 				return true;
-				break;
 			case 2:
 				if (shiftOn)
 				{
@@ -469,7 +467,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("3");
 				drawText();
 				return true;
-				break;
 			case 3:
 				if (shiftOn)
 				{
@@ -478,7 +475,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("4");
 				drawText();
 				return true;
-				break;
 			case 4:
 				if (shiftOn)
 				{
@@ -487,7 +483,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("5");
 				drawText();
 				return true;
-				break;
 			case 5:
 				if (shiftOn)
 				{
@@ -496,7 +491,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("6");
 				drawText();
 				return true;
-				break;
 			case 6:
 				if (shiftOn)
 				{
@@ -505,7 +499,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("7");
 				drawText();
 				return true;
-				break;
 			case 7:
 				if (shiftOn)
 				{
@@ -514,7 +507,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("8");
 				drawText();
 				return true;
-				break;
 			case 8:
 				if (shiftOn)
 				{
@@ -523,7 +515,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("9");
 				drawText();
 				return true;
-				break;
 			case 9:
 				if (shiftOn)
 				{
@@ -532,7 +523,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("0");
 				drawText();
 				return true;
-				break;
 		}
 	}
 	j++;
@@ -575,7 +565,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("q");
 				drawText();
 				return true;
-				break;
 			case 1:
 				if (shiftOn)
 				{
@@ -584,7 +573,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("w");
 				drawText();
 				return true;
-				break;
 			case 2:
 				if (shiftOn)
 				{
@@ -593,7 +581,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("e");
 				drawText();
 				return true;
-				break;
 			case 3:
 				if (shiftOn)
 				{
@@ -602,7 +589,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("r");
 				drawText();
 				return true;
-				break;
 			case 4:
 				if (shiftOn)
 				{
@@ -611,7 +597,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("t");
 				drawText();
 				return true;
-				break;
 			case 5:
 				if (shiftOn)
 				{
@@ -620,7 +605,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("y");
 				drawText();
 				return true;
-				break;
 			case 6:
 				if (shiftOn)
 				{
@@ -629,7 +613,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("u");
 				drawText();
 				return true;
-				break;
 			case 7:
 				if (shiftOn)
 				{
@@ -638,7 +621,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("i");
 				drawText();
 				return true;
-				break;
 			case 8:
 				if (shiftOn)
 				{
@@ -647,7 +629,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("o");
 				drawText();
 				return true;
-				break;
 			case 9:
 				if (shiftOn)
 				{
@@ -656,7 +637,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("p");
 				drawText();
 				return true;
-				break;
 		}
 	}
 	j++;
@@ -695,7 +675,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("a");
 				drawText();
 				return true;
-				break;
 			case 1:
 				if (shiftOn)
 				{
@@ -704,7 +683,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("s");
 				drawText();
 				return true;
-				break;
 			case 2:
 				if (shiftOn)
 				{
@@ -713,7 +691,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("d");
 				drawText();
 				return true;
-				break;
 			case 3:
 				if (shiftOn)
 				{
@@ -722,7 +699,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("f");
 				drawText();
 				return true;
-				break;
 			case 4:
 				if (shiftOn)
 				{
@@ -731,7 +707,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("g");
 				drawText();
 				return true;
-				break;
 			case 5:
 				if (shiftOn)
 				{
@@ -740,7 +715,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("h");
 				drawText();
 				return true;
-				break;
 			case 6:
 				if (shiftOn)
 				{
@@ -749,7 +723,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("j");
 				drawText();
 				return true;
-				break;
 			case 7:
 				if (shiftOn)
 				{
@@ -758,7 +731,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("k");
 				drawText();
 				return true;
-				break;
 			case 8:
 				if (shiftOn)
 				{
@@ -767,7 +739,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("l");
 				drawText();
 				return true;
-				break;
 			case 9:
 				if (shiftOn)
 				{
@@ -776,7 +747,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString(";");
 				drawText();
 				return true;
-				break;
 		}
 	}
 	j++;
@@ -816,7 +786,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("z");
 				drawText();
 				return true;
-				break;
 			case 1:
 				if (shiftOn)
 				{
@@ -825,7 +794,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("x");
 				drawText();
 				return true;
-				break;
 			case 2:
 				if (shiftOn)
 				{
@@ -834,7 +802,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("c");
 				drawText();
 				return true;
-				break;
 			case 3:
 				if (shiftOn)
 				{
@@ -843,7 +810,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("v");
 				drawText();
 				return true;
-				break;
 			case 4:
 				if (shiftOn)
 				{
@@ -852,7 +818,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("b");
 				drawText();
 				return true;
-				break;
 			case 5:
 				if (shiftOn)
 				{
@@ -861,7 +826,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("n");
 				drawText();
 				return true;
-				break;
 			case 6:
 				if (shiftOn)
 				{
@@ -870,7 +834,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("m");
 				drawText();
 				return true;
-				break;
 			case 7:
 				if (shiftOn)
 				{
@@ -879,7 +842,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString(",");
 				drawText();
 				return true;
-				break;
 			case 8:
 				if (shiftOn)
 				{
@@ -888,7 +850,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString(".");
 				drawText();
 				return true;
-				break;
 			case 9:
 				if (shiftOn)
 				{
@@ -897,7 +858,6 @@ bool TouchKeyboard::onKeyboardButtons(cinder::vec2 touch)
 				else appendString("/");
 				drawText();
 				return true;
-				break;
 		}
 	}
 

@@ -44,14 +44,6 @@ struct RealSenseHandler
 		realDrawFlag = false;
 		realSenseDrawEnabled = true;
 
-		int kissCount = 0;
-		int browLCount = 0;
-		int browRCount = 0;
-		int cheekLCount = 0;
-		int cheekRCount = 0;
-		int smileCount = 0;
-		int tongueCount = 0;
-
 		myIllustrator = illustrator;
 
 		//Real sense constructor not complete until realSenseSetup called

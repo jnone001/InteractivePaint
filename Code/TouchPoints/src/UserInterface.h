@@ -46,7 +46,6 @@ struct UserInterface
 		incrementBackground();
 		layerList = fboLayerList;
 		layerAlpha = fboLayerAlpha;
-		int x = 0;
 		for (auto layers : *layerList)
 		{
 			(*layerAlpha).emplace_back(1.0f);
@@ -183,7 +182,6 @@ void UserInterface::drawDeviceButtonsFbo()
 	layout1.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
 	layout1.setFont(Font("Arial", 50));
 	layout1.setColor(Color(1, 1, 1));
-	unsigned char japanese[] = {0xE6, 0x97, 0xA5, 0xE6, 0x9C, 0xAC, 0xE8, 0xAA, 0x9E, 0};
 	layout1.addLine(std::string(" MultiTouch"));
 	Surface8u rendered = layout1.render(true, false);
 	gl::Texture2dRef mTexture = gl::Texture2d::create(rendered);
@@ -744,8 +742,7 @@ void UserInterface::slideButtons(TouchEvent::Touch touch)
 	int y = touch.getY();
 	if (layerVisualization)
 	{
-		int yDist = (*layerList).size();
-		yDist = (*layerList).size() * 200 + 50;
+		int yDist = (*layerList).size() * 200 + 50;
 		int size = 0;
 		for (auto frame : (*layerList))
 		{
@@ -999,8 +996,7 @@ bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
 
 	if (layerVisualization)
 	{
-		int yDist = (*layerList).size();
-		yDist = (*layerList).size() * 200 + 50;
+		int yDist = (*layerList).size() * 200 + 50;
 		int size = 0;
 		for (auto frame : (*layerList))
 		{

@@ -4,8 +4,6 @@
 #include "cinder/app/App.h"
 
 //Standard Library Includes
-#include <vector>
-#include <map>
 #include <list>
 
 #include "TouchShapes.h"

@@ -149,7 +149,7 @@ public:
 	void drawRadial();
 
 	//Proxyfucntions
-	void drawProx();
+	void drawProx() const;
 
 	/*Leap related functions*/
 	void enableGest(Leap::Controller controller);
@@ -300,7 +300,6 @@ void prepareSettings(TouchPointsApp::Settings* settings)
 	// You enable multi-touch from the SettingsFn that fires before the app is constructed.
 	settings->setMultiTouchEnabled(true);
 	// On mobile, if you disable multitouch then touch events will arrive via mouseDown(), mouseDrag(), etc.
-	//	settings->setMultiTouchEnabled( false );
 }
 
 #ifdef EYEX
@@ -310,12 +309,6 @@ void OnStateReceived(TX_HANDLE hStateBag)
 {
 	TX_BOOL success;
 	TX_INTEGER eyeTrackingState;
-	TX_SIZE2 displaySize;
-	TX_SIZE2 screenBounds;
-	TX_SIZE stringSize = 0;
-	TX_STRING currentProfileName;
-	TX_INTEGER presenceData;
-	TX_INTEGER gazeTracking;
 
 	success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_EYETRACKINGSTATE, &eyeTrackingState) == TX_RESULT_OK);
 	if (success)
@@ -440,10 +433,6 @@ void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userP
 
 void TouchPointsApp::setup()
 {
-	//Sets max mulitouch points
-	auto testvar1 = System::hasMultiTouch();
-	int32_t testvar2 = System::getMaxMultiTouchPoints();
-
 	CI_LOG_I("MT: " << System::hasMultiTouch() << " Max points: " << System::getMaxMultiTouchPoints());
 	glEnable(GL_LINE_SMOOTH);
 
@@ -491,13 +480,11 @@ void TouchPointsApp::setup()
 	layerList.emplace_back(thirdFbo);
 
 	//Set up Brush
-	bool tempFalse = false;
-	bool tempTrue = true;
 	ColorA newColor = ColorA(0.0f, 0.0f, 0.0f, 1.0f);
 	float tempFloat = 1.0f;
 	int tempInt = 1;
 	Shape::Shape myShape = Shape::Shape::Line;
-	brush = Brush(myShape, newColor, tempFloat, tempInt, tempFalse, tempFalse, tempFalse, &mySymmetry);
+	brush = Brush(myShape, newColor, tempFloat, tempInt, false, false, false, &mySymmetry);
 	illustrator = Illustrator(&brush, &layerList);
 	deviceHandler = DeviceHandler();
 	cinder::getHomeDirectory();
@@ -609,14 +596,12 @@ void TouchPointsApp::gestRecognition(Leap::Frame frame, Leap::Controller control
 							}
 
 							// Calculate angle swept since last frame
-
 							float sweptAngle = 0;
 							if (circle.state() != Leap::Gesture::STATE_START)
 							{
 								Leap::CircleGesture previousUpdate = Leap::CircleGesture(controller.frame(1).gesture(circle.id()));
 								sweptAngle = (circle.progress() - previousUpdate.progress()) * 2 * M_PI;
 							}
-
 							break;
 						}
 					case Leap::Gesture::TYPE_SWIPE:
@@ -752,8 +737,6 @@ void TouchPointsApp::leapShapeChange()
 			}
 		case 1:
 			{
-				bool tempBool = false;
-
 				if (!brush.getFilledShapes()) imageHandler.loadIcon(SHAPE_Circle);
 				else imageHandler.loadIcon(SHAPE_Filled_Circle);
 				break;
@@ -774,7 +757,6 @@ void TouchPointsApp::leapShapeChange()
 			}
 		default:
 			{
-				//std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
 				break;
 			}
 	}
@@ -908,7 +890,7 @@ void TouchPointsApp::drawRadial()
 	radialActive = true;
 }
 
-void TouchPointsApp::drawProx()
+void TouchPointsApp::drawProx() const
 {
 	(*proxFbo).bindFramebuffer();
 	glClearColor(1.0, 1.0, 1.0, 0.0);
@@ -1124,8 +1106,6 @@ void TouchPointsApp::keyDown(KeyEvent event)
 bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, TouchEvent::Touch currentPoint)
 {
 	//Checks for double tap
-	//TouchEvent::Touch currentPoint = pointList[pointList.size() - 1];
-	//TouchEvent::Touch previousPoint = pointList[pointList.size() - 2];
 	//Detects double tap.
 	if (0.25 > currentPoint.getTime() - previousPoint.getTime())
 	{
@@ -1157,8 +1137,7 @@ bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, Tou
 			}
 		}
 	}
-
-	else return false;
+	return false;
 }
 
 void TouchPointsApp::touchesBegan(TouchEvent event)
@@ -1260,9 +1239,9 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 			if ((touch.getPos().x > myTouch.getX() + 25 || touch.getX() < myTouch.getX() - 25) || (touch.getY() > myTouch.getY() + 25 || touch.getY() < myTouch.getY() - 25))
 			{
 				illustrator.beginTouchShapes(touch.getId(), bufferTouches[touch.getId()].front().getPos());
-				for (auto touch : bufferTouches[touch.getId()])
+				for (auto bufferTouch : bufferTouches[touch.getId()])
 				{
-					illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
+					illustrator.movingTouchShapes(bufferTouch.getId(), bufferTouch.getPos(), bufferTouch.getPrevPos());
 				}
 				illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
 				bufferTouches.erase(touch.getId());
@@ -1562,7 +1541,7 @@ void TouchPointsApp::draw()
 	if (ui.getFps())
 	{
 		auto mFont = Font("Quicksand Book Regular", 36.0f);
-		gl::drawString("Framerate: " + toString((int)getAverageFps()), vec2(windowWidth * .90, windowHeight * .01), ColorA(0.0, 0.0, 0.0, 1.0), mFont);
+		gl::drawString("Framerate: " + toString(static_cast<int>(getAverageFps())), vec2(windowWidth * .90, windowHeight * .01), ColorA(0.0, 0.0, 0.0, 1.0), mFont);
 	}
 
 	if (realSenseHandler.getHoverFlag())

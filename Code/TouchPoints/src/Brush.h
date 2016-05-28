@@ -2,19 +2,10 @@
 #define BRUSH_H
 //Cinder and OpenGL Includes
 #include "cinder/app/App.h"
-#include "cinder/app/RendererGl.h"
-#include "cinder/gl/gl.h"
-#include "cinder/System.h"
-#include "cinder/Rand.h"
-#include "cinder/Log.h"
-#include "cinder/gl/Fbo.h"
 
 //Standard Library Includes
 #include <vector>
-#include <map>
-#include <list>
 
-#include "TouchShapes.h"
 #include "SymmetryLine.h"
 #include "Enums.h"
 struct Brush{
