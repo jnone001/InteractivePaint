@@ -9,10 +9,6 @@
 #include "cinder/Log.h"
 #include "cinder/gl/Fbo.h"
 
-//Our own includes
-//#include "TouchShapes.h"
-
-
 //Standard Library Includes
 #include <vector>
 #include <map>
@@ -22,7 +18,6 @@
 #include "SymmetryLine.h"
 #include "Enums.h"
 struct Brush{
-
 	Brush(){}
 	//Creates a brush
 	Brush(Shape::Shape shape, ColorA color,float alphaColor, int lineSize, bool filledShapes, bool randColor, bool eraserMode, SymmetryLine *mySymmetry){
@@ -52,10 +47,7 @@ struct Brush{
 		colorList.emplace_back(newColor7);
 		Color newColor8(1.0f, 0.3f, 0.0);
 		colorList.emplace_back(newColor8);
-
-
 	}
-
 
 	//Functions to get brush values
 	ColorA getColor();
@@ -86,8 +78,6 @@ struct Brush{
 	void Brush::decrementColor();
 	std::vector<Color> getColorList();
 
-
-
 private:
 	ColorA mColor;
 	int mLineSize;
@@ -101,133 +91,178 @@ private:
 	std::vector<Color> colorList;
 	int currShape = 0;
 	int currColor = 0;
-
-
-
 };
 
-int Brush::getCurrentColor(){
+int Brush::getCurrentColor()
+{
 	return currColor;
 }
-int Brush::getCurrentShape(){
+
+int Brush::getCurrentShape()
+{
 	return mShape;
 }
+
 void Brush::incrementShape()
 {
-	
-	if (mShape == Shape::Shape::Line){
+	if (mShape == Shape::Shape::Line)
+	{
 		mShape = Shape::Shape::Circle;
 	}
-	else if (mShape == Shape::Shape::Circle){
+	else if (mShape == Shape::Shape::Circle)
+	{
 		mShape = Shape::Shape::Rectangle;
 	}
-	else if (mShape == Shape::Shape::Rectangle){
+	else if (mShape == Shape::Shape::Rectangle)
+	{
 		mShape = Shape::Shape::Triangle;
 	}
-	else if (mShape == Shape::Shape::Triangle){
-		if (mFilledShapes == true){
+	else if (mShape == Shape::Shape::Triangle)
+	{
+		if (mFilledShapes == true)
+		{
 			mShape = Shape::Shape::Line;
 			mFilledShapes = false;
 		}
-		else{
+		else 
+		{
 			mFilledShapes = true;
 			mShape = Shape::Shape::Circle;
 		}
-		
 	}
 }
+
 std::vector<Color> Brush::getColorList()
 {
 	return colorList;
 }
 
-ColorA Brush::getColor(){
+ColorA Brush::getColor()
+{
 	return mColor;
 }
-int Brush::getLineSize(){
+
+int Brush::getLineSize()
+{
 	return mLineSize;
 }
-Shape::Shape Brush::getShape(){
+
+Shape::Shape Brush::getShape()
+{
 	return mShape;
 }
-bool Brush::getFilledShapes(){
+
+bool Brush::getFilledShapes()
+{
 	return mFilledShapes;
 }
-SymmetryLine* Brush::getSymmetry(){
-	
+
+SymmetryLine* Brush::getSymmetry()
+{
 	return mMySymmetry;
 }
-bool Brush::getRandColor(){
+
+bool Brush::getRandColor()
+{
 	return mRandColor;
 }
-bool Brush::getEraserMode(){
+
+bool Brush::getEraserMode()
+{
 	return mEraserMode;
 }
-float Brush::getAlphaColor(){
+
+float Brush::getAlphaColor()
+{
 	return mAlphaColor;
 }
+
 //Change brush 
-void Brush::changeColor(ColorA color){
+void Brush::changeColor(ColorA color)
+{
 	mColor = color;
 }
-void Brush::changeLineSize(int lineSize){
+
+void Brush::changeLineSize(int lineSize)
+{
 	mLineSize = lineSize;
 }
-void Brush::increaseLineSize(){
+
+void Brush::increaseLineSize()
+{
 	if (mLineSize != 15.0f)
 		mLineSize++;
 }
-void Brush::decreaseLineSize(){
+
+void Brush::decreaseLineSize()
+{
 	if (mLineSize != 1.0f)
 		mLineSize--;
 }
-void Brush::changeShape(Shape::Shape shape){
+
+void Brush::changeShape(Shape::Shape shape)
+{
 	mShape = shape;
 }
-void Brush::changeFilledShapes(bool filledShapes){
+
+void Brush::changeFilledShapes(bool filledShapes)
+{
 	mFilledShapes = filledShapes;
 }
-void Brush::changeRandColor(bool randColor){
+
+void Brush::changeRandColor(bool randColor)
+{
 	mRandColor = randColor;
 }
-void Brush::changeEraserMode(bool eraserMode){
+
+void Brush::changeEraserMode(bool eraserMode)
+{
 	mEraserMode = eraserMode;
 }
-void Brush::changeAlphaColor(float alphaColor){
+
+void Brush::changeAlphaColor(float alphaColor)
+{
 	mAlphaColor = alphaColor;
 }
-void Brush::increaseAlpha(){
-	if (mAlphaColor != 1.0){
+
+void Brush::increaseAlpha()
+{
+	if (mAlphaColor != 1.0)
+	{
 		mAlphaColor += 0.1;
 		mColor = ColorA(mColor, mAlphaColor);
 	}
 }
-void Brush::decreaseAlpha(){
+
+void Brush::decreaseAlpha()
+{
 	if (mAlphaColor > 0.0){
 		mAlphaColor -= 0.1;
 		mColor = ColorA(mColor, mAlphaColor);
-		//float x = currentAlpha;
 	}
 }
 
-void Brush::incrementColor(){
+void Brush::incrementColor()
+{
 	currColor++;
 	if (currColor == colorList.size()){
 		currColor = 0;
 	}
 	mColor = ColorA(colorList[currColor], mAlphaColor);
-
 }
-void Brush::decrementColor(){
+
+void Brush::decrementColor()
+{
 	currColor--;
-	if (currColor == -1){
+	if (currColor == -1)
+	{
 		currColor = colorList.size() - 1;
 	}
 	mColor = ColorA(colorList[currColor], mAlphaColor);
-
 }
-void Brush::changeStaticColor(ourColors::ourColors staticColor){
 
+void Brush::changeStaticColor(ourColors::ourColors staticColor)
+{
 	if (staticColor == ourColors::ourColors::White)
 	{
 		mStaticColor = ourColors::ourColors::White;
@@ -273,7 +308,5 @@ void Brush::changeStaticColor(ourColors::ourColors staticColor){
 		mStaticColor = ourColors::ourColors::Black;
 		mColor = ColorA(0.0,0.0,0.0, mAlphaColor);
 	}
-
 }
-
 #endif

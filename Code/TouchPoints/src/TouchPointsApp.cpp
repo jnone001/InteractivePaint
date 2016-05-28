@@ -10,49 +10,28 @@
 #include "cinder/app/AppBase.h"
 #include "cinder/ImageIo.h"
 #include "cinder/Utilities.h"
-#include <math.h>
 #include <chrono>
-#include <ctime>
-
 
 //Standard Library Includes
 #include <vector>
 #include <map>
 #include <list>
 
-
 //Our own includes
-//#include "TouchShapes.h"
 #include "SymmetryLine.h"
-//#include "TouchShapes.h"
 #include "Illustrator.h"
 #include "Enums.h"
 #include "Brush.h"
 #include "UserInterface.h"
 #include "ImageHandler.h"
-
 #include "RealSenseHandler.h"
-
 #include "libusb.h"
 #include <stdio.h>
 #include "DeviceHandler.h"
 
-
 //Leap Includes
 #include "Leap.h"
 #include "LeapMath.h"
-
-
-//include Images
-#include "String.h"
-
-
-
-//Standard Library Includes
-#include <vector>
-#include <map>
-#include <list> 
-
 
 using namespace ci;
 using namespace ci::app;
@@ -62,15 +41,11 @@ using namespace cinder;
 //Device connection status
 bool eyeXRunning = false;
 bool leapRunning = false;
-//int multiTouchConnected;
-//int leapConnected;
 
 #define EYEX
 #ifdef EYEX
 
 //Our Tobi EyeX Functionality. Cannot run with Tobii driver soooo...ifdef?
-
-#include <stdio.h>
 #include <conio.h>
 #include <assert.h>
 //#include "stdafx.h"
@@ -92,29 +67,18 @@ static TX_HANDLE g_hGlobalInteractorSnapshot = TX_EMPTY_HANDLE;
 int resolutionX;
 int resolutionY;
 
-
-
 #endif
 #define BACKGROUND_COLORS 8
 #define TOTAL_SYMBOLS 7
 #define TOTAL_SHAPES 7
-
-
-
 #define SWIPE_GESTURE 8
 #define windowWidth  getWindowSize().x
 #define windowHeight getWindowSize().y
-
-//#define windowWidth  1919
-//#define windowHeight 1079
-
 #define FRAME_RATE 120
 
 //Leap map
 map<uint32_t, vec2> pointsMap;
 map<uint32_t, bool> activePointsMap;
-
-
 
 bool imageFlag = false;
 bool drawing = false;
@@ -128,7 +92,6 @@ float fadeTime = 1;
 
 /*Code for Proximity Menu*/
 bool proxActive = false;
-
 
 bool modeChangeFlag = true;
 
@@ -144,68 +107,57 @@ int currColor = 0;
 int currShape = 0;
 int currBackground = 0;
 
-//float backgroundArray[BACKGROUND_COLORS][3] = { { 0.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f } };
-//float colorArray[COLOR_AMOUNT][3] = { { 256.0f, 256.0f, 256.0f }, { 256.0f, 0.0f, 0.0f }, { 256.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 0.0f }, { 0.0f, 256.0f, 256.0f }, { 0.0f, 0.0f, 256.0f }, { 256.0f, 0.0f, 256.0f }, { 1.0f, 0.3f, 0.0 } };
-
 string symbolArray[TOTAL_SYMBOLS];
 
 //Global EyeX Handler
 TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
 
-
-class LeapListener : public Leap::Listener{
+class LeapListener : public Leap::Listener
+{
 public:
 	virtual void onConnect(const Leap::Controller&);
 	//virtual void onFrame(const Leap::Controller&);
 	virtual void onDisconnect(const Leap::Controller&);
 };
 
-
 //TouchPointsApp, our libcinder app!
-class TouchPointsApp : public App {
+class TouchPointsApp : public App
+{
 public:
 	void setup() override;
 
 	void mouseDown(MouseEvent event) override;
 
-	void	touchesBegan(TouchEvent event) override;
-	void	touchesMoved(TouchEvent event) override;
-	void	touchesEnded(TouchEvent event) override;
-	void	keyDown(KeyEvent event) override;
-
-	//Shapes Enum
-	//enum Shape { Line, Circle, Rectangle, Triangle };
-
+	void touchesBegan(TouchEvent event) override;
+	void touchesMoved(TouchEvent event) override;
+	void touchesEnded(TouchEvent event) override;
+	void keyDown(KeyEvent event) override;
 
 	//Drawing Functions for drawUi
-	void	modeRectangle();
-	void	modeCircle();
-	void	modeTriangle();
-	void	modeLine();
-
-	//Function to change Shapes we are drawing
-	//void	brush.changeShape(Shape x);
+	void modeRectangle();
+	void modeCircle();
+	void modeTriangle();
+	void modeLine();
 
 	//Functions to alter our alpha variable.
-	void	increaseAlpha();
-	void	decreaseAlpha();
+	void increaseAlpha();
+	void decreaseAlpha();
 
 	//Ui Functions
-	void	drawUi();
-	bool	inInteractiveUi(int x, int y, uint32_t id);
-	void	drawRadial();
-	//Proxyfucntions
-	void	drawProx();
+	void drawUi();
+	bool inInteractiveUi(int x, int y, uint32_t id);
+	void drawRadial();
 
+	//Proxyfucntions
+	void drawProx();
 
 	/*Leap related functions*/
-	void	enableGest(Leap::Controller controller);
-	void	leapSave();
-	void	leapColorChange();
-	void	leapShapeChange();
-	void	leapDraw(Leap::Frame frame);
-	void 	gestRecognition(Leap::Frame frame, Leap::Controller controller);
-
+	void enableGest(Leap::Controller controller);
+	void leapSave();
+	void leapColorChange();
+	void leapShapeChange();
+	void leapDraw(Leap::Frame frame);
+	void gestRecognition(Leap::Frame frame, Leap::Controller controller);
 	void setDefaultMode(Mode::DefaultModes mode);
 
 	//List of drawUI Flags
@@ -214,27 +166,16 @@ public:
 	bool shapeButtons = false;
 	bool uiFboFlag = false;
 	bool layerVisualization = false;
-
 	bool startUpFlag = true;
 
 	//Variables to keep track of performance. It is cleared once every second.
 	int frames = 0;
 	int fps = 0;
 
-	
-
 	void modeChangeFlagTrue();
-
-
-
-#ifdef EYEX
-
-
-#endif
 
 	void update() override;
 	void draw() override;
-
 
 private:
 	//Setup
@@ -251,15 +192,14 @@ private:
 	//Keeps time for the last time we checked for connected or disconnected devices
 	std::chrono::milliseconds lastDeviceCheck;
 
-
 	//Leap Motion Controller
 	Leap::Controller leapContr;
 	Leap::Frame currentFrame;
 	Leap::GestureList gestList;
-	LeapListener	myLeapListener;
+	LeapListener myLeapListener;
 
 	//EyeX
-	vec2 radialCenter = vec2(windowWidth *.5, windowHeight*.5);
+	vec2 radialCenter = vec2(windowWidth * .5, windowHeight * .5);
 
 	TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
 	TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
@@ -279,11 +219,6 @@ private:
 	map<uint32_t, list<TouchEvent::Touch>> bufferTouches;
 	TouchEvent::Touch previousTouch;
 
-
-
-
-
-
 	//Need to redo this area. We should have a list for active points, this list will contain ALL shapes.
 	//Perhaps Templates? Need to attend C++ Workshop for this.
 	//The touchPoint should have a variable 'shape' which just tells it if it is a square, circle, triangle, line, etc.
@@ -291,79 +226,70 @@ private:
 	//Might need a new function for the eraser mode so it can ALWAYS have the correct background color.
 	//Future playback feature may want eraser points in the same list as the other shapes as well.
 
-	list<TouchShape*>		  myShapes;
-
-
-	//
-
+	list<TouchShape*> myShapes;
 	int activeDrawings;
 
-
-	map<uint32_t, TouchPoint>		myActivePoints;
-	list<TouchPoint>				myPoints;
-	map<uint32_t, TouchPoint>		myActivePointsEraser;
-	list<TouchPoint>				myPointsEraser;
-	map<uint32_t, TouchCircle>		myActiveCirclesEraser;
-	list<TouchCircle>				myCirclesEraser;
-	map<uint32_t, TouchCircle>		myActiveCircles;
-	list<TouchCircle>				myCircles;
-	map<uint32_t, TouchRectangle>	myActiveRectangles;
-	list<TouchRectangle>			myRectangles;
-	map<uint32_t, TouchTriangle>	myActiveTriangles;
-	list<TouchTriangle>				myTriangles;
+	map<uint32_t, TouchPoint> myActivePoints;
+	list<TouchPoint> myPoints;
+	map<uint32_t, TouchPoint> myActivePointsEraser;
+	list<TouchPoint> myPointsEraser;
+	map<uint32_t, TouchCircle> myActiveCirclesEraser;
+	list<TouchCircle> myCirclesEraser;
+	map<uint32_t, TouchCircle> myActiveCircles;
+	list<TouchCircle> myCircles;
+	map<uint32_t, TouchRectangle> myActiveRectangles;
+	list<TouchRectangle> myRectangles;
+	map<uint32_t, TouchTriangle> myActiveTriangles;
+	list<TouchTriangle> myTriangles;
 
 	//Fbo's for Layering.
 	//We may want to set a vector of framebuffers?
 	//This way we can dynamically have multiple layers....????
-	std::shared_ptr<gl::Fbo>		firstFbo;
-	std::shared_ptr<gl::Fbo>		secondFbo;
-	std::shared_ptr<gl::Fbo>		thirdFbo;
-	std::shared_ptr<gl::Fbo>		activeFbo;
-	std::shared_ptr<gl::Fbo>		iconFbo;
-	std::shared_ptr<gl::Fbo>		saveImageFbo;
+	std::shared_ptr<gl::Fbo> firstFbo;
+	std::shared_ptr<gl::Fbo> secondFbo;
+	std::shared_ptr<gl::Fbo> thirdFbo;
+	std::shared_ptr<gl::Fbo> activeFbo;
+	std::shared_ptr<gl::Fbo> iconFbo;
+	std::shared_ptr<gl::Fbo> saveImageFbo;
 
-
-	std::shared_ptr<gl::Fbo>		backgroundFbo;
-
+	std::shared_ptr<gl::Fbo> backgroundFbo;
 	std::vector<std::shared_ptr<gl::Fbo>> layerList;
 	std::vector<float> layerAlpha;
 
-
 	//Fbo for UserInterface
-	std::shared_ptr<gl::Fbo>		uiFbo;
-	std::shared_ptr<gl::Fbo>		imageFbo;
-	std::shared_ptr<gl::Fbo>		radialFbo;
+	std::shared_ptr<gl::Fbo> uiFbo;
+	std::shared_ptr<gl::Fbo> imageFbo;
+	std::shared_ptr<gl::Fbo> radialFbo;
 	//Proxy Menu Fbo
-	std::shared_ptr<gl::Fbo>		proxFbo;
-
-	//
-	std::shared_ptr<gl::Fbo>		fingerLocationFbo;
-
-
+	std::shared_ptr<gl::Fbo> proxFbo;
+	std::shared_ptr<gl::Fbo> fingerLocationFbo;
 };
 
 /*Retrieves frames from leap motion Service*/
-Leap::Frame getLeapFrame(Leap::Controller controller){
+Leap::Frame getLeapFrame(Leap::Controller controller)
+{
 	return controller.frame();
 }
 
-
-void TouchPointsApp::modeChangeFlagTrue(){
+void TouchPointsApp::modeChangeFlagTrue()
+{
 	modeChangeFlag = true;
 }
 
 //Leapmotion listeners
-void LeapListener::onConnect(const Leap::Controller& controller){
+void LeapListener::onConnect(const Leap::Controller& controller)
+{
 	leapRunning = true;
 	modeChangeFlag = true;
-
 }
-void LeapListener::onDisconnect(const Leap::Controller& controller){
+
+void LeapListener::onDisconnect(const Leap::Controller& controller)
+{
 	leapRunning = false;
 	modeChangeFlag = true;
 }
 
-void prepareSettings(TouchPointsApp::Settings *settings)
+void prepareSettings(TouchPointsApp::Settings* settings)
 {
 	settings->setFullScreen(true);
 
@@ -373,7 +299,6 @@ void prepareSettings(TouchPointsApp::Settings *settings)
 	// By default, multi-touch is disabled on desktop and enabled on mobile platforms.
 	// You enable multi-touch from the SettingsFn that fires before the app is constructed.
 	settings->setMultiTouchEnabled(true);
-
 	// On mobile, if you disable multitouch then touch events will arrive via mouseDown(), mouseDrag(), etc.
 	//	settings->setMultiTouchEnabled( false );
 }
@@ -392,43 +317,31 @@ void OnStateReceived(TX_HANDLE hStateBag)
 	TX_INTEGER presenceData;
 	TX_INTEGER gazeTracking;
 
-
 	success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_EYETRACKINGSTATE, &eyeTrackingState) == TX_RESULT_OK);
-	if (success) {
-		switch (eyeTrackingState) {
-		case TX_EYETRACKINGDEVICESTATUS_TRACKING:
-			eyeXRunning = true;
-			modeChangeFlag = true;
-			break;
-
-		case TX_EYETRACKINGDEVICESTATUS_DEVICENOTCONNECTED:
-			eyeXRunning = false;
-			modeChangeFlag = true;
-			break;
-
-		default:
-			printf(":DDD");
+	if (success)
+	{
+		switch (eyeTrackingState)
+		{
+			case TX_EYETRACKINGDEVICESTATUS_TRACKING:
+				eyeXRunning = true;
+				modeChangeFlag = true;
+				break;
+			case TX_EYETRACKINGDEVICESTATUS_DEVICENOTCONNECTED:
+				eyeXRunning = false;
+				modeChangeFlag = true;
+				break;
 		}
 	}
-
-	/*
-
-	success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_GAZETRACKING, &gazeTracking) == TX_RESULT_OK);
-	if (success) {
-	(gazeTracking == TX_GAZETRACKING_GAZETRACKED) ? eyeXRunning = true : eyeXRunning = false;
-	modeChangeFlag = true;
-	}
-	*/
-
-
 }
+
 void TX_CALLCONVENTION OnEngineStateChanged(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userParam)
 {
 	TX_RESULT result = TX_RESULT_UNKNOWN;
 	TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
 
 	if (txGetAsyncDataResultCode(hAsyncData, &result) == TX_RESULT_OK &&
-		txGetAsyncDataContent(hAsyncData, &hStateBag) == TX_RESULT_OK) {
+		txGetAsyncDataContent(hAsyncData, &hStateBag) == TX_RESULT_OK)
+	{
 		OnStateReceived(hStateBag);
 		txReleaseObject(&hStateBag);
 	}
@@ -440,14 +353,14 @@ void TX_CALLCONVENTION OnEngineStateChanged(TX_CONSTHANDLE hAsyncData, TX_USERPA
 BOOL InitializeGlobalInteractorSnapshot(TX_CONTEXTHANDLE hContext)
 {
 	TX_HANDLE hInteractor = TX_EMPTY_HANDLE;
-	TX_GAZEPOINTDATAPARAMS params = { TX_GAZEPOINTDATAMODE_LIGHTLYFILTERED };
+	TX_GAZEPOINTDATAPARAMS params = {TX_GAZEPOINTDATAMODE_LIGHTLYFILTERED};
 	BOOL success;
 
 	success = txCreateGlobalInteractorSnapshot(
-		hContext,
-		InteractorId,
-		&g_hGlobalInteractorSnapshot,
-		&hInteractor) == TX_RESULT_OK;
+	                                           hContext,
+	                                           InteractorId,
+	                                           &g_hGlobalInteractorSnapshot,
+	                                           &hInteractor) == TX_RESULT_OK;
 	success &= txCreateGazePointDataBehavior(hInteractor, &params) == TX_RESULT_OK;
 
 	txReleaseObject(&hInteractor);
@@ -462,7 +375,6 @@ void TX_CALLCONVENTION OnSnapshotCommitted(TX_CONSTHANDLE hAsyncData, TX_USERPAR
 {
 	// check the result code using an assertion.
 	// this will catch validation errors and runtime errors in debug builds. in release builds it won't do anything.
-
 	TX_RESULT result = TX_RESULT_UNKNOWN;
 	txGetAsyncDataResultCode(hAsyncData, &result);
 	assert(result == TX_RESULT_OK || result == TX_RESULT_CANCELLED);
@@ -471,44 +383,20 @@ void TX_CALLCONVENTION OnSnapshotCommitted(TX_CONSTHANDLE hAsyncData, TX_USERPAR
 /*
 * Callback function invoked when the status of the connection to the EyeX Engine has changed.
 */
-
 void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connectionState, TX_USERPARAM userParam)
 {
-	switch (connectionState) {
-	case TX_CONNECTIONSTATE_CONNECTED: {
-
-		BOOL success;
-		//eyeXRunning = true;
-		//printf("The connection state is now CONNECTED (We are connected to the EyeX Engine)\n");
-		// commit the snapshot with the global interactor as soon as the connection to the engine is established.
-		// (it cannot be done earlier because committing means "send to the engine".)
-		success = txCommitSnapshotAsync(g_hGlobalInteractorSnapshot, OnSnapshotCommitted, NULL) == TX_RESULT_OK;
-		txGetStateAsync(hContext, TX_STATEPATH_EYETRACKING, OnEngineStateChanged, NULL);
-		if (!success) {
-
-		}
-		else {
-			//printf("Waiting for gaze data to start streaming...\n");
-		}
-	}
-									   break;
-
-	case TX_CONNECTIONSTATE_DISCONNECTED:
-		//printf("The connection state is now DISCONNECTED (We are disconnected from the EyeX Engine)\n");
-		eyeXRunning = false;
-		break;
-
-	case TX_CONNECTIONSTATE_TRYINGTOCONNECT:
-		//printf("The connection state is now TRYINGTOCONNECT (We are trying to connect to the EyeX Engine)\n");
-		break;
-
-	case TX_CONNECTIONSTATE_SERVERVERSIONTOOLOW:
-		//printf("The connection state is now SERVER_VERSION_TOO_LOW: this application requires a more recent version of the EyeX Engine to run.\n");
-		break;
-
-	case TX_CONNECTIONSTATE_SERVERVERSIONTOOHIGH:
-		//printf("The connection state is now SERVER_VERSION_TOO_HIGH: this application requires an older version of the EyeX Engine to run.\n");
-		break;
+	switch (connectionState)
+	{
+		case TX_CONNECTIONSTATE_CONNECTED:
+			{
+				BOOL success;
+				success = txCommitSnapshotAsync(g_hGlobalInteractorSnapshot, OnSnapshotCommitted, NULL) == TX_RESULT_OK;
+				txGetStateAsync(hContext, TX_STATEPATH_EYETRACKING, OnEngineStateChanged, NULL);
+			}
+			break;
+		case TX_CONNECTIONSTATE_DISCONNECTED:
+			eyeXRunning = false;
+			break;
 	}
 }
 
@@ -518,40 +406,10 @@ void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connect
 void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
 {
 	TX_GAZEPOINTDATAEVENTPARAMS eventParams;
-	if (txGetGazePointDataEventParams(hGazeDataBehavior, &eventParams) == TX_RESULT_OK) {
-
-
-		/*
-		int gazeMovementLimit = 10;
-
-		if (eventParams.X - gazePositionX >= gazeMovementLimit)
-		{
-		gazePositionX += gazeMovementLimit;
-		}
-		else if (eventParams.X - gazePositionX <= gazeMovementLimit){
-		gazePositionX -= gazeMovementLimit;
-		}
-		else {
-		gazePositionX = eventParams.X;
-		}
-
-		if (eventParams.Y - gazePositionY >= gazeMovementLimit)
-		{
-		gazePositionY += gazeMovementLimit;
-		}
-		else if (eventParams.Y - gazePositionY <= gazeMovementLimit){
-		gazePositionY -= gazeMovementLimit;
-		}
-		else {
-		gazePositionY = eventParams.Y;
-		}
-		*/
+	if (txGetGazePointDataEventParams(hGazeDataBehavior, &eventParams) == TX_RESULT_OK)
+	{
 		gazePositionX = eventParams.X;
 		gazePositionY = eventParams.Y;
-
-	}
-	else {
-		//printf("Failed to interpret gaze data event packet.\n");
 	}
 }
 
@@ -563,49 +421,21 @@ void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userP
 	TX_HANDLE hEvent = TX_EMPTY_HANDLE;
 	TX_HANDLE hBehavior = TX_EMPTY_HANDLE;
 
-
 	txGetAsyncDataContent(hAsyncData, &hEvent);
 
 	// NOTE. Uncomment the following line of code to view the event object. The same function can be used with any interaction object.
 	//OutputDebugStringA(txDebugObject(hEvent));
-
-	if (txGetEventBehavior(hEvent, &hBehavior, TX_BEHAVIORTYPE_GAZEPOINTDATA) == TX_RESULT_OK) {
+	if (txGetEventBehavior(hEvent, &hBehavior, TX_BEHAVIORTYPE_GAZEPOINTDATA) == TX_RESULT_OK)
+	{
 		OnGazeDataEvent(hBehavior);
 		txReleaseObject(&hBehavior);
 	}
 
-
 	// NOTE since this is a very simple application with a single interactor and a single data stream,
 	// our event handling code can be very simple too. A more complex application would typically have to
 	// check for multiple behaviors and route events based on interactor IDs.
-
 	txReleaseObject(&hEvent);
-
 }
-
-
-/* 'Checking whether if the eye tracker is connected'
-void TouchPointsApp::HandleNotification(InteractionNotification notification)
-{
-if (NotificationType.SettingsChanged == notification.NotificationType)
-{
-OnSettingsReceived((SettingsBag)notification.Data);
-}
-}
-
-void TouchPointsApp::OnSettingsReceived(SettingsBag data)
-{
-EyeTrackingDeviceStatus deviceStatus;
-var success = data.TryGetSettingValue(out deviceStatus, "eyetracking.state");
-
-if (success)
-{
-Console.WriteLine("Eye Tracking Device Status is: " + deviceStatus);
-
-}
-}
-*/
-
 #endif
 
 void TouchPointsApp::setup()
@@ -614,11 +444,8 @@ void TouchPointsApp::setup()
 	auto testvar1 = System::hasMultiTouch();
 	int32_t testvar2 = System::getMaxMultiTouchPoints();
 
-
 	CI_LOG_I("MT: " << System::hasMultiTouch() << " Max points: " << System::getMaxMultiTouchPoints());
 	glEnable(GL_LINE_SMOOTH);
-	//setWindowSize(windowWidth, windowHeight);
-	//setFullScreen(1);
 
 	//Sets window size and initializes framebuffers (layers).
 	setWindowSize(windowWidth, windowHeight);
@@ -638,18 +465,15 @@ void TouchPointsApp::setup()
 	radialFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 	//Set up fbo for proxy menu
 	proxFbo = gl::Fbo::create(windowWidth, windowHeight, format);
-	
-	
+
 	//Background FBO Testing
 	backgroundFbo = gl::Fbo::create(windowWidth, windowHeight, format);
-
 
 	//Enable all Leap Gestures
 	TouchPointsApp::enableGest(leapContr);
 
 	//Set up fingerlocation FBo
 	fingerLocationFbo = gl::Fbo::create(windowWidth, windowHeight, format);
-
 
 	leapContr.config().setFloat("Gesture.Swipe.MinLength", 150.0);
 	leapContr.config().setFloat("Gesture.Swipe.MinVelocity", 500.0);
@@ -659,18 +483,12 @@ void TouchPointsApp::setup()
 
 	setFrameRate(FRAME_RATE);
 
-	//activeDrawings = 0;
-
-	//Set up symmetry line
-
 	mySymmetry = SymmetryLine(windowWidth / 2, true);
 
 	//Sets up layers
 	layerList.emplace_back(firstFbo);
 	layerList.emplace_back(secondFbo);
 	layerList.emplace_back(thirdFbo);
-	
-
 
 	//Set up Brush
 	bool tempFalse = false;
@@ -687,21 +505,16 @@ void TouchPointsApp::setup()
 
 	//RealSense Setup
 	realSenseHandler = RealSenseHandler(&illustrator);
-	
-	//realSenseHandler.streamData();
 
 	//Set up UI
-
 	deviceHandler.deviceConnection();
 	lastDeviceCheck = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush,  &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
+	ui = UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush, &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
 	deviceHandler.deviceConnection();
 	Mode::DefaultModes resultMode = deviceHandler.getDefaultMode();
 	setDefaultMode(resultMode);
-	
-
 
 	//Sets up eyeX context
 #ifdef EYEX
@@ -712,13 +525,6 @@ void TouchPointsApp::setup()
 	resolutionX = desktop.right;
 	resolutionY = desktop.bottom;
 
-
-
-	//	hcontext.RegisterNotificationHandler(HandleNotification);
-	//	hcontext.RegisterSettingObserver(SettingsPaths.EyeTracking);
-
-
-
 	// initialize and enable the context that is our link to the EyeX Engine.
 	success = txInitializeEyeX(TX_EYEXCOMPONENTOVERRIDEFLAG_NONE, NULL, NULL, NULL, NULL) == TX_RESULT_OK;
 	success &= txCreateContext(&hContext, TX_FALSE) == TX_RESULT_OK;
@@ -727,42 +533,11 @@ void TouchPointsApp::setup()
 	success &= txRegisterEventHandler(hContext, &hEventHandlerTicket, HandleEvent, NULL) == TX_RESULT_OK;
 	success &= txEnableConnection(hContext) == TX_RESULT_OK;
 	success &= txRegisterStateChangedHandler(hContext, &hGazeTrackingStateChangedTicket, TX_STATEPATH_GAZETRACKING, OnEngineStateChanged, NULL) == TX_RESULT_OK;
-
-	if (success){
-		//eyeXRunning = true;
-	}
-	/*
-	// let the events flow until a key is pressed.
-	if (success) {
-	printf("Initialization was successful.\n");
-	}
-	else {
-	printf("Initialization failed.\n");
-	}
-	printf("Press any key to exit...\n");
-	_getch();
-	printf("Exiting.\n");
-	*/
-	/*
-
-	HOW DO WE DELETE THE CONTEXT?
-	// disable and delete the context.
-	txDisableConnection(hContext);
-	txReleaseObject(&g_hGlobalInteractorSnapshot);
-	success = txShutdownContext(hContext, TX_CLEANUPTIMEOUT_DEFAULT, TX_FALSE) == TX_RESULT_OK;
-	success &= txReleaseContext(&hContext) == TX_RESULT_OK;
-	success &= txUninitializeEyeX() == TX_RESULT_OK;
-	if (!success) {
-	printf("EyeX could not be shut down cleanly. Did you remember to release all handles?\n");
-	}
-	*/
 #endif
-
-
 }
 
-static Area calcCenter(gl::TextureRef imageTexture){
-
+static Area calcCenter(gl::TextureRef imageTexture)
+{
 	Area image = imageTexture->getBounds();
 	Area window = getWindowBounds();
 	Area center = Area::proportionalFit(window, image, true, false);
@@ -770,297 +545,302 @@ static Area calcCenter(gl::TextureRef imageTexture){
 	return center;
 }
 
-void TouchPointsApp::enableGest(Leap::Controller controller){
-
+void TouchPointsApp::enableGest(Leap::Controller controller)
+{
 	controller.enableGesture(Leap::Gesture::TYPE_SWIPE);
 	controller.enableGesture(Leap::Gesture::TYPE_CIRCLE);
 	controller.enableGesture(Leap::Gesture::TYPE_SCREEN_TAP);
 	controller.enableGesture(Leap::Gesture::TYPE_KEY_TAP);
-
 }
 
-void TouchPointsApp::gestRecognition(Leap::Frame frame, Leap::Controller controller){
-
-	if (!drawing){
+void TouchPointsApp::gestRecognition(Leap::Frame frame, Leap::Controller controller)
+{
+	if (!drawing)
+	{
 		//List of all gestures
 		gestList = frame.gestures();
 		//Process gestures...
-		if (!imageHandler.getIconFlag()){
+		if (!imageHandler.getIconFlag())
+		{
 			//for (int g = 0; g < gestures.count(); ++g)
-			for (Leap::Gesture gesture : gestList) {
+			for (Leap::Gesture gesture : gestList)
+			{
 				//Gesture gesture = gestList[g];
 
-				switch (gesture.type()) {
-				case Leap::Gesture::TYPE_CIRCLE:
+				switch (gesture.type())
 				{
-					Leap::CircleGesture circle = gesture;
+					case Leap::Gesture::TYPE_CIRCLE:
+						{
+							Leap::CircleGesture circle = gesture;
 
-					if (circle.pointable().direction().angleTo(circle.normal()) <= M_PI / 2) {
-						//clockwise circle
+							if (circle.pointable().direction().angleTo(circle.normal()) <= M_PI / 2)
+							{
+								//clockwise circle
 
-						Leap::Vector position = circle.pointable().tipPosition();
+								Leap::Vector position = circle.pointable().tipPosition();
 
-						if (position.x < 0 && position.y > 250){
+								if (position.x < 0 && position.y > 250)
+								{
+									processing = true;
+									leapColorChange();
+								}
+
+								if (position.x < 0 && position.y < 150)
+								{
+									processing = true;
+									leapShapeChange();
+								}
+
+								if (position.x > 0 && position.y > 250)
+								{
+									processing = true;
+									leapSave();
+								}
+
+								if (position.x > 0 && position.y < 150)
+								{
+									proxActive = false;
+								}
+							}
+							else
+							{
+								//counterclockwise circle
+								drawProx();
+							}
+
+							// Calculate angle swept since last frame
+
+							float sweptAngle = 0;
+							if (circle.state() != Leap::Gesture::STATE_START)
+							{
+								Leap::CircleGesture previousUpdate = Leap::CircleGesture(controller.frame(1).gesture(circle.id()));
+								sweptAngle = (circle.progress() - previousUpdate.progress()) * 2 * M_PI;
+							}
+
+							break;
+						}
+					case Leap::Gesture::TYPE_SWIPE:
+						{
 							processing = true;
 							leapColorChange();
+							break;
 						}
-
-						if (position.x < 0 && position.y < 150){
-							processing = true;
-							leapShapeChange();
-						}
-
-						if (position.x > 0 && position.y > 250){
+					case Leap::Gesture::TYPE_KEY_TAP:
+						{
 							processing = true;
 							leapSave();
+							break;
 						}
+					case Leap::Gesture::TYPE_SCREEN_TAP:
+						{
+							Leap::ScreenTapGesture screentap = gesture;
 
-						if (position.x > 0 && position.y < 150){
-							proxActive = false;
+							break;
 						}
-					}
-					else {
-						//counterclockwise circle
-						drawProx();
-					}
-
-					// Calculate angle swept since last frame
-
-					float sweptAngle = 0;
-					if (circle.state() != Leap::Gesture::STATE_START) {
-						Leap::CircleGesture previousUpdate = Leap::CircleGesture(controller.frame(1).gesture(circle.id()));
-						sweptAngle = (circle.progress() - previousUpdate.progress()) * 2 * M_PI;
-					}
-
-					break;
-				}
-				case Leap::Gesture::TYPE_SWIPE:
-				{
-					processing = true;
-					leapColorChange();
-					break;
-				}
-				case Leap::Gesture::TYPE_KEY_TAP:
-				{
-					processing = true;
-					leapSave();
-					break;
-
-				}
-				case Leap::Gesture::TYPE_SCREEN_TAP:
-				{
-					Leap::ScreenTapGesture screentap = gesture;
-
-					break;
-				}
-				default:
-					std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
-					break;
+					default:
+						std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
+						break;
 				}
 			}
 		}
 	}
 }
 
-void TouchPointsApp::leapSave(){
-
-	if (ui.isBackgroundTransparent()){
+void TouchPointsApp::leapSave()
+{
+	if (ui.isBackgroundTransparent())
+	{
 		imageHandler.saveCanvas(vec2(windowWidth, windowHeight), ColorA(ui.getBackgroundColor(), 0.0));
 	}
 	else imageHandler.saveCanvas(vec2(windowWidth, windowHeight), ColorA(ui.getBackgroundColor(), 1.0));
 }
 
-void TouchPointsApp::leapDraw(Leap::Frame frame){
-
+void TouchPointsApp::leapDraw(Leap::Frame frame)
+{
 	//Get all pointables from current leap frame
 	Leap::PointableList pointables = frame.pointables();
 	//Gets a virtual rectangular prism which is within the field of vie of Leap
 	Leap::InteractionBox iBox = frame.interactionBox();
 
-	//Temporary TouchPoint
-
 	//Traverse all pointables
-	for (auto& points : pointables){
-
+	for (auto& points : pointables)
+	{
 		//Normalize points from iBox
 		Leap::Vector normalizedPosition = iBox.normalizePoint(points.stabilizedTipPosition());
 		//Get x and y coordinate value form normalized value within given window
 		float leapXCoordinate = normalizedPosition.x * windowWidth;
 		float leapYCoordinate = windowHeight - normalizedPosition.y * windowHeight;
 
-
-		//Create a prevous vec2
-		//vec2 prevPoint;
-
-
 		if (points.touchDistance() > 0 && points.touchZone() != Leap::Pointable::Zone::ZONE_NONE)
 		{
-
 			gl::color(0, 1, 0, 1 - points.touchDistance());
 			gl::drawSolidCircle(vec2(leapXCoordinate, leapYCoordinate), 40);
 			gl::color(1.0, 0.9, 0.5, 1 - points.touchDistance());
 			gl::drawStrokedCircle(vec2(leapXCoordinate, leapYCoordinate), 40.0f, 10.0f);
 			/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
-			if (pointsMap.find(points.id()) != pointsMap.end()){
+			if (pointsMap.find(points.id()) != pointsMap.end())
+			{
 				pointsMap.erase(points.id());
 
 				activePointsMap.erase(points.id());
 				illustrator.endTouchShapes(points.id());
 			}
-
 		}
 		else if (points.touchDistance() <= 0 && !proxActive)
 		{
-
 			lockCurrentFrame = true;
 
 			//Check to see if id for pointable object is present
 			auto result = pointsMap.find(points.id());
 			//Checks to see if new pointable is drawing
-			if (result == pointsMap.end()){
-
+			if (result == pointsMap.end())
+			{
 				/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
 				illustrator.beginTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate));
 
 				pointsMap.emplace(points.id(), vec2(leapXCoordinate, leapYCoordinate));
 				activePointsMap.emplace(points.id(), true);
-
 			}
-			else{
-
+			else
+			{
 				/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
-
 				illustrator.movingTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate), pointsMap[points.id()]);
 				activePointsMap[points.id()] = true;
 				pointsMap[points.id()] = vec2(leapXCoordinate, leapYCoordinate);
 			}
-
 		}
 	}
 	std::vector<uint32_t> list;
-	for (auto& points : activePointsMap){
-		if (points.second){
+	for (auto& points : activePointsMap)
+	{
+		if (points.second)
+		{
 			points.second = false;
 		}
-		else {
+		else
+		{
 			illustrator.endTouchShapes(points.first);
 			list.emplace_back(points.first);
 			pointsMap.erase(points.first);
 		}
 	}
-	for (auto ids : list){
+	for (auto ids : list)
+	{
 		activePointsMap.erase(ids);
 	}
-
 }
 
-void TouchPointsApp::leapShapeChange(){
-
-
-
-	if (currShape != TOTAL_SYMBOLS - 1){
+void TouchPointsApp::leapShapeChange()
+{
+	if (currShape != TOTAL_SYMBOLS - 1)
+	{
 		currShape++;
 	}
-	else{
+	else
+	{
 		currShape = 0;
 	}
 	brush.incrementShape();
 	ui.setModeChangeFlag();
-	switch (brush.getCurrentShape()){
-	case 0:{
-		imageHandler.loadIcon(SHAPE_LINE);
+	switch (brush.getCurrentShape())
+	{
+		case 0:
+			{
+				imageHandler.loadIcon(SHAPE_LINE);
 
-		break;
-	}
-	case 1:{
-		bool tempBool = false;
+				break;
+			}
+		case 1:
+			{
+				bool tempBool = false;
 
-		if (!brush.getFilledShapes())
-			imageHandler.loadIcon(SHAPE_Circle);
-		else imageHandler.loadIcon(SHAPE_Filled_Circle);
-		break;
-	}
-	case 2:{
-
-
-		if (!brush.getFilledShapes())
-			imageHandler.loadIcon(SHAPE_Rectangle);
-		else imageHandler.loadIcon(SHAPE_Filled_Rectangle);
-		imageFlag = true;
-		break;
-	}
-	case 3:{
-
-		if (!brush.getFilledShapes())
-			imageHandler.loadIcon(SHAPE_Triangle);
-		else imageHandler.loadIcon(SHAPE_Filled_Triangle);
-		imageFlag = true;
-		break;
-	}
-	default:{
-		//std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
-		break;
-	}
-
+				if (!brush.getFilledShapes()) imageHandler.loadIcon(SHAPE_Circle);
+				else imageHandler.loadIcon(SHAPE_Filled_Circle);
+				break;
+			}
+		case 2:
+			{
+				if (!brush.getFilledShapes()) imageHandler.loadIcon(SHAPE_Rectangle);
+				else imageHandler.loadIcon(SHAPE_Filled_Rectangle);
+				imageFlag = true;
+				break;
+			}
+		case 3:
+			{
+				if (!brush.getFilledShapes()) imageHandler.loadIcon(SHAPE_Triangle);
+				else imageHandler.loadIcon(SHAPE_Filled_Triangle);
+				imageFlag = true;
+				break;
+			}
+		default:
+			{
+				//std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
+				break;
+			}
 	}
 }
 
-void TouchPointsApp::leapColorChange(){
-
-	
+void TouchPointsApp::leapColorChange()
+{
 	brush.incrementColor();
 	ui.setModeChangeFlag();
 	//Provides correct image to provide feedback
-	switch (brush.getCurrentColor()){
-	case 0:{
+	switch (brush.getCurrentColor())
+	{
+		case 0:
+			{
+				imageHandler.loadIcon(COLOR_ZERO);
 
-		imageHandler.loadIcon(COLOR_ZERO);
+				break;
+			}
+		case 1:
+			{
+				imageHandler.loadIcon(COLOR_ONE);
 
-		break;
-	}
-	case 1:{
+				break;
+			}
+		case 2:
+			{
+				imageHandler.loadIcon(COLOR_TWO);
 
-		imageHandler.loadIcon(COLOR_ONE);
+				break;
+			}
+		case 3:
+			{
+				imageHandler.loadIcon(COLOR_THREE);
 
-		break;
-	}
-	case 2:{
+				break;
+			}
+		case 4:
+			{
+				imageHandler.loadIcon(COLOR_FOUR);
+				break;
+			}
+		case 5:
+			{
+				imageHandler.loadIcon(COLOR_FIVE);
 
-		imageHandler.loadIcon(COLOR_TWO);
-
-		break;
-	}
-	case 3:{
-		imageHandler.loadIcon(COLOR_THREE);
-
-		break;
-	}
-	case 4:{
-		imageHandler.loadIcon(COLOR_FOUR);
-		break;
-	}
-	case 5:{
-		imageHandler.loadIcon(COLOR_FIVE);
-
-		break;
-	}
-	case 6:{
-		imageHandler.loadIcon(COLOR_SIX);
-		break;
-	}
-	case 7:{
-		imageHandler.loadIcon(COLOR_SEVEN);
-		break;
-	}
-	default:{
-		//std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
-		break;
-	}
-
+				break;
+			}
+		case 6:
+			{
+				imageHandler.loadIcon(COLOR_SIX);
+				break;
+			}
+		case 7:
+			{
+				imageHandler.loadIcon(COLOR_SEVEN);
+				break;
+			}
+		default:
+			{
+				break;
+			}
 	}
 }
 
-void TouchPointsApp::drawRadial(){
+void TouchPointsApp::drawRadial()
+{
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	(*radialFbo).bindFramebuffer();
 	glClearColor(1.0, 1.0, 1.0, 0.0);
@@ -1079,92 +859,42 @@ void TouchPointsApp::drawRadial(){
 
 	gl::color(.24, .24, .24, 0.8);
 
-
 	gl::drawSolidCircle(radialCenter, 29.0f);
 
 	//Draws outer ring
 	gl::color(.24, .24, .24, 0.8);
 	gl::drawStrokedCircle(radialCenter, 100.0f, 60.0f);
 
-
 	gl::color(0.0, 0.0, 0.0, 0.5);
 	gl::drawStrokedCircle(radialCenter, 131.0f, 2.0f, 300);
 
-
-	gl::color(0.0,0.0,0.0, 0.8);
+	gl::color(0.0, 0.0, 0.0, 0.8);
 	gl::drawStrokedCircle(radialCenter, 69.0f, 2.0f, 300);
 
-
-
 	//Draw left icon
-
 	gl::color(1.0, 1.0, 1.0, 1.0);
 
-	/*Old Way to Draw Icons to FBO.
-	imageTexture = gl::Texture::create(loadImage(loadAsset("AllColor.png")));
-	(*iconFbo).bindFramebuffer();
-	gl::clear(ColorA(1.0, 1.0, 1.0, 1.0));
-	gl::draw(imageTexture, Rectf(0, 0, 1920, 1080));
-	(*iconFbo).unbindFramebuffer();
-	*/
 	(*radialFbo).bindFramebuffer();
-
 
 	//New way to draw icons to FBO.
 	gl::TextureRef texture = gl::Texture::create(loadImage(loadAsset("Colors.png")));
 
 	gl::color(1.0, 1.0, 1.0, 1.0);
-	
-	gl::draw(texture, Rectf(radialCenter.x - 125, radialCenter.y - 25, radialCenter.x - 75,  radialCenter.y + 25));
 
-
-
-	//Outdated Icon Drawing to FBO.
-	//iconFbo->blitTo(radialFbo, Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(radialCenter.x - 125, windowHeight - radialCenter.y + 25), vec2(radialCenter.x - 75, windowHeight - radialCenter.y - 25)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
-	//iconFbo->blitTo(radialFbo, Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(0,0), vec2(100,100)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
-	/*
-	gl::color(1.0, 0.9, 0.5);
-	gl::drawStrokedCircle(vec2(radialCenter.x - 100, radialCenter.y), 30.0f, 2.0f);
-
-	gl::color(1.0,1.0,1.0);
-	gl::drawSolidCircle(vec2(radialCenter.x - 100, radialCenter.y), 29.0f);
-	*/
-	//Draw Right IconimageTexture = gl::Texture::create(loadImage(loadAsset("AllColor.png")));
-	
+	gl::draw(texture, Rectf(radialCenter.x - 125, radialCenter.y - 25, radialCenter.x - 75, radialCenter.y + 25));
 
 	texture = gl::Texture::create(loadImage(loadAsset("Shapes.png")));
 
 	gl::color(1.0, 1.0, 1.0, 1.0);
 
 	gl::draw(texture, Rectf(radialCenter.x + 75, radialCenter.y - 25, radialCenter.x + 125, radialCenter.y + 25));
-	
-	
-	
-	/*
-	imageTexture = gl::Texture::create(loadImage(loadAsset("ShapesIcon.png")));
-	(*iconFbo).bindFramebuffer();
-	gl::clear(ColorA(1.0, 1.0, 1.0, 1.0));
-	gl::draw(imageTexture, Rectf(10, 10, 1910, 1070));
-	(*iconFbo).unbindFramebuffer();
-	(*radialFbo).bindFramebuffer();
-	
-	iconFbo->blitTo(radialFbo, Area(vec2(0, 0), vec2(1920, 1080)), Area(vec2(radialCenter.x + 75, windowHeight - radialCenter.y + 25), vec2(radialCenter.x + 125, windowHeight - radialCenter.y - 25)), GL_NEAREST, GL_COLOR_BUFFER_BIT);
-	*/
 
-	//Draw lower Icon
-	//gl::color(1.0, 0.9, 0.5);
-	//gl::drawStrokedCircle(vec2(radialCenter.x, radialCenter.y - 100), 30.0f, 2.0f);
-
-	//gl::color(1.0, 1.0, 1.0);
-
-	//gl::drawSolidCircle(vec2(radialCenter.x, radialCenter.y - 100), 29.0f);
 	//Draw Upper Icon
 	texture = gl::Texture::create(loadImage(loadAsset("Undo.png")));
 
 	gl::color(1.0, 1.0, 1.0, 1.0);
 
-	gl::draw(texture, Rectf(radialCenter.x - 25, radialCenter.y -130, radialCenter.x + 25, radialCenter.y - 70));
-
+	gl::draw(texture, Rectf(radialCenter.x - 25, radialCenter.y - 130, radialCenter.x + 25, radialCenter.y - 70));
 
 	//Draw Lower Icon
 	gl::color(1.0, 0.9, 0.5);
@@ -1176,11 +906,10 @@ void TouchPointsApp::drawRadial(){
 	(*radialFbo).unbindFramebuffer();
 
 	radialActive = true;
-
 }
 
-void TouchPointsApp::drawProx(){
-
+void TouchPointsApp::drawProx()
+{
 	(*proxFbo).bindFramebuffer();
 	glClearColor(1.0, 1.0, 1.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -1193,45 +922,37 @@ void TouchPointsApp::drawProx(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	gl::lineWidth(10);
-	gl::color(0.0, 0.0, 0.0,1.0);
-	gl::drawLine(vec2(windowWidth*.5, windowHeight), vec2(windowWidth*.5, 0));
+	gl::color(0.0, 0.0, 0.0, 1.0);
+	gl::drawLine(vec2(windowWidth * .5, windowHeight), vec2(windowWidth * .5, 0));
 
-	gl::drawLine(vec2(0, windowHeight*.5), vec2(windowWidth, windowHeight*.5));
+	gl::drawLine(vec2(0, windowHeight * .5), vec2(windowWidth, windowHeight * .5));
 
 	(*proxFbo).unbindFramebuffer();
 
 	proxActive = true;
 }
 
-/*
-int TouchPointsApp::getCurrentLayer(){
-	return currentLayerOrder[2];
-}
-*/
 /*Mode Change Functions*/
-
-
 void TouchPointsApp::keyDown(KeyEvent event)
 {
-	if (event.getChar() == 'z') {
+	if (event.getChar() == 'z')
+	{
 		// Toggle full screen when the user presses the 'f' key.
-		if (lineSize != 1.0f)
-			lineSize--;
+		if (lineSize != 1.0f) lineSize--;
 
 		brush.decreaseLineSize();
 		ui.setModeChangeFlag();
-
 	}
-	else if (event.getChar() == 'x') {
+	else if (event.getChar() == 'x')
+	{
 		// Clear the list of points when the user presses the space bar.
-		if (lineSize != 15.0f)
-			lineSize++;
+		if (lineSize != 15.0f) lineSize++;
 
 		brush.increaseLineSize();
 		ui.setModeChangeFlag();
-
 	}
-	else if (event.getCode() == KeyEvent::KEY_ESCAPE) {
+	else if (event.getCode() == KeyEvent::KEY_ESCAPE)
+	{
 		//Clears EyeX context then quits the program.
 #ifdef EYEX
 		txDisableConnection(hContext);
@@ -1242,55 +963,46 @@ void TouchPointsApp::keyDown(KeyEvent event)
 #endif
 		quit();
 	}
-	else if (event.getChar() == 'r')	//Turns on random color mode
+	else if (event.getChar() == 'r') //Turns on random color mode
 	{
 		//Turns on random color mode
 		brush.changeRandColor(!brush.getRandColor());
 
 		ui.setModeChangeFlag();
 	}
-	else if (event.getChar() == 'q')	//Cycles through colors
+	else if (event.getChar() == 'q') //Cycles through colors
 	{
-		
-
-
-
 		brush.decrementColor();
 		ui.setModeChangeFlag();
 	}
-	else if (event.getChar() == 'w')	//Cycles through colors
+	else if (event.getChar() == 'w') //Cycles through colors
 	{
-		
 		brush.incrementColor();
 
 		ui.setModeChangeFlag();
 	}
-	else if (event.getChar() == 't')	//Increase transparency / Decrease alpha
+	else if (event.getChar() == 't') //Increase transparency / Decrease alpha
 	{
 		brush.decreaseAlpha();
 		ui.setModeChangeFlag();
 	}
-	else if (event.getChar() == 'y')	//Decrease transparency/ increase alpha
+	else if (event.getChar() == 'y') //Decrease transparency/ increase alpha
 	{
 		brush.increaseAlpha();
 		ui.setModeChangeFlag();
 	}
-	else if (event.getChar() == 'e')	//Eraser mode
+	else if (event.getChar() == 'e') //Eraser mode
 	{
-
 		brush.changeEraserMode(!(brush.getEraserMode()));
 
 		ui.setModeChangeFlag();
 	}
-	else if (event.getChar() == 'c')	//Clear Screen (Broken with framebuffers).
+	else if (event.getChar() == 'c') //Clear Screen (Broken with framebuffers).
 	{
 		ui.clearLayers();
-
 	}
 	else if (event.getChar() == 'b')
 	{
-
-		//ui.changeBackgroundColor(Color(1.0, 1.0, 1.0));
 		ui.incrementBackground();
 		ui.setModeChangeFlag();
 	}
@@ -1319,41 +1031,39 @@ void TouchPointsApp::keyDown(KeyEvent event)
 		brush.changeShape(Shape::Shape::Triangle);
 		ui.setModeChangeFlag();
 	}
-	else if (event.getChar() == 'n'){
-		//saveImage(".png");
-		//imageFlag = true;
+	else if (event.getChar() == 'n')
+	{
 		leapSave();
 	}
-	else if (event.getChar() == 'j') {
-		//saveImage(".jpeg");
-		//imageFlag = true;
+	else if (event.getChar() == 'j')
+	{
 		imageHandler.changeImageType("jpeg");
-
 	}
-	else if (event.getChar() == 't') {
-		//saveImage(".tif");
-		//imageFlag = true;
+	else if (event.getChar() == 't')
+	{
 		imageHandler.changeImageType("tif");
 	}
-	else if (event.getChar() == 'v'){
+	else if (event.getChar() == 'v')
+	{
 		leapDrawFlag = !leapDrawFlag;
 	}
-	else if (event.getChar() == 's'){
+	else if (event.getChar() == 's')
+	{
 		mySymmetry.toggleSymmetry();
 	}
-	else if (event.getChar() == 'a'){
-
+	else if (event.getChar() == 'a')
+	{
 		drawRadial();
 	}
-	else if (event.getChar() == 'g'){
+	else if (event.getChar() == 'g')
+	{
 		ui.toggleUiFlag();
 	}
 #ifdef EYEX
 	else if (event.getChar() == ' ')
 	{
-		if (deviceHandler.eyeXStatus()){
-
-
+		if (deviceHandler.eyeXStatus())
+		{
 			if (gazePositionX <= resolutionX / 2 && gazePositionY <= resolutionY / 2)
 			{
 				brush.changeShape(Shape::Shape::Line);
@@ -1379,7 +1089,6 @@ void TouchPointsApp::keyDown(KeyEvent event)
 				imageHandler.loadIcon(SHAPE_Triangle);
 			}
 		}
-
 	}
 #endif
 	else if (event.getChar() == 'l')
@@ -1390,54 +1099,40 @@ void TouchPointsApp::keyDown(KeyEvent event)
 	{
 		leapColorChange();
 	}
-	else if (event.getChar() == '1'){
+	else if (event.getChar() == '1')
+	{
 		leapShapeChange();
 	}
-	else if (event.getChar() == '2'){
-		
+	else if (event.getChar() == '2')
+	{
 		illustrator.undoDraw(ui.getBackgroundColor());
 	}
-	else if (event.getChar() == '3'){
+	else if (event.getChar() == '3')
+	{
 		leapColorChange();
 	}
-	else if (event.getChar() == '4'){
+	else if (event.getChar() == '4')
+	{
 		mySymmetry.toggleSymmetry();
 	}
-	else if (event.getChar() == '5'){
+	else if (event.getChar() == '5')
+	{
 		ui.toggleUiFlag();
 	}
-
-
-
-
 }
 
-
-
-double lastTouch = 0;
-float lastX = 0;
-float lastY = 0;
-
-
-
-bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, TouchEvent::Touch currentPoint){
-
+bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, TouchEvent::Touch currentPoint)
+{
 	//Checks for double tap
 	//TouchEvent::Touch currentPoint = pointList[pointList.size() - 1];
 	//TouchEvent::Touch previousPoint = pointList[pointList.size() - 2];
 	//Detects double tap.
-	if (0.25 >   currentPoint.getTime() - previousPoint.getTime())
+	if (0.25 > currentPoint.getTime() - previousPoint.getTime())
 	{
 		if (previousPoint.getX() < currentPoint.getX() + 20 && previousPoint.getX() > currentPoint.getX() - 20)
 		{
-			if (previousPoint.getY() < currentPoint.getY() + 20 && previousPoint.getY() > currentPoint.getY() - 20){
-
-
-				//(*firstFbo).bindFramebuffer();
-				//gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
-				//gl::drawSolidCircle(vec2(500, 500), 30, 10);
-				//(*firstFbo).unbindFramebuffer();
-				//uiFboFlag = !uiFboFlag;
+			if (previousPoint.getY() < currentPoint.getY() + 20 && previousPoint.getY() > currentPoint.getY() - 20)
+			{
 				radialCenter = currentPoint.getPos();
 
 				drawRadial();
@@ -1445,146 +1140,112 @@ bool TouchPointsApp::findMultiTouchGestures(TouchEvent::Touch previousPoint, Tou
 				bufferTouches.erase(previousPoint.getId());
 				bufferTouches.erase(currentPoint.getId());
 				return true;
-
 			}
 		}
 	}
-	/*
-	if (0.05 >   currentPoint.getTime() - previousPoint.getTime())
-	{
-		if (((previousPoint.getX() > currentPoint.getX() + 20) && previousPoint.getX() < currentPoint.getX() + 75) || (previousPoint.getX() < currentPoint.getX() - 20 && previousPoint.getX() > currentPoint.getX() - 75))
-		{
-			if ((previousPoint.getY() < currentPoint.getY() + 20) && (previousPoint.getY() > currentPoint.getY() - 20)){
-
-
-				//(*firstFbo).bindFramebuffer();
-				//gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
-				//gl::drawSolidCircle(vec2(500, 500), 30, 10);
-				//(*firstFbo).unbindFramebuffer();
-				//uiFboFlag = !uiFboFlag;
-				//brush.incrementColor();
-				leapColorChange();
-				bufferTouches.erase(previousPoint.getId());
-				bufferTouches.erase(currentPoint.getId());
-				return true;
-
-			}
-		}
-	}
-	*/
 	//'Two finger tap' gesture
-	if (0.05 >   currentPoint.getTime() - previousPoint.getTime())
+	if (0.05 > currentPoint.getTime() - previousPoint.getTime())
 	{
 		if (((previousPoint.getX() > currentPoint.getX() + 20) && previousPoint.getX() < currentPoint.getX() + 75) || (previousPoint.getX() < currentPoint.getX() - 20 && previousPoint.getX() > currentPoint.getX() - 75))
 		{
-			if ((previousPoint.getY() < currentPoint.getY() + 120) && (previousPoint.getY() > currentPoint.getY() - 120)){
-
-
-				//(*firstFbo).bindFramebuffer();
-				//gl::color(CM_HSV, Rand::randFloat(), 0.5f, 1.0f);
-				//gl::drawSolidCircle(vec2(500, 500), 30, 10);
-				//(*firstFbo).unbindFramebuffer();
-				//uiFboFlag = !uiFboFlag;
-				//brush.incrementColor();
+			if ((previousPoint.getY() < currentPoint.getY() + 120) && (previousPoint.getY() > currentPoint.getY() - 120))
+			{
 				leapColorChange();
 				bufferTouches.erase(previousPoint.getId());
 				bufferTouches.erase(currentPoint.getId());
 				return true;
-
 			}
 		}
 	}
-	
-	else return false;
 
+	else return false;
 }
 
 void TouchPointsApp::touchesBegan(TouchEvent event)
 {
-
-
-	for (const auto &touch : event.getTouches()) {
-
+	for (const auto& touch : event.getTouches())
+	{
 		if (!deviceHandler.multiTouchStatus())
 		{
 			ui.inInteractiveUi(touch.getX(), touch.getY(), touch.getId());
 			return;
 		}
 
-		if (radialActive){
+		if (radialActive)
+		{
 			int x = touch.getX();
 			int y = touch.getY();
-			if ((((radialCenter.x - 100) - 30) < x && x < ((radialCenter.x - 100) + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30))){
+			if ((((radialCenter.x - 100) - 30) < x && x < ((radialCenter.x - 100) + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30)))
+			{
 				//brush.changeStaticColor();
 				leapColorChange();
 				return;
 			}
 
-			if ((((radialCenter.x + 100) - 30) < x && x < ((radialCenter.x + 100) + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30))){
+			if ((((radialCenter.x + 100) - 30) < x && x < ((radialCenter.x + 100) + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30)))
+			{
 				//brush.cycleShape();
 				leapShapeChange();
 				return;
 			}
 
-			if ((((radialCenter.x) - 30) < x && x < ((radialCenter.x) + 30)) && ((radialCenter.y - 100) - 30) < y && y < (radialCenter.y - 100) + 30){
+			if ((((radialCenter.x) - 30) < x && x < ((radialCenter.x) + 30)) && ((radialCenter.y - 100) - 30) < y && y < (radialCenter.y - 100) + 30)
+			{
 				//mySymmetry.toggleSymmetry();
 				illustrator.undoDraw(ui.getBackgroundColor());
 				return;
 			}
 
-			if ((((radialCenter.x) - 30) < x && x < ((radialCenter.x) + 30)) && ((radialCenter.y + 100) - 30) < y && y < (radialCenter.y + 100) + 30){
+			if ((((radialCenter.x) - 30) < x && x < ((radialCenter.x) + 30)) && ((radialCenter.y + 100) - 30) < y && y < (radialCenter.y + 100) + 30)
+			{
 				ui.toggleUiFlag();
 				return;
 			}
 
-			if ((radialCenter.x - 30) < x && x < ((radialCenter.x + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30))){
+			if ((radialCenter.x - 30) < x && x < ((radialCenter.x + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30)))
+			{
 				radialActive = false;
 				return;
 			}
 		}
-		if (ui.inInteractiveUi(touch.getX(), touch.getY(), touch.getId())){
+		if (ui.inInteractiveUi(touch.getX(), touch.getY(), touch.getId()))
+		{
 			return;
 		}
-		else {
+		else
+		{
 			list<TouchEvent::Touch> tempList;
 			tempList.push_back(touch);
 			bufferTouches.emplace(touch.getId(), tempList);
 
-			if (!findMultiTouchGestures(previousTouch, touch)) {
+			if (!findMultiTouchGestures(previousTouch, touch))
+			{
 				//If we didn't find a gesture this time, save the point incase.
 				previousTouch = touch;
 			}
-			else {
+			else
+			{
 				//Clears the previous touch if we found a multitouch gesture.
 				previousTouch.setPos(vec2(-100, -100));
 			}
-
 		}
 	}
 }
 
 void TouchPointsApp::touchesMoved(TouchEvent event)
 {
-	if (!deviceHandler.multiTouchStatus())
-		return;
+	if (!deviceHandler.multiTouchStatus()) return;
 
-	for (const auto &touch : event.getTouches()) {
+	for (const auto& touch : event.getTouches())
+	{
 		ui.slideButtons(touch);
-		if (bufferTouches.find(touch.getId()) == bufferTouches.end()){
+		if (bufferTouches.find(touch.getId()) == bufferTouches.end())
+		{
 			illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
 		}
-		//
 		else
 		{
 			TouchEvent::Touch myTouch = bufferTouches[touch.getId()].front();
-			/*
-			if (touch.getPos() != touch.getPrevPos())
-			{
-				illustrator.beginTouchShapes(touch.getId(), bufferTouches[touch.getId()].front().getPos());
-				illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
-				bufferTouches.erase(touch.getId());
-			}
-			*/
 
 			//'Extended Touch' Gesture
 			if (touch.getPos() == touch.getPrevPos() && touch.getTime() > myTouch.getTime() + .75)
@@ -1592,98 +1253,97 @@ void TouchPointsApp::touchesMoved(TouchEvent event)
 				leapShapeChange();
 				bufferTouches[touch.getId()].clear();
 				bufferTouches[touch.getId()].emplace_front(touch);
-			}else 
-				//On finger movement, we know it is no longer a gesture. 
-				//So we remove it from 'buffer' touches and begin drawing
+			}
+			else
+			//On finger movement, we know it is no longer a gesture. 
+			//So we remove it from 'buffer' touches and begin drawing
 			if ((touch.getPos().x > myTouch.getX() + 25 || touch.getX() < myTouch.getX() - 25) || (touch.getY() > myTouch.getY() + 25 || touch.getY() < myTouch.getY() - 25))
 			{
 				illustrator.beginTouchShapes(touch.getId(), bufferTouches[touch.getId()].front().getPos());
-				for (auto touch : bufferTouches[touch.getId()]){
+				for (auto touch : bufferTouches[touch.getId()])
+				{
 					illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
 				}
 				illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
 				bufferTouches.erase(touch.getId());
 			}
-			else {
+			else
+			{
 				bufferTouches[touch.getId()].emplace_back(touch);
 			}
 		}
-		//auto myTouch = bufferTouches[touch.getId()].back;
-		//else illustrator.movingTouchShapes(touch.getId(), touch.getPos(), touch.getPrevPos());
 	}
 }
 
 void TouchPointsApp::touchesEnded(TouchEvent event)
 {
-	if (!deviceHandler.multiTouchStatus())
-		return;
-	for (const auto &touch : event.getTouches()) {
+	if (!deviceHandler.multiTouchStatus()) return;
+	for (const auto& touch : event.getTouches())
+	{
 		bufferTouches.erase(touch.getId());
 		illustrator.endTouchShapes(touch.getId());
 		ui.endButtonPress(touch);
 	}
 }
 
-void TouchPointsApp::setDefaultMode(Mode::DefaultModes mode){
-
+void TouchPointsApp::setDefaultMode(Mode::DefaultModes mode)
+{
 	bool temp = false;
 	bool temp2 = true;
 
-	switch (mode){
-	case Mode::DefaultModes::MLE:
-		ui.changeModeButtons(temp2);
-		break;
-	case Mode::DefaultModes::MLR:
-		ui.changeModeButtons(temp2);
-		break;
-	case Mode::DefaultModes::MER:
-		ui.changeModeButtons(temp2);
-		break;
-	case Mode::DefaultModes::LER:
-		ui.changeModeButtons(temp);
-		break;
-	case Mode::DefaultModes::ML:
-		ui.changeModeButtons(temp2);
-		break;
-	case Mode::DefaultModes::ME:
-		ui.changeModeButtons(temp2);
-		break;
-	case Mode::DefaultModes::MR:
-		ui.changeModeButtons(temp2);
-		break;
-	case Mode::DefaultModes::LE:
-		ui.changeModeButtons(temp);
-		break;
-	case Mode::DefaultModes::LR:
-		ui.changeModeButtons(temp);
-		break;
-	case Mode::DefaultModes::ER:
-		ui.changeModeButtons(temp);
-		break;
-	case Mode::DefaultModes::M:
-		ui.changeModeButtons(temp2);
-		break;
-	case Mode::DefaultModes::L:
-		ui.changeModeButtons(temp);
-		break;
-	case Mode::DefaultModes::E:
-		ui.changeModeButtons(temp);
-		break;
-	case Mode::DefaultModes::R:
-		ui.changeModeButtons(temp);
-		break;
+	switch (mode)
+	{
+		case Mode::DefaultModes::MLE:
+			ui.changeModeButtons(temp2);
+			break;
+		case Mode::DefaultModes::MLR:
+			ui.changeModeButtons(temp2);
+			break;
+		case Mode::DefaultModes::MER:
+			ui.changeModeButtons(temp2);
+			break;
+		case Mode::DefaultModes::LER:
+			ui.changeModeButtons(temp);
+			break;
+		case Mode::DefaultModes::ML:
+			ui.changeModeButtons(temp2);
+			break;
+		case Mode::DefaultModes::ME:
+			ui.changeModeButtons(temp2);
+			break;
+		case Mode::DefaultModes::MR:
+			ui.changeModeButtons(temp2);
+			break;
+		case Mode::DefaultModes::LE:
+			ui.changeModeButtons(temp);
+			break;
+		case Mode::DefaultModes::LR:
+			ui.changeModeButtons(temp);
+			break;
+		case Mode::DefaultModes::ER:
+			ui.changeModeButtons(temp);
+			break;
+		case Mode::DefaultModes::M:
+			ui.changeModeButtons(temp2);
+			break;
+		case Mode::DefaultModes::L:
+			ui.changeModeButtons(temp);
+			break;
+		case Mode::DefaultModes::E:
+			ui.changeModeButtons(temp);
+			break;
+		case Mode::DefaultModes::R:
+			ui.changeModeButtons(temp);
+			break;
 	}
 }
 
-void TouchPointsApp::mouseDown(MouseEvent event)
+void TouchPointsApp::mouseDown(MouseEvent event) {}
+
+void TouchPointsApp::update()
 {
-}
-
-void TouchPointsApp::update(){
-
-
-
-	if (!setupComplete){
+	if (!setupComplete)
+	{
 		ui.uiSetup();
 		realSenseHandler.realSenseSetup();
 		setupComplete = true;
@@ -1691,60 +1351,63 @@ void TouchPointsApp::update(){
 	//Increment the frame counter
 	frames++;
 
-
 	//Gets current clock time in milliseconds
 	std::chrono::milliseconds currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-
-
 	//This is how often we will check our device connection in milliseconds.
-	std::chrono::milliseconds checkTime{ 2000 };
-	if (currentTime - lastDeviceCheck >= checkTime){
+	std::chrono::milliseconds checkTime{2000};
+	if (currentTime - lastDeviceCheck >= checkTime)
+	{
 		//Updates FPS - Ensure frames is being divided by how many seconds it takes to get into this loop.
-		fps = frames/2;
+		fps = frames / 2;
 		frames = 0;
-		
+
 		//Resets our lastDeviceCheck time.
 		lastDeviceCheck = currentTime;
 
 		//Checks if any device statuses have changed.
-		if (deviceHandler.deviceConnection()){
+		if (deviceHandler.deviceConnection())
+		{
 			ui.drawDeviceButtonsFbo();
 			ui.setModeChangeFlag();
 		}
 		//Checks to see if default mode needs to be reset
-		if (deviceHandler.getUpdateDefaultFlag()){
+		if (deviceHandler.getUpdateDefaultFlag())
+		{
 			deviceHandler.updateDefaultMode();
 			Mode::DefaultModes resultMode = deviceHandler.getDefaultMode();
 			setDefaultMode(resultMode);
 		}
 	}
 
-	
-	
 	//Checks the real sense device and updates anything associated with it.
-	if (deviceHandler.realSenseStatus()){
-
-		
+	if (deviceHandler.realSenseStatus())
+	{
 		//Checks if expressions is turned on.
 		if (deviceHandler.realSenseExpressions())
 		{
-			if (illustrator.getActiveDrawings() == 0){
+			if (illustrator.getActiveDrawings() == 0)
+			{
 				realSenseHandler.streamData();
 
-				if (realSenseHandler.getBrowGestureFlag()){
+				if (realSenseHandler.getBrowGestureFlag())
+				{
 					illustrator.undoDraw(ui.getBackgroundColor());
 				}
-				if (realSenseHandler.getKissGestureFlag()){
+				if (realSenseHandler.getKissGestureFlag())
+				{
 					ui.toggleUiFlag();
 				}
-				if (realSenseHandler.getTongueGestureFlag()){
+				if (realSenseHandler.getTongueGestureFlag())
+				{
 					mySymmetry.toggleSymmetry();
 				}
-				if (realSenseHandler.getCheekGestureFlag()){
+				if (realSenseHandler.getCheekGestureFlag())
+				{
 					leapColorChange();
 				}
-				if (realSenseHandler.getSmileGestureFlag()){
+				if (realSenseHandler.getSmileGestureFlag())
+				{
 					leapShapeChange();
 				}
 				realSenseHandler.resetGesturesFlag();
@@ -1752,21 +1415,14 @@ void TouchPointsApp::update(){
 		}
 
 		//Real Sense Draw
-		if (deviceHandler.realSenseDraw()){
+		if (deviceHandler.realSenseDraw())
+		{
 			//Draw functions for real sense.
 			realSenseHandler.streamCursorData();
 			realSenseHandler.realSenseDraw(fingerLocationFbo);
-
 		}
 	}
 
-	/*
-	if (realSenseHandler.getRealSenseDrawEnabled()){
-
-		realSenseHandler.streamCursorData();
-		realSenseHandler.realSenseDraw(fingerLocationFbo);
-	}
-	*/
 	//Updates the active shapes being drawn by the user
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	(*activeFbo).bindFramebuffer();
@@ -1776,17 +1432,14 @@ void TouchPointsApp::update(){
 	//Draws all active Shapes (non-permanent);
 	illustrator.drawActiveShapes();
 	(*activeFbo).unbindFramebuffer();
-	
 }
 
 void TouchPointsApp::draw()
 {
-
 	//Clears the Application Context to the background color with a 0 Alpha Value (transparent)
 	Color myBG = ui.getBackgroundColor();
 	glClearColor(myBG.r, myBG.g, myBG.b, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-
 
 	/* Small script that checks FPS
 	gl::color(1.0, 1.0, 1.0);
@@ -1799,29 +1452,28 @@ void TouchPointsApp::draw()
 	gl::drawStrokedCircle(vec2(960, 540), 60.0f * 2);
 	*/
 
-
 	//Currently leapDraw before drawing layers to prevent flickering. 
 	//However, this makes it impossible to see green 'hands' on top of images.
-	if (deviceHandler.leapStatus()){
+	if (deviceHandler.leapStatus())
+	{
 		currentFrame = getLeapFrame(leapContr);
-		if (deviceHandler.leapDraw()){
-
-			if (leapDrawFlag){
+		if (deviceHandler.leapDraw())
+		{
+			if (leapDrawFlag)
+			{
 				leapDraw(currentFrame);
 			}
 		}
 		if (deviceHandler.leapGesture())
 		{
-			if (!lockCurrentFrame){
+			if (!lockCurrentFrame)
+			{
 				//Calls specified action from gesture recgonized
 				gestRecognition(currentFrame, leapContr);
 			}
-
-
 		}
 		lockCurrentFrame = false;
 	}
-
 
 	//Draw Checkerboard pattern if background is transparent
 	if (ui.isBackgroundTransparent())
@@ -1840,81 +1492,85 @@ void TouchPointsApp::draw()
 	}
 	//Loop Which Draws our Layers
 	int x = 0;
-	for (auto frames : layerList){
+	for (auto frames : layerList)
+	{
 		gl::color(1.0, 1.0, 1.0, ui.getLayerAlpha(x));
 		gl::draw(frames->getColorTexture());
 		x++;
 	}
 
-	if (imageHandler.getStartUpFlag()){
+	if (imageHandler.getStartUpFlag())
+	{
 		imageHandler.loadStartIcon(START_LOGO);
 	}
 	/*Draws icons that provides feedback */
 	imageHandler.displayIcon();
 	imageHandler.displayStartIcon();
-	
+
 	//Draws all the UI elements (Currently only updated the uiFbo which stores data for the mode box), drawing is done below.
 	ui.drawUi();
 
 	//Draws radial menu
-	if (radialActive){
+	if (radialActive)
+	{
 		gl::color(1.0, 1.0, 1.0, 1.0);
 		gl::draw(radialFbo->getColorTexture());
 	}
 
 	//Draws proximity menu
-	if (proxActive){
+	if (proxActive)
+	{
 		gl::draw(proxFbo->getColorTexture());
 	}
-
 
 	gl::color(1.0, 1.0, 1.0, 1.0);
 
 	/*Draws the frame buffer for UI*/
-	if (deviceHandler.eyeXStatus()){
+	if (deviceHandler.eyeXStatus())
+	{
+		gl::color(0.0, 0.0, 0.0, 0.4);
 
-		gl::color(0.0,0.0,0.0,0.4);
-		
 		vec2 gaze1(gazePositionX - 10, gazePositionY);
 		vec2 gaze2(gazePositionX + 10, gazePositionY);
 
 		gl::drawStrokedCircle(gaze1, 10.0f, 10.0f);
 		gl::drawStrokedCircle(gaze2, 10.0f, 10.0f);
-		
+
 		gl::color(1.0, 1.0, 1.0, 1.0);
-		if (gazePositionX < 500 && gazePositionY < 100){
+		if (gazePositionX < 500 && gazePositionY < 100)
+		{
 			bool tempBool = true;
 			ui.changeModeButtons(tempBool);
 		}
-		else {
+		else
+		{
 			bool tempBool = false;
 			ui.changeModeButtons(tempBool);
 		}
 
-		if (gazePositionX > windowWidth*.75 && gazePositionY > windowHeight*.6)
+		if (gazePositionX > windowWidth * .75 && gazePositionY > windowHeight * .6)
 		{
 			gl::draw(uiFbo->getColorTexture());
 		}
 	}
 	else if (ui.getUiFboFlag()) gl::draw(uiFbo->getColorTexture());
 
-
 	//Draws all the active shapes being drawn by the user
 	gl::color(1.0, 1.0, 1.0, 1.0);
 	gl::draw(activeFbo->getColorTexture());
 
-	if (ui.getFps()){
+	if (ui.getFps())
+	{
 		auto mFont = Font("Quicksand Book Regular", 36.0f);
-		gl::drawString("Framerate: " + toString((int)getAverageFps()), vec2(windowWidth*.90, windowHeight *.01), ColorA(0.0, 0.0, 0.0, 1.0), mFont);
+		gl::drawString("Framerate: " + toString((int)getAverageFps()), vec2(windowWidth * .90, windowHeight * .01), ColorA(0.0, 0.0, 0.0, 1.0), mFont);
 	}
-	
 
-	if (realSenseHandler.getHoverFlag()){
+	if (realSenseHandler.getHoverFlag())
+	{
 		//Draws finger location
 		gl::color(1.0, 1.0, 1.0, 1.0);
 		gl::draw(fingerLocationFbo->getColorTexture());
 	}
-
 }
 
-CINDER_APP(TouchPointsApp, RendererGl, prepareSettings)
+CINDER_APP(TouchPointsApp, RendererGl, prepareSettings);

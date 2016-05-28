@@ -6,10 +6,11 @@
 #include "Enums.h"
 #include <stdio.h>
 
-struct DeviceHandler{
-
+struct DeviceHandler
+{
 	//Creates a Device Handlers
-	DeviceHandler(){
+	DeviceHandler()
+	{
 		leapConnected = 0;
 		multiTouchConnected = 0;
 		eyeXConnected = 0;
@@ -33,7 +34,6 @@ struct DeviceHandler{
 		updateDefaultFlag = false;
 	}
 
-
 	int deviceConnection();
 	Mode::DefaultModes getDefaultMode();
 	int leapStatus();
@@ -41,7 +41,6 @@ struct DeviceHandler{
 	int eyeXStatus();
 	int realSenseStatus();
 
-	
 	void toggleMultiTouch();
 	void toggleEyeX();
 	//Sense Device and Functionality
@@ -74,7 +73,7 @@ struct DeviceHandler{
 	Mode::DefaultModes set_E_Mode();
 	Mode::DefaultModes set_M_Mode();
 	Mode::DefaultModes set_R_Mode();
-	
+
 	bool getUpdateDefaultFlag();
 	void updateDefaultMode();
 	void setUpdateStatus();
@@ -85,8 +84,6 @@ private:
 	int setEyeXState();
 	int setRealSenseState();
 	void resetFlags();
-
-
 
 	int leapConnectedFlag;
 	int multiTouchConnectedFlag;
@@ -111,166 +108,165 @@ private:
 	bool overrideRealSense;
 
 	bool updateDefaultFlag;
-
 };
 
-
-
-bool DeviceHandler::leapDraw(){
-	
-	if (leapConnected){
+bool DeviceHandler::leapDraw()
+{
+	if (leapConnected)
+	{
 		return leapDrawEnabled;
 	}
-	else {
+	else
+	{
 		return false;
 	}
 }
-bool DeviceHandler::leapGesture(){
-	if (leapConnected){
+
+bool DeviceHandler::leapGesture()
+{
+	if (leapConnected)
+	{
 		return leapGestureEnabled;
 	}
-	else {
+	else
+	{
 		return false;
 	}
 }
-bool DeviceHandler::realSenseExpressions(){
-	if (realSenseConnected){
+
+bool DeviceHandler::realSenseExpressions()
+{
+	if (realSenseConnected)
+	{
 		return realSenseExpressionsEnabled;
 	}
-	else {
+	else
+	{
 		return false;
 	}
-
 }
 
-bool DeviceHandler::realSenseDraw(){
-	if (realSenseConnected){
+bool DeviceHandler::realSenseDraw()
+{
+	if (realSenseConnected)
+	{
 		return realSenseDrawEnabled;
 	}
-	else {
+	else
+	{
 		return false;
 	}
-
 }
 
-void DeviceHandler::toggleLeap(){
-
-	if (leapConnected){
+void DeviceHandler::toggleLeap()
+{
+	if (leapConnected)
+	{
 		leapConnected = false;
 		overrideLeap = true;
 	}
-	else {
+	else
+	{
 		overrideLeap = false;
 		deviceConnection();
 	}
-	//overrideLeap = true;
-	/*
-	leapConnected = !leapConnected;
-	if (leapConnected){
-		overrideLeap = false;
-	}
-	else {
-		overrideLeap = true;
-	}
-	*/
 }
-void DeviceHandler::toggleLeapDraw(){
 
+void DeviceHandler::toggleLeapDraw()
+{
 	leapDrawEnabled = !leapDrawEnabled;
 }
-void DeviceHandler::toggleLeapGesture(){
 
+void DeviceHandler::toggleLeapGesture()
+{
 	leapGestureEnabled = !leapGestureEnabled;
-
 }
-void DeviceHandler::toggleRealSense(){
+
+void DeviceHandler::toggleRealSense()
+{
 	//realSenseConnected = !realSenseConnected;
-	if (realSenseConnected){
+	if (realSenseConnected)
+	{
 		realSenseConnected = false;
 		overrideRealSense = true;
 	}
-	else {
+	else
+	{
 		overrideRealSense = false;
 		deviceConnection();
 	}
 }
-void DeviceHandler::toggleRealSenseExpressions(){
+
+void DeviceHandler::toggleRealSenseExpressions()
+{
 	realSenseExpressionsEnabled = !realSenseExpressionsEnabled;
 }
 
-void DeviceHandler::toggleRealSenseDraw(){
+void DeviceHandler::toggleRealSenseDraw()
+{
 	realSenseDrawEnabled = !realSenseDrawEnabled;
 }
-void DeviceHandler::toggleMultiTouch(){
-	if (multiTouchConnected){
+
+void DeviceHandler::toggleMultiTouch()
+{
+	if (multiTouchConnected)
+	{
 		multiTouchConnected = false;
 		overrideMultiTouch = true;
 	}
-	else {
+	else
+	{
 		overrideMultiTouch = false;
 		deviceConnection();
 	}
-	/*
-	multiTouchConnected = !multiTouchConnected;
-	if (multiTouchConnected){
-		overrideMultiTouch = false;
-	}
-	else {
-		overrideMultiTouch = true;
-	}
-	*/
 }
-void DeviceHandler::toggleEyeX(){
 
-	if (eyeXConnected){
+void DeviceHandler::toggleEyeX()
+{
+	if (eyeXConnected)
+	{
 		eyeXConnected = false;
 		overrideEyeX = true;
 	}
-	else {
+	else
+	{
 		overrideEyeX = false;
 		deviceConnection();
 	}
-	/*
-	eyeXConnected = !eyeXConnected;
-	if (eyeXConnected){
-		overrideEyeX = false;
-	}
-	else {
-		overrideEyeX = true;
-	}
-	*/
-	
 }
 
+int DeviceHandler::deviceConnection()
+{
+	libusb_device** devs; //pointer to pointer of device, used to retrieve a list of devices
+	libusb_context* contex = NULL; //a libusb session
 
-int DeviceHandler::deviceConnection(){
-
-	libusb_device **devs;			//pointer to pointer of device, used to retrieve a list of devices
-	libusb_context *contex = NULL;		//a libusb session
-
-	int r;			//return values
-	ssize_t listCount;	//Number of devices in list
+	int r; //return values
+	ssize_t listCount; //Number of devices in list
 
 	//Intialize Library Session
 	r = libusb_init(&contex);
-	if (r < 0){
+	if (r < 0)
+	{
 		//Intialization Error
 		return -1;
 	}
 
 	//Get the list of devices
 	listCount = libusb_get_device_list(contex, &devs);
-	if (listCount < 0) {
+	if (listCount < 0)
+	{
 		return (int)listCount;
 	}
 
-	libusb_device *dev;
+	libusb_device* dev;
 
 	int i = 0, j = 0;
-	while ((dev = devs[i++]) != NULL) {
+	while ((dev = devs[i++]) != NULL)
+	{
 		struct libusb_device_descriptor desc;
 		int r = libusb_get_device_descriptor(dev, &desc);
-		if (r < 0) {
+		if (r < 0)
+		{
 			//Error
 			return -1;
 		}
@@ -278,13 +274,16 @@ int DeviceHandler::deviceConnection(){
 		uint16_t vendorid = desc.idVendor;
 		uint16_t productid = desc.idProduct;
 
-		if (vendorid == vendorList[0]){
+		if (vendorid == vendorList[0])
+		{
 			leapConnectedFlag = 1;
 		}
-		if (vendorid == vendorList[1]){
+		if (vendorid == vendorList[1])
+		{
 			multiTouchConnectedFlag = 1;
 		}
-		if (vendorid == vendorList[2]){
+		if (vendorid == vendorList[2])
+		{
 			eyeXConnectedFlag = 1;
 		}
 		if (productid == vendorList[3])
@@ -303,298 +302,369 @@ int DeviceHandler::deviceConnection(){
 
 	stateCounter = stateCounter + (setRealSenseState());
 
-	//setUpdateStatus();
-
 	resetFlags();
 
 	libusb_free_device_list(devs, 1);
-
 
 	libusb_exit(NULL);
 
 	return stateCounter;
 }
 
-Mode::DefaultModes DeviceHandler::getDefaultMode(){
-
-	if (multiTouchConnected && leapConnected && eyeXConnected && realSenseConnected){
+Mode::DefaultModes DeviceHandler::getDefaultMode()
+{
+	if (multiTouchConnected && leapConnected && eyeXConnected && realSenseConnected)
+	{
 		return set_MLER_Mode();
 	}
-	else if (multiTouchConnected && leapConnected && eyeXConnected){ //&& eyeXConnectedFlag){
+	else if (multiTouchConnected && leapConnected && eyeXConnected)
+	{
 		return set_MLE_Mode();
 	}
-	else if (multiTouchConnected && leapConnected && realSenseConnected){
+	else if (multiTouchConnected && leapConnected && realSenseConnected)
+	{
 		return set_MLR_Mode();
 	}
-	else if (multiTouchConnected && eyeXConnected && realSenseConnected){
+	else if (multiTouchConnected && eyeXConnected && realSenseConnected)
+	{
 		return set_MER_Mode();
 	}
-	else if (leapConnected && eyeXConnected && realSenseConnected){
+	else if (leapConnected && eyeXConnected && realSenseConnected)
+	{
 		return set_LER_Mode();
 	}
-	else if (leapConnected && eyeXConnected){
+	else if (leapConnected && eyeXConnected)
+	{
 		return set_LE_Mode();
 	}
-	else if (multiTouchConnected && eyeXConnected){
+	else if (multiTouchConnected && eyeXConnected)
+	{
 		return set_ME_Mode();
 	}
-	else if (multiTouchConnected && leapConnected){
+	else if (multiTouchConnected && leapConnected)
+	{
 		return set_ML_Mode();
 	}
-	else if (multiTouchConnected && realSenseConnected){
+	else if (multiTouchConnected && realSenseConnected)
+	{
 		return set_MR_Mode();
 	}
-	else if (leapConnected && realSenseConnected){
+	else if (leapConnected && realSenseConnected)
+	{
 		return set_LR_Mode();
 	}
-	else if (eyeXConnected && realSenseConnected){
+	else if (eyeXConnected && realSenseConnected)
+	{
 		return set_ER_Mode();
 	}
-	else if (leapConnected){
+	else if (leapConnected)
+	{
 		return set_L_Mode();
 	}
-	else if (multiTouchConnected){
+	else if (multiTouchConnected)
+	{
 		return set_M_Mode();
 	}
-	else if (realSenseConnected){
+	else if (realSenseConnected)
+	{
 		return set_R_Mode();
 	}
-	else{
+	else
+	{
 		return set_E_Mode();
 	}
-	
 }
 
-int DeviceHandler::leapStatus(){
+int DeviceHandler::leapStatus()
+{
 	return leapConnected;
 }
 
-int DeviceHandler::multiTouchStatus(){
+int DeviceHandler::multiTouchStatus()
+{
 	return multiTouchConnected;
 }
 
-int DeviceHandler::eyeXStatus(){
+int DeviceHandler::eyeXStatus()
+{
 	return eyeXConnected;
 }
 
-int DeviceHandler::realSenseStatus(){
+int DeviceHandler::realSenseStatus()
+{
 	return realSenseConnected;
 }
 
-int DeviceHandler::setLeapState(){
-
-	if (overrideLeap){
+int DeviceHandler::setLeapState()
+{
+	if (overrideLeap)
+	{
 		return 0;
 	}
 
-	if (leapConnectedFlag == 1){
-		if (leapConnected == 0){
+	if (leapConnectedFlag == 1)
+	{
+		if (leapConnected == 0)
+		{
 			leapConnected = 1;
 			updateDefaultFlag = true;
 			return 1;
 		}
-		else{
+		else
+		{
 			return 0;
 		}
 	}
-	else{
-		if (leapConnected == 1){
+	else
+	{
+		if (leapConnected == 1)
+		{
 			leapConnected = 0;
 			updateDefaultFlag = true;
 			return 1;
 		}
-		else{
+		else
+		{
 			return 0;
 		}
 	}
 }
 
-int DeviceHandler::setMultiTouchState(){
-
-	if (overrideMultiTouch){
+int DeviceHandler::setMultiTouchState()
+{
+	if (overrideMultiTouch)
+	{
 		return 0;
 	}
 
-	if( multiTouchConnectedFlag == 1){
-		if (multiTouchConnected == 0){
+	if (multiTouchConnectedFlag == 1)
+	{
+		if (multiTouchConnected == 0)
+		{
 			multiTouchConnected = 1;
 			updateDefaultFlag = true;
 			return 1;
 		}
-		else{
+		else
+		{
 			return 0;
 		}
 	}
-	else{
-		if (multiTouchConnected == 1){
+	else
+	{
+		if (multiTouchConnected == 1)
+		{
 			multiTouchConnected = 0;
 			updateDefaultFlag = true;
 			return 1;
 		}
-		else{
+		else
+		{
 			return 0;
 		}
 	}
 }
 
-int DeviceHandler::setEyeXState(){
-
-	if (overrideEyeX){
+int DeviceHandler::setEyeXState()
+{
+	if (overrideEyeX)
+	{
 		return 0;
 	}
 
-	if (eyeXConnectedFlag == 1){
-		if (eyeXConnected == 0){
-
+	if (eyeXConnectedFlag == 1)
+	{
+		if (eyeXConnected == 0)
+		{
 			eyeXConnected = 1;
 			updateDefaultFlag = true;
 			return 1;
 		}
-		else{
+		else
+		{
 			return 0;
 		}
 	}
-	else{
-		if (eyeXConnected == 1){
+	else
+	{
+		if (eyeXConnected == 1)
+		{
 			eyeXConnected = 0;
 			updateDefaultFlag = true;
 			return 1;
 		}
-		else{
+		else
+		{
 			return 0;
 		}
 	}
 }
 
-int DeviceHandler::setRealSenseState(){
-
-	if (overrideRealSense){
+int DeviceHandler::setRealSenseState()
+{
+	if (overrideRealSense)
+	{
 		return 0;
 	}
 
-	if (realSenseConnectedFlag == 1){
-		if (realSenseConnected == 0){
+	if (realSenseConnectedFlag == 1)
+	{
+		if (realSenseConnected == 0)
+		{
 			realSenseConnected = 1;
 			updateDefaultFlag = true;
 			return 1;
 		}
-		else{
+		else
+		{
 			return 0;
 		}
 	}
-	else{
-		if (realSenseConnected == 1){
+	else
+	{
+		if (realSenseConnected == 1)
+		{
 			realSenseConnected = 0;
 			updateDefaultFlag = true;
 			return 1;
 		}
-		else{
+		else
+		{
 			return 0;
 		}
 	}
 }
 
-void DeviceHandler::resetFlags(){
+void DeviceHandler::resetFlags()
+{
 	leapConnectedFlag = 0;
 	multiTouchConnectedFlag = 0;
 	eyeXConnectedFlag = 0;
 	realSenseConnectedFlag = 0;
 }
 
-Mode::DefaultModes DeviceHandler::set_MLER_Mode(){
+Mode::DefaultModes DeviceHandler::set_MLER_Mode()
+{
 	realSenseExpressionsEnabled = true;
 	leapGestureEnabled = false;
 	leapDrawEnabled = false;
 	return Mode::DefaultModes::MLER;
 }
-Mode::DefaultModes DeviceHandler::set_MLE_Mode(){
 
+Mode::DefaultModes DeviceHandler::set_MLE_Mode()
+{
 	//Turn off leapDraw
 	leapDrawEnabled = false;
 	leapGestureEnabled = true;
 	return Mode::DefaultModes::MLE;
-
 }
-Mode::DefaultModes DeviceHandler::set_MLR_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_MLR_Mode()
+{
 	realSenseExpressionsEnabled = true;
 	leapGestureEnabled = false;
 	leapDrawEnabled = false;
-	
+
 	return Mode::DefaultModes::MLR;
 }
-Mode::DefaultModes DeviceHandler::set_MER_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_MER_Mode()
+{
 	realSenseExpressionsEnabled = true;
 	leapDrawEnabled = false;
 	leapGestureEnabled = false;
 	return Mode::DefaultModes::MER;
 }
-Mode::DefaultModes DeviceHandler::set_LER_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_LER_Mode()
+{
 	realSenseExpressionsEnabled = true;
 	leapGestureEnabled = false;
 	leapDrawEnabled = true;
 	return Mode::DefaultModes::LER;
 }
-Mode::DefaultModes DeviceHandler::set_ML_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_ML_Mode()
+{
 	leapDrawEnabled = false;
 	leapGestureEnabled = true;
 	return Mode::DefaultModes::ML;
 }
-Mode::DefaultModes DeviceHandler::set_ME_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_ME_Mode()
+{
 	leapDrawEnabled = false;
 	leapGestureEnabled = false;
 	return Mode::DefaultModes::ME;
 }
-Mode::DefaultModes DeviceHandler::set_MR_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_MR_Mode()
+{
 	realSenseExpressionsEnabled = true;
 	leapDrawEnabled = false;
 	leapGestureEnabled = false;
 	return Mode::DefaultModes::MR;
 }
-Mode::DefaultModes DeviceHandler::set_LE_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_LE_Mode()
+{
 	leapDrawEnabled = true;
 	leapGestureEnabled = true;
 	return Mode::DefaultModes::LE;
 }
-Mode::DefaultModes DeviceHandler::set_LR_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_LR_Mode()
+{
 	realSenseExpressionsEnabled = true;
 	leapGestureEnabled = false;
 	leapDrawEnabled = true;
 	return Mode::DefaultModes::LR;
 }
-Mode::DefaultModes DeviceHandler::set_ER_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_ER_Mode()
+{
 	realSenseExpressionsEnabled = true;
 	leapGestureEnabled = false;
 	leapDrawEnabled = false;
 	return Mode::DefaultModes::LR;
 }
-Mode::DefaultModes DeviceHandler::set_L_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_L_Mode()
+{
 	leapDrawEnabled = true;
 	leapGestureEnabled = true;
 	return Mode::DefaultModes::L;
 }
-Mode::DefaultModes DeviceHandler::set_E_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_E_Mode()
+{
 	leapDrawEnabled = false;
 	leapGestureEnabled = false;
 	return Mode::DefaultModes::E;
 }
-Mode::DefaultModes DeviceHandler::set_M_Mode(){
 
+Mode::DefaultModes DeviceHandler::set_M_Mode()
+{
 	leapDrawEnabled = false;
 	leapGestureEnabled = false;
 	return Mode::DefaultModes::M;
 }
-Mode::DefaultModes DeviceHandler::set_R_Mode(){
+
+Mode::DefaultModes DeviceHandler::set_R_Mode()
+{
 	realSenseExpressionsEnabled = true;
 	leapDrawEnabled = false;
 	leapGestureEnabled = false;
 	return Mode::DefaultModes::R;
 }
 
-bool DeviceHandler::getUpdateDefaultFlag(){
+bool DeviceHandler::getUpdateDefaultFlag()
+{
 	return updateDefaultFlag;
 }
 
-void DeviceHandler::updateDefaultMode(){
+void DeviceHandler::updateDefaultMode()
+{
 	overrideEyeX = false;
 	overrideLeap = false;
 	overrideMultiTouch = false;
@@ -603,32 +673,39 @@ void DeviceHandler::updateDefaultMode(){
 	updateDefaultFlag = false;
 }
 
-void DeviceHandler::setUpdateStatus(){
-
-	if (leapConnectedFlag && !leapConnected && !overrideLeap){
+void DeviceHandler::setUpdateStatus()
+{
+	if (leapConnectedFlag && !leapConnected && !overrideLeap)
+	{
 		updateDefaultFlag = true;
 	}
-	if (leapConnectedFlag == 0 && leapConnected == 1){
+	if (leapConnectedFlag == 0 && leapConnected == 1)
+	{
 		updateDefaultFlag = true;
 	}
-	if (multiTouchConnectedFlag && !multiTouchConnected && !overrideMultiTouch){
+	if (multiTouchConnectedFlag && !multiTouchConnected && !overrideMultiTouch)
+	{
 		updateDefaultFlag = true;
 	}
-	if (multiTouchConnectedFlag == 0 && multiTouchConnected == 1){
+	if (multiTouchConnectedFlag == 0 && multiTouchConnected == 1)
+	{
 		updateDefaultFlag = true;
 	}
-	if (eyeXConnectedFlag && !eyeXConnected && !overrideEyeX){
+	if (eyeXConnectedFlag && !eyeXConnected && !overrideEyeX)
+	{
 		updateDefaultFlag = true;
 	}
-	if (eyeXConnectedFlag == 0 && eyeXConnected == 1){
+	if (eyeXConnectedFlag == 0 && eyeXConnected == 1)
+	{
 		updateDefaultFlag = true;
 	}
-	if (realSenseConnectedFlag && !realSenseConnected && !overrideRealSense){
+	if (realSenseConnectedFlag && !realSenseConnected && !overrideRealSense)
+	{
 		updateDefaultFlag = true;
 	}
-	if (realSenseConnectedFlag == 0 && realSenseConnected == 1){
+	if (realSenseConnectedFlag == 0 && realSenseConnected == 1)
+	{
 		updateDefaultFlag = true;
 	}
 }
-
 #endif

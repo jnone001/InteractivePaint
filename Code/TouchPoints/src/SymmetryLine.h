@@ -2,16 +2,6 @@
 #define SYMMETRYLINE_H
 //Cinder and OpenGL Includes
 #include "cinder/app/App.h"
-#include "cinder/app/RendererGl.h"
-#include "cinder/gl/gl.h"
-#include "cinder/System.h"
-#include "cinder/Rand.h"
-#include "cinder/Log.h"
-#include "cinder/gl/Fbo.h"
-
-//Our own includes
-//#include "TouchShapes.h"
-
 
 //Standard Library Includes
 #include <vector>
@@ -20,16 +10,20 @@
 
 #include "TouchShapes.h"
 
-struct SymmetryLine{
+struct SymmetryLine
+{
+	SymmetryLine() {}
 
-	SymmetryLine(){}
 	//Creates a symmetric line about the 
-	SymmetryLine(float x, bool ySymmetric){
-		if (ySymmetric){
+	SymmetryLine(float x, bool ySymmetric)
+	{
+		if (ySymmetric)
+		{
 			point1 = vec2(x, 0);
 			point2 = vec2(x, 1);
 		}
-		else{
+		else
+		{
 			point1 = vec2(0, x);
 			point2 = vec2(1, x);
 		}
@@ -44,40 +38,40 @@ struct SymmetryLine{
 	void toggleSymmetry();
 	bool getSymmetryOn();
 
-
 private:
 	vec2 point1;
 	vec2 point2;
 	bool symmetryOn;
 	//float slope;
-
-
 };
 
-void SymmetryLine::toggleSymmetry(){
+void SymmetryLine::toggleSymmetry()
+{
 	symmetryOn = !symmetryOn;
 }
 
-bool SymmetryLine::getSymmetryOn(){
+bool SymmetryLine::getSymmetryOn()
+{
 	return symmetryOn;
 }
 
-TouchPoint SymmetryLine::symmetricLine(TouchPoint line){
-
+TouchPoint SymmetryLine::symmetricLine(TouchPoint line)
+{
 	auto points = line.getPointList();
 	vec2 firstPoint = SymmetryLine::symmetricPoint(points.front());
 	TouchPoint symmetricTouch(firstPoint, line.getColor(), line.getSize());
-	for (auto touches : points){
+	for (auto touches : points)
+	{
 		symmetricTouch.addPoint(SymmetryLine::symmetricPoint(touches));
 	}
 
 	return symmetricTouch;
-
-
 };
 
-vec2 SymmetryLine::symmetricPoint(vec2 point){
-	if (point1.x - point2.x == 0){
+vec2 SymmetryLine::symmetricPoint(vec2 point)
+{
+	if (point1.x - point2.x == 0)
+	{
 		auto symmetricX = point1.x - (point.x - point1.x);
 		return vec2(symmetricX, point.y);
 	}
@@ -87,19 +81,18 @@ vec2 SymmetryLine::symmetricPoint(vec2 point){
 		return vec2(point.x, symmetricY);
 	}
 	return vec2(0, 0);
-
 };
 
-TouchCircle SymmetryLine::symmetricCircle(TouchCircle circle){
-
+TouchCircle SymmetryLine::symmetricCircle(TouchCircle circle)
+{
 	vec2 symCenter = SymmetryLine::symmetricPoint(circle.getCenter());
 	bool x = circle.getFilledShape();
 	TouchCircle symmetricCircle(symCenter, circle.getRadius(), circle.getColor(), circle.getSize(), x);
 	return symmetricCircle;
 }
 
-TouchRectangle SymmetryLine::symmetricRectangle(TouchRectangle rectangle){
-
+TouchRectangle SymmetryLine::symmetricRectangle(TouchRectangle rectangle)
+{
 	vec2 symUpperLeft = SymmetryLine::symmetricPoint(vec2(rectangle.upperLeftX(), rectangle.upperLeftY()));
 	vec2 symLowerRight = SymmetryLine::symmetricPoint(vec2(rectangle.lowerRightX(), rectangle.lowerRightY()));
 
@@ -112,11 +105,10 @@ TouchRectangle SymmetryLine::symmetricRectangle(TouchRectangle rectangle){
 
 	TouchRectangle symmetricRectangle(x1, y1, x2, y2, rectangle.getColor(), rectangle.getSize(), symBool);
 	return symmetricRectangle;
-
 }
 
-TouchTriangle SymmetryLine::symmetricTriangle(TouchTriangle triangle){
-
+TouchTriangle SymmetryLine::symmetricTriangle(TouchTriangle triangle)
+{
 	vec2 symPoint1 = symmetricPoint(triangle.getPoint1());
 	vec2 symPoint2 = symmetricPoint(triangle.getPoint2());
 	vec2 symPoint3 = symmetricPoint(triangle.getPoint3());

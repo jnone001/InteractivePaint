@@ -18,13 +18,52 @@
 #define SHAPE_Filled_Triangle "FilledTriangle.png"
 #define START_LOGO "interactive-paint-logo.png"
 
-namespace Shape{
-	enum Shape { Line, Circle, Rectangle, Triangle };
+namespace Shape
+{
+	enum Shape
+	{
+		Line,
+		Circle,
+		Rectangle,
+		Triangle
+	};
 }
-namespace ourColors{
-	enum ourColors{ Black, Red, Yellow, Green, Aqua, Blue, Purple, Orange, White };
+
+namespace ourColors
+{
+	enum ourColors
+	{
+		Black,
+		Red,
+		Yellow,
+		Green,
+		Aqua,
+		Blue,
+		Purple,
+		Orange,
+		White
+	};
 }
-namespace Mode{
-	enum DefaultModes{ MLER, MLE, MLR, MER, LER, ML, ME, MR, LE, LR, ER, M, L, E , R };
+
+namespace Mode
+{
+	enum DefaultModes
+	{
+		MLER,
+		MLE,
+		MLR,
+		MER,
+		LER,
+		ML,
+		ME,
+		MR,
+		LE,
+		LR,
+		ER,
+		M,
+		L,
+		E,
+		R
+	};
 }
 #endif

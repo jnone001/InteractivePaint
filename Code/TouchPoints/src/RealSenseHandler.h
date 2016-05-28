@@ -1,48 +1,36 @@
 #ifndef REALSENSE_H
 #define REALSENSE_H
 
-#include "pxcsession.h"
 #include "pxcfacedata.h"
-#include "pxchandconfiguration.h"
 #include "pxchanddata.h"
-#include "pxchandmodule.h"
 #include "pxccursorconfiguration.h"
 #include "pxccursordata.h"
 #include "pxchandcursormodule.h"
 #include "pxcfaceconfiguration.h"
-#include <windows.h>
 #include "pxcdefs.h"
-#include "service/pxcsessionservice.h"
 #include "pxcsensemanager.h"
-#include "pxccapturemanager.h"
 #include "pxcfacemodule.h"
 #include "pxcstatus.h"
-#include <WindowsX.h>
 #include "pxccapture.h"
-#include "pxcprojection.h"
-#include "pxcmetadata.h"
-#include "pxcbase.h"
-#include "pxcaddref.h"
-#include "pxcversion.h"
 #include "Illustrator.h"
 #include <vector>
 #include <map> 
-#include <list>
-
-
 
 using namespace std;
 
 #define MAX_FACES 1
 #define NUM_HANDS 2
 
-struct RealSenseHandler{
-	RealSenseHandler(){}
-	RealSenseHandler(Illustrator *illustrator){
+struct RealSenseHandler
+{
+	RealSenseHandler() {}
+
+	RealSenseHandler(Illustrator* illustrator)
+	{
 		kissGestureFlag = false;
 		browGestureFlag = false;
 		cheekGestureFlag = false;
-		smileGestureFlag = false; 
+		smileGestureFlag = false;
 		tongueGestureFlag = false;
 
 		browLFlag = false;
@@ -55,9 +43,8 @@ struct RealSenseHandler{
 		hoverZoneFlag = false;
 		realDrawFlag = false;
 		realSenseDrawEnabled = true;
-		
 
-		int kissCount = 0; 
+		int kissCount = 0;
 		int browLCount = 0;
 		int browRCount = 0;
 		int cheekLCount = 0;
@@ -76,11 +63,11 @@ struct RealSenseHandler{
 	void streamData();
 	void streamCursorData();
 
-	pxcBool kissDetection(PXCFaceData::ExpressionsData *expressionData);
-	pxcBool eyebrowDetection(PXCFaceData::ExpressionsData *expressionData);
-	pxcBool cheekDetection(PXCFaceData::ExpressionsData *expressionData);
-	pxcBool tongueDetection(PXCFaceData::ExpressionsData *expressionData);
-	pxcBool smileDetection(PXCFaceData::ExpressionsData *expressionData);
+	pxcBool kissDetection(PXCFaceData::ExpressionsData* expressionData);
+	pxcBool eyebrowDetection(PXCFaceData::ExpressionsData* expressionData);
+	pxcBool cheekDetection(PXCFaceData::ExpressionsData* expressionData);
+	pxcBool tongueDetection(PXCFaceData::ExpressionsData* expressionData);
+	pxcBool smileDetection(PXCFaceData::ExpressionsData* expressionData);
 
 	bool getKissGestureFlag();
 	bool getBrowGestureFlag();
@@ -95,19 +82,19 @@ struct RealSenseHandler{
 	void resetBrowGestureFlag();
 	void resetKissGestureFlag();
 
-	void drawFingerLocation(std::shared_ptr<gl::Fbo> &fingerLocation);
-	void realSenseDraw(std::shared_ptr<gl::Fbo> &fingerLocation);
+	void drawFingerLocation(std::shared_ptr<gl::Fbo>& fingerLocation);
+	void realSenseDraw(std::shared_ptr<gl::Fbo>& fingerLocation);
 	bool getRealSenseDrawEnabled();
 
 private:
 
-	PXCSenseManager *senseManager = 0;
-	PXCFaceModule *faceAnalyzer;
+	PXCSenseManager* senseManager = 0;
+	PXCFaceModule* faceAnalyzer;
 	PXCHandCursorModule* cursorAnalyzer = 0;
-	PXCFaceData *faceOutputData;
-	PXCCursorData *cursorOutputData;
-	PXCFaceConfiguration *faceConfig;
-	PXCCursorConfiguration *cursorConfig;
+	PXCFaceData* faceOutputData;
+	PXCCursorData* cursorOutputData;
+	PXCFaceConfiguration* faceConfig;
+	PXCCursorConfiguration* cursorConfig;
 
 	bool kissFlag;
 	bool browLFlag;
@@ -135,7 +122,7 @@ private:
 	int tongueCount;
 
 	float xPosition;
-	float yPosition; 
+	float yPosition;
 	float zPosition;
 
 	float currentId;
@@ -144,12 +131,11 @@ private:
 	map<uint32_t, vec2> realPointsMap;
 	map<uint32_t, bool> realActivePointsMap;
 
-	Illustrator *myIllustrator;
-
+	Illustrator* myIllustrator;
 };
 
-
-void RealSenseHandler::realSenseSetup(){
+void RealSenseHandler::realSenseSetup()
+{
 	pxcStatus sts;
 
 	senseManager = PXCSenseManager::CreateInstance();
@@ -158,19 +144,22 @@ void RealSenseHandler::realSenseSetup(){
 	//senseManager->EnableFace();
 
 	sts = senseManager->EnableFace();
-	if (sts < PXC_STATUS_NO_ERROR) {
+	if (sts < PXC_STATUS_NO_ERROR)
+	{
 		wprintf_s(L"Unable to enable Hand Tracking\n");
 	}
 
 	sts = senseManager->EnableHandCursor();
-	if (sts < PXC_STATUS_NO_ERROR) {
+	if (sts < PXC_STATUS_NO_ERROR)
+	{
 		wprintf_s(L"Unable to enable Hand Tracking\n");
 	}
 
 	faceAnalyzer = senseManager->QueryFace();
 
 	cursorAnalyzer = senseManager->QueryHandCursor();
-	if (!senseManager){
+	if (!senseManager)
+	{
 		wprintf_s(L"Unable to retrieve hand results\n");
 	}
 
@@ -182,56 +171,49 @@ void RealSenseHandler::realSenseSetup(){
 	/*Cursor Output Data*/
 	cursorOutputData = cursorAnalyzer->CreateOutput();
 	cursorConfig = cursorAnalyzer->CreateActiveConfiguration();
-	
+
 	/*Initialziation of Face and Cursor Configurations*/
 	intializeFaceSensing();
 	intializeCursorSensing();
-
 }
 
-void RealSenseHandler::intializeFaceSensing(){
-
+void RealSenseHandler::intializeFaceSensing()
+{
 	faceConfig->SetTrackingMode(PXCFaceConfiguration::TrackingModeType::FACE_MODE_COLOR_PLUS_DEPTH);
 	faceConfig->QueryExpressions()->Enable();
 	faceConfig->QueryExpressions()->EnableAllExpressions();
 	faceConfig->QueryExpressions()->properties.maxTrackedFaces = MAX_FACES;
 	faceConfig->ApplyChanges();
-
 }
-void RealSenseHandler::intializeCursorSensing(){
-	//handConfig->SetTrackingMode(PXCHandData::TRACKING_MODE_FULL_HAND);
+
+void RealSenseHandler::intializeCursorSensing()
+{
 	cursorConfig->ApplyChanges();
 }
 
-void RealSenseHandler::streamData(){
-
-	//while (senseManager->AcquireFrame(true) >= PXC_STATUS_NO_ERROR){
-	if (senseManager->AcquireFrame(true) >= PXC_STATUS_NO_ERROR){
-
+void RealSenseHandler::streamData()
+{
+	if (senseManager->AcquireFrame(true) >= PXC_STATUS_NO_ERROR)
+	{
 		/*Update the Output Data to current Frame*/
 		faceOutputData->Update();
 		cursorOutputData->Update();
 
 		/* Face Detection Struct */
-		PXCFaceData::ExpressionsData *expressionData = nullptr;
-		/* Hand Detection Struct */
-		//PXCHandData::JointData nodes[NUM_HANDS][PXCHandData::NUMBER_OF_JOINTS] = {};
-		//pxcU16 numOfFaces = faceOutputData->QueryNumberOfDetectedFaces();
-		/*Cursor Detection Info*/
-		//pxcU16 numOfCursors = cursorOutputData->QueryNumberOfCursors();
-
+		PXCFaceData::ExpressionsData* expressionData = nullptr;
 
 		/* Face Data Analysis*/
 		for (pxcU16 i = 0; i <= faceOutputData->QueryNumberOfDetectedFaces(); i++)
 		{
 			// Get face data by index
-			PXCFaceData::Face *trackedFace = faceOutputData->QueryFaceByIndex(i);
+			PXCFaceData::Face* trackedFace = faceOutputData->QueryFaceByIndex(i);
 
-			if (trackedFace != NULL){
+			if (trackedFace != NULL)
+			{
 				/* Query Expression Data */
 				expressionData = trackedFace->QueryExpressions();
 			}
-			
+
 			if (expressionData != NULL)
 			{
 				kissGestureFlag = kissDetection(expressionData);
@@ -245,36 +227,40 @@ void RealSenseHandler::streamData(){
 		senseManager->ReleaseFrame();
 	}
 }
-void RealSenseHandler::streamCursorData(){
 
-	//while (senseManager->AcquireFrame(true) >= PXC_STATUS_NO_ERROR){
-	if (senseManager->AcquireFrame(true) >= PXC_STATUS_NO_ERROR){
-
+void RealSenseHandler::streamCursorData()
+{
+	if (senseManager->AcquireFrame(true) >= PXC_STATUS_NO_ERROR)
+	{
 		/*Update the Output Data to current Frame*/
 		cursorOutputData->Update();
 
 		/* Cursor Data Analysis */
-		PXCCursorData::ICursor *cursor;
+		PXCCursorData::ICursor* cursor;
 		for (int i = 0; i < cursorOutputData->QueryNumberOfCursors(); ++i)
 		{
 			cursorOutputData->QueryCursorData(PXCCursorData::ACCESS_ORDER_BY_TIME, i, cursor);
 			std::string handSide = "Unknown Hand";
 			handSide = cursor->QueryBodySide() == PXCHandData::BODY_SIDE_LEFT ? "Left Hand Cursor" : "Right Hand Cursor";
-			
+
 			xPosition = 1920 - (((cursor->QueryCursorImagePoint().x) / 640) * 1920);
-			yPosition = ((cursor->QueryCursorImagePoint().y)/480) * 1080;
+			yPosition = ((cursor->QueryCursorImagePoint().y) / 480) * 1080;
 			zPosition = cursor->QueryCursorImagePoint().z;
 
 			currentId = cursor->QueryUniqueId();
 
-			if (zPosition >= .35 && zPosition <= .50){
+			if (zPosition >= .35 && zPosition <= .50)
+			{
 				hoverZoneFlag = true;
 				realDrawFlag = false;
-			} else if(zPosition >= 0 && zPosition <.35){
+			}
+			else if (zPosition >= 0 && zPosition < .35)
+			{
 				hoverZoneFlag = false;
 				realDrawFlag = true;
 			}
-			else{
+			else
+			{
 				hoverZoneFlag = false;
 				realDrawFlag = false;
 			}
@@ -282,23 +268,22 @@ void RealSenseHandler::streamCursorData(){
 			std::printf("%s\n==============\n", handSide.c_str());
 			std::printf("Cursor Image Point: X: %f, Y: %f Z: %f \n", xPosition, yPosition, zPosition);
 			std::printf("Cursor World Point: X: %f, Y: %f, Z: %f \n", cursor->QueryCursorWorldPoint().x, cursor->QueryCursorWorldPoint().y, cursor->QueryCursorWorldPoint().z);
-			//std::printf("Cursor Engagement status: %d%c \n\n", cursor->QueryEngagementPercent(), '%');
 		}
-		
+
 		senseManager->ReleaseFrame();
 	}
-
 }
 
-pxcBool RealSenseHandler::kissDetection(PXCFaceData::ExpressionsData *expressionData){
-
+pxcBool RealSenseHandler::kissDetection(PXCFaceData::ExpressionsData* expressionData)
+{
 	PXCFaceData::ExpressionsData::FaceExpressionResult expressionResultKiss;
 	pxcBool kissResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_KISS, &expressionResultKiss);
 
-	if (kissResult){
+	if (kissResult)
+	{
 		pxcI32 value = expressionResultKiss.intensity;
-		if (value == 100){
-
+		if (value == 100)
+		{
 			kissCount++;
 
 			if (kissCount > 15)
@@ -306,21 +291,24 @@ pxcBool RealSenseHandler::kissDetection(PXCFaceData::ExpressionsData *expression
 				kissCount = 0;
 				return true;
 			}
-
 		}
-		else{
+		else
+		{
 			kissCount = 0;
 		}
 	}
 	return false;
 }
-pxcBool RealSenseHandler::eyebrowDetection(PXCFaceData::ExpressionsData *expressionData){
 
+pxcBool RealSenseHandler::eyebrowDetection(PXCFaceData::ExpressionsData* expressionData)
+{
 	PXCFaceData::ExpressionsData::FaceExpressionResult expressionBrowL;
 	pxcBool browLResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_BROW_RAISER_LEFT, &expressionBrowL);
-	if (browLResult){
+	if (browLResult)
+	{
 		pxcI32 value = expressionBrowL.intensity;
-		if (value == 100){
+		if (value == 100)
+		{
 			browLCount++;
 			if (browLCount > 15)
 			{
@@ -328,16 +316,19 @@ pxcBool RealSenseHandler::eyebrowDetection(PXCFaceData::ExpressionsData *express
 				browLCount = 0;
 			}
 		}
-		else{
+		else
+		{
 			browLCount = 0;
 		}
 	}
 
 	PXCFaceData::ExpressionsData::FaceExpressionResult expressionBrowR;
 	pxcBool browRResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_BROW_RAISER_LEFT, &expressionBrowR);
-	if (browRResult){
+	if (browRResult)
+	{
 		pxcI32 value = expressionBrowR.intensity;
-		if (value == 100){
+		if (value == 100)
+		{
 			browRCount++;
 			if (browRCount > 15)
 			{
@@ -345,45 +336,53 @@ pxcBool RealSenseHandler::eyebrowDetection(PXCFaceData::ExpressionsData *express
 				browRCount = 0;
 			}
 		}
-		else{
+		else
+		{
 			browRCount = 0;
 		}
 	}
 
-	if (browRFlag && browLFlag){
+	if (browRFlag && browLFlag)
+	{
 		browRFlag = false;
 		browLFlag = false;
 		return true;
 	}
-	else{
+	else
+	{
 		return false;
 	}
 }
-pxcBool RealSenseHandler::cheekDetection(PXCFaceData::ExpressionsData *expressionData){
 
+pxcBool RealSenseHandler::cheekDetection(PXCFaceData::ExpressionsData* expressionData)
+{
 	PXCFaceData::ExpressionsData::FaceExpressionResult expressionCheekL;
 	pxcBool cheekLResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_PUFF_LEFT, &expressionCheekL);
-	if (cheekLResult){
+	if (cheekLResult)
+	{
 		pxcI32 value = expressionCheekL.intensity;
-		if (value == 100){
+		if (value == 100)
+		{
 			cheekLCount++;
 			if (cheekLCount > 15)
 			{
 				browLCount = 0;
 				cheekLFlag = true;
-				
 			}
 		}
-		else{
+		else
+		{
 			cheekLCount = 0;
 		}
 	}
 
 	PXCFaceData::ExpressionsData::FaceExpressionResult expressionCheekR;
 	pxcBool cheekRResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_PUFF_RIGHT, &expressionCheekR);
-	if (cheekRResult){
+	if (cheekRResult)
+	{
 		pxcI32 value = expressionCheekR.intensity;
-		if (value == 100){
+		if (value == 100)
+		{
 			cheekRCount++;
 			if (cheekRCount > 15)
 			{
@@ -391,29 +390,34 @@ pxcBool RealSenseHandler::cheekDetection(PXCFaceData::ExpressionsData *expressio
 				cheekRCount = 0;
 			}
 		}
-		else{
+		else
+		{
 			cheekRCount = 0;
 		}
 	}
 
-	if (cheekLFlag && cheekRFlag){
+	if (cheekLFlag && cheekRFlag)
+	{
 		cheekLFlag = false;
 		cheekRFlag = false;
 		return true;
 	}
-	else{
+	else
+	{
 		return false;
 	}
 }
-pxcBool RealSenseHandler::tongueDetection(PXCFaceData::ExpressionsData *expressionData){
 
+pxcBool RealSenseHandler::tongueDetection(PXCFaceData::ExpressionsData* expressionData)
+{
 	PXCFaceData::ExpressionsData::FaceExpressionResult expressionResultTongue;
 	pxcBool tongueResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_TONGUE_OUT, &expressionResultTongue);
 
-	if (tongueResult){
+	if (tongueResult)
+	{
 		pxcI32 value = expressionResultTongue.intensity;
-		if (value == 100){
-
+		if (value == 100)
+		{
 			tongueCount++;
 
 			if (tongueCount > 15)
@@ -421,22 +425,25 @@ pxcBool RealSenseHandler::tongueDetection(PXCFaceData::ExpressionsData *expressi
 				tongueCount = 0;
 				return true;
 			}
-
 		}
-		else{
+		else
+		{
 			tongueCount = 0;
 		}
 	}
 	return false;
 }
-pxcBool RealSenseHandler::smileDetection(PXCFaceData::ExpressionsData *expressionData){
+
+pxcBool RealSenseHandler::smileDetection(PXCFaceData::ExpressionsData* expressionData)
+{
 	PXCFaceData::ExpressionsData::FaceExpressionResult expressionResultSmile;
 	pxcBool smileResult = expressionData->QueryExpression(PXCFaceData::ExpressionsData::EXPRESSION_SMILE, &expressionResultSmile);
 
-	if (smileResult){
+	if (smileResult)
+	{
 		pxcI32 value = expressionResultSmile.intensity;
-		if (value > 25){
-
+		if (value > 25)
+		{
 			smileCount++;
 
 			if (smileCount > 15)
@@ -444,39 +451,52 @@ pxcBool RealSenseHandler::smileDetection(PXCFaceData::ExpressionsData *expressio
 				smileCount = 0;
 				return true;
 			}
-
 		}
-		else{
+		else
+		{
 			smileCount = 0;
 		}
 	}
 	return false;
 }
 
-bool RealSenseHandler::getKissGestureFlag(){
+bool RealSenseHandler::getKissGestureFlag()
+{
 	return kissGestureFlag;
 }
-bool RealSenseHandler::getBrowGestureFlag(){
+
+bool RealSenseHandler::getBrowGestureFlag()
+{
 	return browGestureFlag;
 }
-bool RealSenseHandler::getCheekGestureFlag(){
-	return cheekGestureFlag; 
+
+bool RealSenseHandler::getCheekGestureFlag()
+{
+	return cheekGestureFlag;
 }
-bool RealSenseHandler::getTongueGestureFlag(){
+
+bool RealSenseHandler::getTongueGestureFlag()
+{
 	return tongueGestureFlag;
 }
-bool RealSenseHandler::getSmileGestureFlag(){
+
+bool RealSenseHandler::getSmileGestureFlag()
+{
 	return smileGestureFlag;
 }
 
-void RealSenseHandler::resetBrowGestureFlag(){
+void RealSenseHandler::resetBrowGestureFlag()
+{
 	browGestureFlag = false;
-	
 }
-void RealSenseHandler::resetKissGestureFlag(){
+
+void RealSenseHandler::resetKissGestureFlag()
+{
 	kissGestureFlag = false;
 }
-void RealSenseHandler::resetGesturesFlag(){
+
+void RealSenseHandler::resetGesturesFlag()
+{
 	browGestureFlag = false;
 	kissGestureFlag = false;
 	cheekGestureFlag = false;
@@ -484,10 +504,10 @@ void RealSenseHandler::resetGesturesFlag(){
 	smileGestureFlag = false;
 }
 
-void RealSenseHandler::realSenseDraw(std::shared_ptr<gl::Fbo> &fingerLocation){
-
-	if (hoverZoneFlag){
-
+void RealSenseHandler::realSenseDraw(std::shared_ptr<gl::Fbo>& fingerLocation)
+{
+	if (hoverZoneFlag)
+	{
 		(*fingerLocation).bindFramebuffer();
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -497,55 +517,60 @@ void RealSenseHandler::realSenseDraw(std::shared_ptr<gl::Fbo> &fingerLocation){
 		gl::color(1.0, 0.9, 0.5, 1);
 		gl::drawStrokedCircle(vec2(xPosition, yPosition), 40.0f, 10.0f);
 		(*fingerLocation).unbindFramebuffer();
-
-	}else if (realDrawFlag){
-
+	}
+	else if (realDrawFlag)
+	{
 		auto result = realPointsMap.find(currentId);
 		//New cursor is has started to draw
-		if (result == realPointsMap.end()){
-		
+		if (result == realPointsMap.end())
+		{
 			(*myIllustrator).beginTouchShapes(currentId, vec2(xPosition, yPosition));
 
 			realPointsMap.emplace(currentId, vec2(xPosition, yPosition));
 			realActivePointsMap.emplace(currentId, true);
-
 		}
-		else{
+		else
+		{
 			//Already drawing with current cursor
 			(*myIllustrator).movingTouchShapes(currentId, vec2(xPosition, yPosition), realPointsMap[currentId]);
 			realActivePointsMap[currentId] = true;
 			realPointsMap[currentId] = vec2(xPosition, yPosition);
-
 		}
-
 	}
 
-
 	std::vector<uint32_t> list;
-	for (auto& points : realActivePointsMap){
-		if (points.second){
+	for (auto& points : realActivePointsMap)
+	{
+		if (points.second)
+		{
 			points.second = false;
 		}
-		else {
+		else
+		{
 			(*myIllustrator).endTouchShapes(points.first);
 			list.emplace_back(points.first);
 			realPointsMap.erase(points.first);
 		}
 	}
-	for (auto ids : list){
+	for (auto ids : list)
+	{
 		realActivePointsMap.erase(ids);
 	}
-
 }
-bool RealSenseHandler::getHoverFlag(){
+
+bool RealSenseHandler::getHoverFlag()
+{
 	return hoverZoneFlag;
 }
-bool RealSenseHandler::realDrawStatus(){
+
+bool RealSenseHandler::realDrawStatus()
+{
 	return realDrawFlag;
 }
-bool RealSenseHandler::getRealSenseDrawEnabled(){
+
+bool RealSenseHandler::getRealSenseDrawEnabled()
+{
 	return realSenseDrawEnabled;
 }
-
 
 #endif
