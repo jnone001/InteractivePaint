@@ -190,11 +190,23 @@
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\Brush.cpp" />
+    <ClCompile Include="..\src\DeviceHandler.cpp" />
+    <ClCompile Include="..\src\Illustrator.cpp" />
+    <ClCompile Include="..\src\ImageHandler.cpp" />
+    <ClCompile Include="..\src\RealSenseHandler.cpp" />
+    <ClCompile Include="..\src\SymmetryLine.cpp" />
+    <ClCompile Include="..\src\TouchCircle.cpp" />
+    <ClCompile Include="..\src\TouchKeyboard.cpp" />
+    <ClCompile Include="..\src\TouchPoint.cpp" />
     <ClCompile Include="..\src\TouchPointsApp.cpp" />
-    <ClCompile Include="..\src\TouchShapes.cpp" />
+    <ClCompile Include="..\src\TouchRectangle.cpp" />
+    <ClCompile Include="..\src\TouchShape.cpp" />
+    <ClCompile Include="..\src\TouchTriangle.cpp" />
+    <ClCompile Include="..\src\UserInterface.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\Resources.h" />
+    <ClInclude Include="..\src\AllShapes.h" />
     <ClInclude Include="..\src\Brush.h" />
     <ClInclude Include="..\src\DeviceHandler.h" />
     <ClInclude Include="..\src\Enums.h" />
@@ -202,8 +214,12 @@
     <ClInclude Include="..\src\ImageHandler.h" />
     <ClInclude Include="..\src\RealSenseHandler.h" />
     <ClInclude Include="..\src\SymmetryLine.h" />
+    <ClInclude Include="..\src\TouchCircle.h" />
     <ClInclude Include="..\src\TouchKeyboard.h" />
-    <ClInclude Include="..\src\TouchShapes.h" />
+    <ClInclude Include="..\src\TouchPoint.h" />
+    <ClInclude Include="..\src\TouchRectangle.h" />
+    <ClInclude Include="..\src\TouchShape.h" />
+    <ClInclude Include="..\src\TouchTriangle.h" />
     <ClInclude Include="..\src\UserInterface.h" />
   </ItemGroup>
   <ItemGroup>
