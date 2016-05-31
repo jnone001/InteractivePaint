@@ -7,8 +7,6 @@
 #include "Brush.h"
 #include <stack>
 
-//#include "Enums.h"
-
 using namespace std;
 
 namespace touchpoints {
