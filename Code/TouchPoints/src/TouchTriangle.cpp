@@ -1,8 +1,9 @@
 #include "TouchTriangle.h"
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	TouchTriangle::TouchTriangle() {}
-	
+
 	TouchTriangle::TouchTriangle(const vec2& point1, const vec2& point2, const vec2& point3, const vec2& baseCenter, const ColorA& color, const float& size, bool& filledShapes)
 	{
 		mPoint1 = point1;
@@ -59,4 +60,4 @@ namespace drawing {
 	{
 		return mBaseCenter;
 	}
-}
+}}

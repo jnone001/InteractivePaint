@@ -1,7 +1,8 @@
 #pragma once
 #include "TouchShape.h"
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	struct TouchPoint : public TouchShape
 	{
 	public:
@@ -15,4 +16,4 @@ namespace drawing {
 	private:
 		list<vec2> pointList;
 	};
-}
+}}

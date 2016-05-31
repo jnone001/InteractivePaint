@@ -1,6 +1,7 @@
 #include "TouchPoint.h"
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	TouchPoint::TouchPoint() {}
 
 	TouchPoint::TouchPoint(const vec2& initialPt, const ColorA& color, const float& size)
@@ -40,4 +41,4 @@ namespace drawing {
 			gl::drawSolidCircle(points, mSize);
 		}
 	}
-}
+}}

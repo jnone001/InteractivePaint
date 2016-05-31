@@ -1,6 +1,8 @@
 #include "DeviceHandler.h"
+#include "libusb.h"
 
-namespace devices {
+namespace touchpoints { namespace devices
+{
 	DeviceHandler::DeviceHandler()
 	{
 		leapConnected = 0;
@@ -159,7 +161,7 @@ namespace devices {
 		int r; //return values
 		ssize_t listCount; //Number of devices in list
 
-						   //Intialize Library Session
+		//Intialize Library Session
 		r = libusb_init(&contex);
 		if (r < 0)
 		{
@@ -624,4 +626,4 @@ namespace devices {
 			updateDefaultFlag = true;
 		}
 	}
-}
+}}

@@ -1,5 +1,6 @@
-#ifndef ENUMS_H
-#define ENUMS_H
+#pragma once
+namespace touchpoints
+{
 #define COLOR_ZERO "Black.png"
 #define COLOR_ONE "Red.png"
 #define COLOR_TWO "Yellow.png"
@@ -18,52 +19,52 @@
 #define SHAPE_Filled_Triangle "FilledTriangle.png"
 #define START_LOGO "interactive-paint-logo.png"
 
-namespace Shape
-{
-	enum Shape
+	namespace Shape
 	{
-		Line,
-		Circle,
-		Rectangle,
-		Triangle
-	};
-}
+		enum Shape
+		{
+			Line,
+			Circle,
+			Rectangle,
+			Triangle
+		};
+	}
 
-namespace ourColors
-{
-	enum ourColors
+	namespace ourColors
 	{
-		Black,
-		Red,
-		Yellow,
-		Green,
-		Aqua,
-		Blue,
-		Purple,
-		Orange,
-		White
-	};
-}
+		enum ourColors
+		{
+			Black,
+			Red,
+			Yellow,
+			Green,
+			Aqua,
+			Blue,
+			Purple,
+			Orange,
+			White
+		};
+	}
 
-namespace Mode
-{
-	enum DefaultModes
+	namespace Mode
 	{
-		MLER,
-		MLE,
-		MLR,
-		MER,
-		LER,
-		ML,
-		ME,
-		MR,
-		LE,
-		LR,
-		ER,
-		M,
-		L,
-		E,
-		R
-	};
+		enum DefaultModes
+		{
+			MLER,
+			MLE,
+			MLR,
+			MER,
+			LER,
+			ML,
+			ME,
+			MR,
+			LE,
+			LR,
+			ER,
+			M,
+			L,
+			E,
+			R
+		};
+	}
 }
-#endif

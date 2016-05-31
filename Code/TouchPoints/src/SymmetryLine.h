@@ -3,7 +3,8 @@
 #include <list>
 #include "AllShapes.h"
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	struct SymmetryLine
 	{
 	public:
@@ -22,4 +23,4 @@ namespace drawing {
 		vec2 point2;
 		bool symmetryOn;
 	};
-}
+}}

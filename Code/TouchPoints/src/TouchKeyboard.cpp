@@ -1,6 +1,7 @@
 #include "TouchKeyboard.h"
 
-namespace ui {
+namespace touchpoints { namespace ui
+{
 	TouchKeyboard::TouchKeyboard() {}
 
 	TouchKeyboard::TouchKeyboard(int windowWidth, int windowHeight)
@@ -815,4 +816,4 @@ namespace ui {
 		}
 		return false;
 	}
-}
+}}

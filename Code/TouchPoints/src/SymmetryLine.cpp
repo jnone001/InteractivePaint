@@ -1,7 +1,9 @@
 #include "SymmetryLine.h"
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	SymmetryLine::SymmetryLine() {}
+
 	SymmetryLine::SymmetryLine(float x, bool ySymmetric)
 	{
 		if (ySymmetric)
@@ -90,4 +92,4 @@ namespace drawing {
 		TouchTriangle symmetricTriangle(symPoint1, symPoint2, symPoint3, symBaseCenter, triangle.getColor(), triangle.getSize(), symBool);
 		return symmetricTriangle;
 	}
-}
+}}

@@ -1,7 +1,8 @@
 #include "RealSenseHandler.h"
 
-namespace devices {
-	RealSenseHandler::RealSenseHandler() {}
+namespace touchpoints { namespace devices
+{
+	RealSenseHandler::RealSenseHandler() { }
 
 	RealSenseHandler::RealSenseHandler(drawing::Illustrator* illustrator)
 	{
@@ -463,4 +464,4 @@ namespace devices {
 	{
 		return realSenseDrawEnabled;
 	}
-}
+}}

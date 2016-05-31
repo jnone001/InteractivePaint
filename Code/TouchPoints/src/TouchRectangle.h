@@ -1,7 +1,8 @@
 #pragma once
 #include "TouchShape.h"
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	struct TouchRectangle : public TouchShape
 	{
 		TouchRectangle();
@@ -18,4 +19,4 @@ namespace drawing {
 		int mLowerRightX;
 		int mLowerRightY;
 	};
-}
+}}

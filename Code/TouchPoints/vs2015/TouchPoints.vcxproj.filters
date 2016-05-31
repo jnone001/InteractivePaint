@@ -30,9 +30,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\TouchPointsApp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\Brush.cpp">
       <Filter>drawing</Filter>
     </ClCompile>
@@ -75,11 +72,11 @@
     <ClCompile Include="..\src\RealSenseHandler.cpp">
       <Filter>devices</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\TouchPointsApp.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\Resources.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\Brush.h">
       <Filter>drawing</Filter>
     </ClInclude>

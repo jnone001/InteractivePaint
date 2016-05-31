@@ -1,6 +1,7 @@
 #include "TouchRectangle.h"
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	TouchRectangle::TouchRectangle() {}
 
 	TouchRectangle::TouchRectangle(const int& x1, const int& y1, const int& x2, const int& y2, const ColorA& color, const float& size, bool& filledShapes)
@@ -51,4 +52,4 @@ namespace drawing {
 
 		gl::color(1.0, 1.0, 1.0, 1.0);
 	}
-}
+}}

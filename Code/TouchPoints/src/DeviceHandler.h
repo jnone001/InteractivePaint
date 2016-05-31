@@ -1,9 +1,8 @@
 #pragma once
-
-#include "libusb.h"
 #include "Enums.h"
 
-namespace devices {
+namespace touchpoints { namespace devices
+{
 	struct DeviceHandler
 	{
 	public:
@@ -83,4 +82,4 @@ namespace devices {
 
 		bool updateDefaultFlag;
 	};
-}
+}}

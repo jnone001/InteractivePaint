@@ -7,7 +7,8 @@ using namespace ci;
 using namespace ci::app;
 using namespace std;
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	struct TouchShape
 	{
 	public:
@@ -21,4 +22,4 @@ namespace drawing {
 		ColorA mColor;
 		float mSize;
 	};
-}
+}}

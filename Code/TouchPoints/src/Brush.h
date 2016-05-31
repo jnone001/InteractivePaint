@@ -4,11 +4,13 @@
 #include "SymmetryLine.h"
 #include "Enums.h"
 
-namespace drawing {
-	struct Brush {
+namespace touchpoints { namespace drawing
+{
+	struct Brush
+	{
 	public:
 		Brush();
-		Brush(Shape::Shape shape, cinder::ColorA color, float alphaColor, int lineSize, bool filledShapes, bool randColor, bool eraserMode, SymmetryLine *mySymmetry);
+		Brush(Shape::Shape shape, cinder::ColorA color, float alphaColor, int lineSize, bool filledShapes, bool randColor, bool eraserMode, SymmetryLine* mySymmetry);
 		cinder::ColorA getColor();
 		int getLineSize();
 		Shape::Shape getShape();
@@ -51,4 +53,4 @@ namespace drawing {
 		int currShape = 0;
 		int currColor = 0;
 	};
-}
+}}

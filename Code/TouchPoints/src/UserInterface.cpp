@@ -1,6 +1,7 @@
 #include "UserInterface.h"
 
-namespace ui {
+namespace touchpoints { namespace ui
+{
 	UserInterface::UserInterface() {}
 
 	UserInterface::UserInterface(int mWindowWidth, int mWindowHeight, bool leapRun, bool eyeXRun, drawing::Brush* brush, drawing::Illustrator* mIllustrator, devices::DeviceHandler* mDeviceHandler, std::shared_ptr<gl::Fbo> fbo, std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha)
@@ -52,7 +53,7 @@ namespace ui {
 			gl::color(1.0, 1.0, 1.0);
 			gl::drawSolidRect(Rectf(50, 50 * i + 50, 100, 50 * i + 100));
 			gl::color(0.75, 0.75, .75, 1.0);
-			gl::drawStrokedRect(Rectf(50, 50 * (i)+50, 100, 50 * i + 100), uiOutlineSize);
+			gl::drawStrokedRect(Rectf(50, 50 * (i) + 50, 100, 50 * i + 100), uiOutlineSize);
 		}
 
 		gl::TextureRef texture = gl::Texture::create(loadImage(loadAsset("Eraser.png")));
@@ -520,9 +521,9 @@ namespace ui {
 		for (auto myColor : (*mBrush).getColorList())
 		{
 			gl::color(myColor);
-			gl::drawSolidRect(Rectf(0, 50 * (i)+50, 50, 50 * (i)+100));
+			gl::drawSolidRect(Rectf(0, 50 * (i) + 50, 50, 50 * (i) + 100));
 			gl::color(0.75, 0.75, .75, 1.0);
-			gl::drawStrokedRect(Rectf(0, 50 * (i)+50, 50, 50 * i + 100), uiOutlineSize);
+			gl::drawStrokedRect(Rectf(0, 50 * (i) + 50, 50, 50 * i + 100), uiOutlineSize);
 			i++;
 		}
 		colorButtonsFbo->unbindFramebuffer();
@@ -832,7 +833,7 @@ namespace ui {
 			}
 			if (uiFboFlag)
 			{//Mode box FBO Flag.
-			 //Device Modes button
+				//Device Modes button
 				if (x > windowWidth * .92 && x < windowWidth && y > windowHeight * .8 && y < windowHeight * .84)
 				{
 					deviceButtons = !deviceButtons;
@@ -1293,7 +1294,7 @@ namespace ui {
 		}
 		if (uiFboFlag)
 		{//Constantly drawn Ui buttons. If ui flag is off, we shut down the ui
-		 //Currently shuts down nothing because it needs to be developed in parralel to inInteractiveUi
+			//Currently shuts down nothing because it needs to be developed in parralel to inInteractiveUi
 		}
 
 		if (settingsButtons)
@@ -1387,4 +1388,4 @@ namespace ui {
 			gl::draw((keyboard.getMovingKeyboardFbo()->getColorTexture()));
 		}
 	}
-}
+}}

@@ -5,7 +5,8 @@
 #include "cinder/gl/Fbo.h"
 #include <list>
 
-namespace ui {
+namespace touchpoints { namespace ui
+{
 	struct TouchKeyboard
 	{
 	public:
@@ -56,4 +57,4 @@ namespace ui {
 		bool textCleanup = false;
 		uint32_t moverId = 0;
 	};
-}
+}}

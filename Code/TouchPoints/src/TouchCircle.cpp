@@ -1,6 +1,7 @@
 #include "TouchCircle.h"
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	TouchCircle::TouchCircle() {}
 
 	TouchCircle::TouchCircle(const vec2& center, const float& radius, const ColorA& color, const float& size, bool& filledShapes)
@@ -53,4 +54,4 @@ namespace drawing {
 
 		gl::color(1.0, 1.0, 1.0, 1.0);
 	}
-}
+}}

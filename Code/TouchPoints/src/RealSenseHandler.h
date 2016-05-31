@@ -19,7 +19,8 @@ using namespace std;
 #define MAX_FACES 1
 #define NUM_HANDS 2
 
-namespace devices {
+namespace touchpoints { namespace devices
+{
 	struct RealSenseHandler
 	{
 	public:
@@ -99,4 +100,4 @@ namespace devices {
 
 		drawing::Illustrator* myIllustrator;
 	};
-}
+}}

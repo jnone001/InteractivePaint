@@ -10,7 +10,8 @@
 #include <chrono>
 #include <vector>
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	struct ImageHandler
 	{
 	public:
@@ -38,4 +39,4 @@ namespace drawing {
 		cinder::gl::TextureRef startImageTexture;
 		std::chrono::milliseconds start;
 	};
-}
+}}

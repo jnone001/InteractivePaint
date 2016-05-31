@@ -1,6 +1,7 @@
 #include "ImageHandler.h"
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	ImageHandler::ImageHandler() {}
 
 	ImageHandler::ImageHandler(std::vector<std::shared_ptr<cinder::gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha)
@@ -15,6 +16,7 @@ namespace drawing {
 		startUpFlag = true;
 		iconStartFlag = false;
 	}
+
 	bool ImageHandler::getIconFlag()
 	{
 		return iconFlag;
@@ -28,8 +30,8 @@ namespace drawing {
 		cinder::gl::color(1.0, 1.0, 1.0, fadeTime);
 		cinder::gl::draw(imageTexture, cinder::Rectf(cinder::app::getWindowSize().x / 2 + 55, cinder::app::getWindowSize().y / 2 - 55, cinder::app::getWindowSize().x / 2 - 100, cinder::app::getWindowSize().y / 2 + 100));
 		//ms is fade time in milliseconds.
-		std::chrono::milliseconds ms{ 2000 };
-		std::chrono::milliseconds dif{ std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - start };
+		std::chrono::milliseconds ms{2000};
+		std::chrono::milliseconds dif{std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - start};
 		long longMs = ms.count();
 		long longDif = dif.count();
 		fadeTime = 1.0f * (longMs - longDif) / longMs;
@@ -57,10 +59,10 @@ namespace drawing {
 		if (iconStartFlag == false) return;
 		cinder::gl::color(1.0, 1.0, 1.0, startFadeTime);
 		cinder::gl::draw(imageTexture, cinder::Rectf(cinder::app::getWindowSize().x / 2 - 500, cinder::app::getWindowSize().y / 2 - 255, cinder::app::getWindowSize().x / 2 + 455, cinder::app::getWindowSize().y / 2 + 300)); //ms is fade time in milliseconds.
-		std::chrono::milliseconds ms{ 5000 };
-		std::chrono::milliseconds msDelay{ 2000 };
+		std::chrono::milliseconds ms{5000};
+		std::chrono::milliseconds msDelay{2000};
 
-		std::chrono::milliseconds dif{ std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - start };
+		std::chrono::milliseconds dif{std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - start};
 		long longMs = ms.count();
 		long longDif = dif.count();
 		long longMsDelay = msDelay.count();
@@ -114,4 +116,4 @@ namespace drawing {
 		loadIcon("Save.png");
 		std::cout << "Image " << imageNum << "Saved!";
 	}
-}
+}}

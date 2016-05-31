@@ -5,7 +5,8 @@
 #include "DeviceHandler.h"
 #include "TouchKeyboard.h"
 
-namespace ui {
+namespace touchpoints { namespace ui
+{
 	struct UserInterface
 	{
 	public:
@@ -86,4 +87,4 @@ namespace ui {
 		list<Color> backgroundList;
 		Color backgroundColor;
 	};
-}
+}}

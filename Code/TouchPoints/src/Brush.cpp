@@ -1,9 +1,11 @@
 #include "Brush.h"
 
-namespace drawing {
+namespace touchpoints { namespace drawing
+{
 	Brush::Brush() {}
 
-	Brush::Brush(Shape::Shape shape, cinder::ColorA color, float alphaColor, int lineSize, bool filledShapes, bool randColor, bool eraserMode, SymmetryLine *mySymmetry) {
+	Brush::Brush(Shape::Shape shape, cinder::ColorA color, float alphaColor, int lineSize, bool filledShapes, bool randColor, bool eraserMode, SymmetryLine* mySymmetry)
+	{
 		mShape = shape;
 		mColor = color;
 		mLineSize = lineSize;
@@ -175,7 +177,8 @@ namespace drawing {
 
 	void Brush::decreaseAlpha()
 	{
-		if (mAlphaColor > 0.0) {
+		if (mAlphaColor > 0.0)
+		{
 			mAlphaColor -= 0.1;
 			mColor = ColorA(mColor, mAlphaColor);
 		}
@@ -184,7 +187,8 @@ namespace drawing {
 	void Brush::incrementColor()
 	{
 		currColor++;
-		if (currColor == colorList.size()) {
+		if (currColor == colorList.size())
+		{
 			currColor = 0;
 		}
 		mColor = ColorA(colorList[currColor], mAlphaColor);
@@ -248,4 +252,4 @@ namespace drawing {
 			mColor = ColorA(0.0, 0.0, 0.0, mAlphaColor);
 		}
 	}
-}
+}}
