@@ -2,7 +2,6 @@
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
 #include "cinder/System.h"
-#include "cinder/Rand.h"
 #include "cinder/Log.h"
 #include "cinder/gl/Fbo.h"
 #include "cinder/gl/Texture.h"
@@ -13,7 +12,6 @@
 #include <vector>
 #include <map>
 #include <list>
-#include <stdio.h>
 #include "SymmetryLine.h"
 #include "Illustrator.h"
 #include "Enums.h"
@@ -27,9 +25,9 @@
 #include "LeapMath.h"
 
 using namespace ci;
-using namespace ci::app;
 using namespace std;
 using namespace cinder;
+using namespace cinder::app;
 
 namespace touchpoints { namespace app
 {
@@ -40,11 +38,9 @@ namespace touchpoints { namespace app
 #define EYEX
 #ifdef EYEX
 
-	//Our Tobi EyeX Functionality. Cannot run with Tobii driver soooo...ifdef?
-#include <conio.h>
+//Our Tobi EyeX Functionality. Cannot run with Tobii driver soooo...ifdef?
 #include <assert.h>
 #include "eyex/EyeX.h"
-#include "wtypes.h"
 
 #pragma comment (lib, "Tobii.EyeX.Client.lib")
 	//Stores values of eyePosition(where we are looking) from tobii EyeX

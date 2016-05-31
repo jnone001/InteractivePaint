@@ -1,4 +1,7 @@
 #include "Illustrator.h"
+#include "cinder/Rand.h"
+#include <cinder/gl/scoped.h>
+#include <cinder/gl/draw.h>
 
 namespace touchpoints { namespace drawing
 {

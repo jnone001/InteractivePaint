@@ -10,8 +10,8 @@ namespace touchpoints { namespace drawing
 	{
 	public:
 		Brush();
-		Brush(Shape::Shape shape, cinder::ColorA color, float alphaColor, int lineSize, bool filledShapes, bool randColor, bool eraserMode, SymmetryLine* mySymmetry);
-		cinder::ColorA getColor();
+		Brush(Shape::Shape shape, ColorA color, float alphaColor, int lineSize, bool filledShapes, bool randColor, bool eraserMode, SymmetryLine* mySymmetry);
+		ColorA getColor();
 		int getLineSize();
 		Shape::Shape getShape();
 		bool getFilledShapes();
@@ -20,7 +20,7 @@ namespace touchpoints { namespace drawing
 		bool getEraserMode();
 		float getAlphaColor();
 		//Change brush 
-		void changeColor(cinder::ColorA color);
+		void changeColor(ColorA color);
 		void changeLineSize(int lineSize);
 		void increaseLineSize();
 		void decreaseLineSize();
@@ -40,7 +40,7 @@ namespace touchpoints { namespace drawing
 		std::vector<Color> getColorList();
 
 	private:
-		cinder::ColorA mColor;
+		ColorA mColor;
 		int mLineSize;
 		Shape::Shape mShape;
 		bool mFilledShapes;

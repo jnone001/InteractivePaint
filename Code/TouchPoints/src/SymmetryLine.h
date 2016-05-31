@@ -1,6 +1,5 @@
 #pragma once
 #include "cinder/app/App.h"
-#include <list>
 #include "AllShapes.h"
 
 namespace touchpoints { namespace drawing

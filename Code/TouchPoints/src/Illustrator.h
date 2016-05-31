@@ -1,17 +1,15 @@
 #pragma once
 #include "cinder/app/App.h"
-#include "cinder/app/RendererGl.h"
-#include "cinder/gl/gl.h"
-#include "cinder/Rand.h"
 #include "cinder/gl/Fbo.h"
 #include <vector>
-#include <map>
 #include <list>
-#include <stack>
 #include "AllShapes.h"
-#include "SymmetryLine.h"
 #include "Brush.h"
-#include "Enums.h"
+#include <stack>
+
+//#include "Enums.h"
+
+using namespace std;
 
 namespace touchpoints {
 	namespace drawing {
@@ -19,7 +17,7 @@ namespace touchpoints {
 		{
 		public:
 			Illustrator();
-			Illustrator(Brush* brush, std::vector<std::shared_ptr<gl::Fbo>>* layerList);
+			Illustrator(Brush* brush, vector<shared_ptr<gl::Fbo>>* layerList);
 			void beginTouchShapes(uint32_t myId, vec2 myPos);
 			void movingTouchShapes(uint32_t myId, vec2 myPos, vec2 prevPos);
 			void endTouchShapes(uint32_t myId);
@@ -32,7 +30,7 @@ namespace touchpoints {
 			void drawActiveShapes();
 
 		private:
-			std::vector<std::shared_ptr<gl::Fbo>>* mLayerList;
+			vector<shared_ptr<gl::Fbo>>* mLayerList;
 			Brush* mBrush;
 			int activeDrawings;
 			map<uint32_t, TouchPoint> myActivePoints;
@@ -49,9 +47,9 @@ namespace touchpoints {
 			list<TouchTriangle> myTriangles;
 
 			//TimeMachine 
-			map<std::shared_ptr<gl::Fbo>, std::list<std::shared_ptr<gl::Fbo>>> myTimeMachine;
+			map<shared_ptr<gl::Fbo>, list<shared_ptr<gl::Fbo>>> myTimeMachine;
 			//Stack that tells which item in map to pop
-			stack<std::shared_ptr<gl::Fbo>> undoOrder;
+			stack<shared_ptr<gl::Fbo>> undoOrder;
 			int undoCount = 0;
 		};
 	}

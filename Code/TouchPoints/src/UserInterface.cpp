@@ -1,4 +1,7 @@
 #include "UserInterface.h"
+#include <cinder/Rand.h>
+
+using namespace cinder::app;
 
 namespace touchpoints { namespace ui
 {

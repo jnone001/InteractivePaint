@@ -1,4 +1,8 @@
 #include "TouchRectangle.h"
+#include <cinder/gl/scoped.h>
+#include <cinder/gl/draw.h>
+
+using namespace cinder;
 
 namespace touchpoints { namespace drawing
 {

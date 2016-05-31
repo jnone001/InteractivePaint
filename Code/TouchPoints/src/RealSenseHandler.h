@@ -1,6 +1,5 @@
 #pragma once
 #include "pxcfacedata.h"
-#include "pxchanddata.h"
 #include "pxccursorconfiguration.h"
 #include "pxccursordata.h"
 #include "pxchandcursormodule.h"
@@ -8,10 +7,7 @@
 #include "pxcdefs.h"
 #include "pxcsensemanager.h"
 #include "pxcfacemodule.h"
-#include "pxcstatus.h"
-#include "pxccapture.h"
 #include "Illustrator.h"
-#include <vector>
 #include <map> 
 
 using namespace std;

@@ -1,7 +1,6 @@
 #pragma once
 #include "Brush.h"
 #include "Illustrator.h"
-#include "libusb.h"
 #include "DeviceHandler.h"
 #include "TouchKeyboard.h"
 
@@ -35,10 +34,10 @@ namespace touchpoints { namespace ui
 		void drawBrushButtonsFbo();
 		void drawShapesButtonsFbo();
 
-		void slideButtons(TouchEvent::Touch touch);
+		void slideButtons(app::TouchEvent::Touch touch);
 		float getLayerAlpha(int layerNumber);
 		void incrementBackground();
-		void endButtonPress(TouchEvent::Touch touch);
+		void endButtonPress(app::TouchEvent::Touch touch);
 
 		//Functions to get brush values
 

@@ -1,4 +1,6 @@
 #include "RealSenseHandler.h"
+#include <cinder/gl/scoped.h>
+#include <cinder/gl/draw.h>
 
 namespace touchpoints { namespace devices
 {

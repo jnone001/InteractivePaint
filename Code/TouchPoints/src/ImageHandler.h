@@ -1,12 +1,8 @@
 #pragma once
 #include "cinder/app/App.h"
-#include "cinder/app/RendererGl.h"
-#include "cinder/gl/gl.h"
 #include "cinder/gl/Fbo.h"
 #include "cinder/gl/Texture.h"
 #include "cinder/app/AppBase.h"
-#include "cinder/ImageIo.h"
-#include "cinder/Utilities.h"
 #include <chrono>
 #include <vector>
 

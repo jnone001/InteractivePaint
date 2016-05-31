@@ -11,9 +11,9 @@ namespace touchpoints { namespace drawing
 		void addPoint(const vec2& pt);
 		void clearPoints();
 		vec2 getFirstPoint();
-		list<vec2> getPointList();
+		std::list<vec2> getPointList();
 		void draw() override;
 	private:
-		list<vec2> pointList;
+		std::list<vec2> pointList;
 	};
 }}

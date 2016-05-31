@@ -1,10 +1,15 @@
 #include "ImageHandler.h"
+#include <cinder/gl/scoped.h>
+#include <cinder/gl/draw.h>
+#include <cinder/Utilities.h>
+
+using namespace cinder;
 
 namespace touchpoints { namespace drawing
 {
 	ImageHandler::ImageHandler() {}
 
-	ImageHandler::ImageHandler(std::vector<std::shared_ptr<cinder::gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha)
+	ImageHandler::ImageHandler(std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha)
 	{
 		mLayerList = fboLayerList;
 		iconFlag = false;
@@ -27,8 +32,8 @@ namespace touchpoints { namespace drawing
 	void ImageHandler::displayIcon()
 	{
 		if (iconFlag == false) return;
-		cinder::gl::color(1.0, 1.0, 1.0, fadeTime);
-		cinder::gl::draw(imageTexture, cinder::Rectf(cinder::app::getWindowSize().x / 2 + 55, cinder::app::getWindowSize().y / 2 - 55, cinder::app::getWindowSize().x / 2 - 100, cinder::app::getWindowSize().y / 2 + 100));
+		gl::color(1.0, 1.0, 1.0, fadeTime);
+		gl::draw(imageTexture, Rectf(app::getWindowSize().x / 2 + 55, app::getWindowSize().y / 2 - 55, app::getWindowSize().x / 2 - 100, app::getWindowSize().y / 2 + 100));
 		//ms is fade time in milliseconds.
 		std::chrono::milliseconds ms{2000};
 		std::chrono::milliseconds dif{std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()) - start};
@@ -48,7 +53,7 @@ namespace touchpoints { namespace drawing
 
 	void ImageHandler::loadIcon(std::string icon)
 	{
-		imageTexture = cinder::gl::Texture::create(cinder::loadImage(cinder::app::loadAsset(icon)));
+		imageTexture = gl::Texture::create(loadImage(app::loadAsset(icon)));
 		fadeTime = 1.0f;
 		start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 		iconFlag = true;
@@ -57,8 +62,8 @@ namespace touchpoints { namespace drawing
 	void ImageHandler::displayStartIcon()
 	{
 		if (iconStartFlag == false) return;
-		cinder::gl::color(1.0, 1.0, 1.0, startFadeTime);
-		cinder::gl::draw(imageTexture, cinder::Rectf(cinder::app::getWindowSize().x / 2 - 500, cinder::app::getWindowSize().y / 2 - 255, cinder::app::getWindowSize().x / 2 + 455, cinder::app::getWindowSize().y / 2 + 300)); //ms is fade time in milliseconds.
+		gl::color(1.0, 1.0, 1.0, startFadeTime);
+		gl::draw(imageTexture, Rectf(app::getWindowSize().x / 2 - 500, app::getWindowSize().y / 2 - 255, app::getWindowSize().x / 2 + 455, app::getWindowSize().y / 2 + 300)); //ms is fade time in milliseconds.
 		std::chrono::milliseconds ms{5000};
 		std::chrono::milliseconds msDelay{2000};
 
@@ -79,7 +84,7 @@ namespace touchpoints { namespace drawing
 
 	void ImageHandler::loadStartIcon(std::string icon)
 	{
-		imageTexture = cinder::gl::Texture::create(cinder::loadImage(cinder::app::loadAsset(icon)));
+		imageTexture = gl::Texture::create(loadImage(app::loadAsset(icon)));
 		startFadeTime = 1.0f;
 		start = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 		startUpFlag = false;
@@ -91,27 +96,27 @@ namespace touchpoints { namespace drawing
 		return startUpFlag;
 	}
 
-	void ImageHandler::saveCanvas(cinder::vec2 windowSize, cinder::ColorA background)
+	void ImageHandler::saveCanvas(vec2 windowSize, ColorA background)
 	{
-		cinder::gl::Fbo::Format format;
-		std::shared_ptr<cinder::gl::Fbo> saveImageFbo;
-		saveImageFbo = cinder::gl::Fbo::create(windowSize.x, windowSize.y, format);
+		gl::Fbo::Format format;
+		std::shared_ptr<gl::Fbo> saveImageFbo;
+		saveImageFbo = gl::Fbo::create(windowSize.x, windowSize.y, format);
 
 		(*saveImageFbo).bindFramebuffer();
 		glClearColor(1.0, 1.0, 1.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
-		cinder::gl::color(background);
-		cinder::gl::drawSolidRect(cinder::Rectf(0, 0, windowSize.x, windowSize.y));
-		cinder::gl::color(1.0, 1.0, 1.0, 1.0);
+		gl::color(background);
+		gl::drawSolidRect(Rectf(0, 0, windowSize.x, windowSize.y));
+		gl::color(1.0, 1.0, 1.0, 1.0);
 		int x = 0;
 		for (auto frames : *mLayerList)
 		{
-			cinder::gl::color(1.0, 1.0, 1.0, (*layerAlpha)[x]);
-			cinder::gl::draw(frames->getColorTexture());
+			gl::color(1.0, 1.0, 1.0, (*layerAlpha)[x]);
+			gl::draw(frames->getColorTexture());
 			x++;
 		}
 		(*saveImageFbo).unbindFramebuffer();
-		writeImage(cinder::getHomeDirectory() / "Interactive_Paint" / "Saved_Images" / (cinder::toString(imageNum) + "." + imageType), (saveImageFbo->getColorTexture())->createSource());
+		writeImage(getHomeDirectory() / "Interactive_Paint" / "Saved_Images" / (toString(imageNum) + "." + imageType), (saveImageFbo->getColorTexture())->createSource());
 		imageNum++;
 		loadIcon("Save.png");
 		std::cout << "Image " << imageNum << "Saved!";

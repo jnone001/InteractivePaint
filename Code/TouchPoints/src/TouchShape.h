@@ -1,11 +1,7 @@
 #pragma once
 #include "cinder/app/App.h"
-#include "cinder/gl/gl.h"
-#include <list>
 
-using namespace ci;
-using namespace ci::app;
-using namespace std;
+using namespace cinder;
 
 namespace touchpoints { namespace drawing
 {

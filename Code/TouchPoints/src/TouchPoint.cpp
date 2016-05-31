@@ -1,4 +1,8 @@
 #include "TouchPoint.h"
+#include <cinder/gl/Context.h>
+#include <cinder/gl/draw.h>
+
+using namespace cinder;
 
 namespace touchpoints { namespace drawing
 {
@@ -26,7 +30,7 @@ namespace touchpoints { namespace drawing
 		return pointList.front();
 	}
 
-	list<vec2> TouchPoint::getPointList()
+		std::list<vec2> TouchPoint::getPointList()
 	{
 		return pointList;
 	}
