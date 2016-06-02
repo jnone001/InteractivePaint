@@ -196,10 +196,7 @@ namespace touchpoints { namespace devices
 			{
 				leapConnectedFlag = 1;
 			}
-			if (vendorid == vendorList[1])
-			{
-				multiTouchConnectedFlag = 1;
-			}
+			multiTouchConnectedFlag = 1;
 			if (vendorid == vendorList[2])
 			{
 				eyeXConnectedFlag = 1;
