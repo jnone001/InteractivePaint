@@ -33,7 +33,6 @@ namespace touchpoints { namespace app
 {
 	//Device connection status
 	bool eyeXRunning = false;
-	bool leapRunning = false;
 
 #define EYEX
 #ifdef EYEX
@@ -83,8 +82,6 @@ namespace touchpoints { namespace app
 	/*Code for Proximity Menu*/
 	bool proxActive = false;
 
-	bool modeChangeFlag = true;
-
 	//Layers
 	int currLayer = 0;
 
@@ -101,13 +98,6 @@ namespace touchpoints { namespace app
 
 	//Global EyeX Handler
 	TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
-
-	class LeapListener : public Leap::Listener
-	{
-	public:
-		virtual void onConnect(const Leap::Controller&);
-		virtual void onDisconnect(const Leap::Controller&);
-	};
 
 	//TouchPointsApp, our libcinder app!
 	class TouchPointsApp : public App
@@ -161,8 +151,6 @@ namespace touchpoints { namespace app
 		int frames = 0;
 		int fps = 0;
 
-		void modeChangeFlagTrue();
-
 		void update() override;
 		void draw() override;
 
@@ -185,7 +173,7 @@ namespace touchpoints { namespace app
 		Leap::Controller leapContr;
 		Leap::Frame currentFrame;
 		Leap::GestureList gestList;
-		LeapListener myLeapListener;
+		Leap::Listener leapListener;
 
 		//EyeX
 		vec2 radialCenter = vec2(windowWidth * .5, windowHeight * .5);
@@ -260,24 +248,6 @@ namespace touchpoints { namespace app
 		return controller.frame();
 	}
 
-	void TouchPointsApp::modeChangeFlagTrue()
-	{
-		modeChangeFlag = true;
-	}
-
-	//Leapmotion listeners
-	void LeapListener::onConnect(const Leap::Controller& controller)
-	{
-		leapRunning = true;
-		modeChangeFlag = true;
-	}
-
-	void LeapListener::onDisconnect(const Leap::Controller& controller)
-	{
-		leapRunning = false;
-		modeChangeFlag = true;
-	}
-
 	void prepareSettings(TouchPointsApp::Settings* settings)
 	{
 		settings->setFullScreen(true);
@@ -306,11 +276,9 @@ namespace touchpoints { namespace app
 			{
 			case TX_EYETRACKINGDEVICESTATUS_TRACKING:
 				eyeXRunning = true;
-				modeChangeFlag = true;
 				break;
 			case TX_EYETRACKINGDEVICESTATUS_DEVICENOTCONNECTED:
 				eyeXRunning = false;
-				modeChangeFlag = true;
 				break;
 			}
 		}
@@ -457,7 +425,7 @@ namespace touchpoints { namespace app
 		leapContr.config().setFloat("Gesture.Swipe.MinVelocity", 500.0);
 		leapContr.config().save();
 
-		leapContr.addListener(myLeapListener);
+		leapContr.addListener(leapListener);
 
 		setFrameRate(FRAME_RATE);
 
@@ -486,7 +454,7 @@ namespace touchpoints { namespace app
 		deviceHandler.deviceConnection();
 		lastDeviceCheck = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-		gui = ui::UserInterface(windowWidth, windowHeight, leapRunning, eyeXRunning, &brush, &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
+		gui = ui::UserInterface(windowWidth, windowHeight, eyeXRunning, &brush, &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
 		deviceHandler.deviceConnection();
 		Mode::DefaultModes resultMode = deviceHandler.getDefaultMode();

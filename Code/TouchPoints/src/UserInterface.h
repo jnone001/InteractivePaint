@@ -10,7 +10,7 @@ namespace touchpoints { namespace ui
 	{
 	public:
 		UserInterface();
-		UserInterface(int mWindowWidth, int mWindowHeight, bool leapRun, bool eyeXRun, drawing::Brush* brush, drawing::Illustrator* mIllustrator, devices::DeviceHandler* mDeviceHandler, std::shared_ptr<gl::Fbo> fbo, std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha);
+		UserInterface(int mWindowWidth, int mWindowHeight, bool eyeXRun, drawing::Brush* brush, drawing::Illustrator* mIllustrator, devices::DeviceHandler* mDeviceHandler, std::shared_ptr<gl::Fbo> fbo, std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha);
 		void modeRectangle();
 		void modeCircle();
 		void modeTriangle();
