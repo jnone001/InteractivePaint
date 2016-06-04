@@ -190,12 +190,6 @@ namespace touchpoints { namespace app
 		std::shared_ptr<gl::Fbo> fingerLocationFbo;
 	};
 
-	/*Retrieves frames from leap motion Service*/
-	Leap::Frame getLeapFrame(Leap::Controller controller)
-	{
-		return controller.frame();
-	}
-
 	void prepareSettings(TouchPointsApp::Settings* settings)
 	{
 		settings->setFullScreen(true);
@@ -288,11 +282,8 @@ namespace touchpoints { namespace app
 		GetWindowRect(hDesktop, &desktop);
 
 		TX_CONNECTIONSTATE eyeXConnectedState = deviceHandler.GetEyeXConnected() ? TX_CONNECTIONSTATE_CONNECTED : TX_CONNECTIONSTATE_DISCONNECTED;
-		//eyeXHandler = devices::EyeXHandler(0.0f, 0.0f, desktop.right, desktop.bottom, eyeXConnectedState);
-		eyeXHandler = devices::EyeXHandler();
-		eyeXHandler.SetResolutionX(desktop.right);
-		eyeXHandler.SetResolutionX(desktop.bottom);
-		eyeXHandler.InitEyeX(eyeXConnectedState, hGazeTrackingStateChangedTicket, hConnectionStateChangedTicket, hEventHandlerTicket);
+		eyeXHandler = devices::EyeXHandler(0.0f, 0.0f, desktop.right, desktop.bottom, eyeXConnectedState);
+		eyeXHandler.InitEyeX();
 	}
 
 	void TouchPointsApp::enableGest(Leap::Controller controller)
@@ -1191,7 +1182,7 @@ namespace touchpoints { namespace app
 		//However, this makes it impossible to see green 'hands' on top of images.
 		if (deviceHandler.leapStatus())
 		{
-			currentFrame = getLeapFrame(leapContr);
+			currentFrame = leapContr.frame();
 			if (deviceHandler.leapDraw())
 			{
 				if (leapDrawFlag)

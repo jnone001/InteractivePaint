@@ -12,20 +12,14 @@ namespace touchpoints { namespace devices
 	TX_HANDLE EyeXHandler::g_hGlobalInteractorSnapshot = nullptr;
 	TX_CONTEXTHANDLE EyeXHandler::hContext = nullptr;
 
-	EyeXHandler::EyeXHandler() : hGazeTrackingStateChangedTicket(TX_INVALID_TICKET),
-		hConnectionStateChangedTicket(TX_INVALID_TICKET), hEventHandlerTicket(TX_INVALID_TICKET) {};
-
+	EyeXHandler::EyeXHandler() {};
 	EyeXHandler::EyeXHandler(float gazePositionX, float gazePositionY, int resolutionX, int resolutionY, 
 		TX_CONNECTIONSTATE isEyeXConnected)
 		: gazePositionX(gazePositionX), gazePositionY(gazePositionY), resolutionX(resolutionX),
-		  resolutionY(resolutionY) ,hGazeTrackingStateChangedTicket(TX_INVALID_TICKET),
-		hConnectionStateChangedTicket(TX_INVALID_TICKET), hEventHandlerTicket(TX_INVALID_TICKET)
-	{
-		//InitEyeX(isEyeXConnected);
-	};
+		  resolutionY(resolutionY), isEyeXConnected(isEyeXConnected), hGazeTrackingStateChangedTicket(TX_INVALID_TICKET),
+		hConnectionStateChangedTicket(TX_INVALID_TICKET), hEventHandlerTicket(TX_INVALID_TICKET) {};
 
-	bool EyeXHandler::InitEyeX(TX_CONNECTIONSTATE isEyeXConnected, TX_TICKET hGazeTrackingStateChangedTicket,
-		TX_TICKET hConnectionStateChangedTicket, TX_TICKET hEventHandlerTicket)
+	bool EyeXHandler::InitEyeX()
 	{
 		bool success;
 		success = txInitializeEyeX(TX_EYEXCOMPONENTOVERRIDEFLAG_NONE, NULL, NULL, NULL, NULL) == TX_RESULT_OK;

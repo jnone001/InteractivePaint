@@ -11,8 +11,7 @@ namespace touchpoints { namespace devices
 		EyeXHandler();
 		EyeXHandler(float gazePositionX, float gazePositionY, int resolutionX, int resolutionY, TX_CONNECTIONSTATE isEyeXConnected);
 
-		bool InitEyeX(TX_CONNECTIONSTATE isEyeXConnected, TX_TICKET hGazeTrackingStateChangedTicket,
-			TX_TICKET hConnectionStateChangedTicket, TX_TICKET hEventHandlerTicket);
+		bool InitEyeX();
 		bool EyeXTearDown();
 		void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior);
 		bool InitializeGlobalInteractorSnapshot(TX_CONTEXTHANDLE hContext);
@@ -37,10 +36,9 @@ namespace touchpoints { namespace devices
 		float gazePositionY;
 		int resolutionX;
 		int resolutionY;
+		TX_CONNECTIONSTATE isEyeXConnected;
 		TX_TICKET hGazeTrackingStateChangedTicket;
 		TX_TICKET hConnectionStateChangedTicket;
 		TX_TICKET hEventHandlerTicket;
-
-		
 	};
 }}
