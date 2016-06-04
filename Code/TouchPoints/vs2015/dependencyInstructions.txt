@@ -1,7 +1,5 @@
-to get latest dependencies check out "https://tamsenior.visualstudio.com/_git/dependencies" from inside this directory
-you will also need to copy the necesary dlls to the debug/release folder, i created a powershell script to handle this for you 
-just run '$ powershell -ExecutionPolicy ByPass -File CopyDebugDlls.ps1' from commandline
+to get latest dependencies clone "https://tamsenior.visualstudio.com/_git/dependencies" from inside this directory
 
-so just to sum up:
-1. run: '$git clone https://tamsenior.visualstudio.com/_git/dependencies' from inside this directory
-2. run: '$ powershell -ExecutionPolicy ByPass -File CopyDebugx86Dlls.ps1' also inside this directory
+the visual studio build should take care of moving .dll files into the right location, but in case those files get deleted
+just rebuild the project or run '$ powershell -ExecutionPolicy ByPass -File CopyDebugx86Dlls.ps1' with the appropriate
+powershell script. Or just move the dlls your self lol.

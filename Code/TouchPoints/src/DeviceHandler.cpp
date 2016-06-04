@@ -7,7 +7,7 @@ namespace touchpoints { namespace devices
 	{
 		leapConnected = 0;
 		multiTouchConnected = 0;
-		eyeXConnected = 0;
+		eyeXConnected = false;
 		realSenseConnected = 0;
 		leapConnectedFlag = 0;
 		realSenseConnectedFlag = 0;
@@ -389,9 +389,9 @@ namespace touchpoints { namespace devices
 
 		if (eyeXConnectedFlag == 1)
 		{
-			if (eyeXConnected == 0)
+			if (eyeXConnected == false)
 			{
-				eyeXConnected = 1;
+				eyeXConnected = true;
 				updateDefaultFlag = true;
 				return 1;
 			}
@@ -402,9 +402,9 @@ namespace touchpoints { namespace devices
 		}
 		else
 		{
-			if (eyeXConnected == 1)
+			if (eyeXConnected == true)
 			{
-				eyeXConnected = 0;
+				eyeXConnected = false;
 				updateDefaultFlag = true;
 				return 1;
 			}

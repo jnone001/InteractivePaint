@@ -243,3 +243,5 @@ paket-files/
 
 #dependencies folder
 dependencies/
+
+*.VC.db

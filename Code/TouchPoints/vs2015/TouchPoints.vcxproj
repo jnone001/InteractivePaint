@@ -102,6 +102,9 @@
       <TargetMachine>MachineX86</TargetMachine>
       <IgnoreSpecificDefaultLibraries>LIBCMT;LIBCPMT;LibCmtD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
     </Link>
+    <PreBuildEvent>
+      <Command>powershell -ExecutionPolicy ByPass -File "$(SolutionDir)Copy$(Configuration)$(PlatformTarget)Dlls.ps1"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -127,6 +130,9 @@
       <DataExecutionPrevention />
       <IgnoreSpecificDefaultLibraries>LIBCMT;LIBCPMT</IgnoreSpecificDefaultLibraries>
     </Link>
+    <PreBuildEvent>
+      <Command>powershell -ExecutionPolicy ByPass -File "$(SolutionDir)Copy$(Configuration)$(PlatformTarget)Dlls.ps1"</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -192,6 +198,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\Brush.cpp" />
     <ClCompile Include="..\src\DeviceHandler.cpp" />
+    <ClCompile Include="..\src\EyeXHandler.cpp" />
     <ClCompile Include="..\src\Illustrator.cpp" />
     <ClCompile Include="..\src\ImageHandler.cpp" />
     <ClCompile Include="..\src\RealSenseHandler.cpp" />
@@ -210,6 +217,7 @@
     <ClInclude Include="..\src\Brush.h" />
     <ClInclude Include="..\src\DeviceHandler.h" />
     <ClInclude Include="..\src\Enums.h" />
+    <ClInclude Include="..\src\EyeXHandler.h" />
     <ClInclude Include="..\src\Illustrator.h" />
     <ClInclude Include="..\src\ImageHandler.h" />
     <ClInclude Include="..\src\RealSenseHandler.h" />

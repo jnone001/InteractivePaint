@@ -10,7 +10,7 @@ namespace touchpoints { namespace ui
 	{
 	public:
 		UserInterface();
-		UserInterface(int mWindowWidth, int mWindowHeight, bool eyeXRun, drawing::Brush* brush, drawing::Illustrator* mIllustrator, devices::DeviceHandler* mDeviceHandler, std::shared_ptr<gl::Fbo> fbo, std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha);
+		UserInterface(int mWindowWidth, int mWindowHeight, drawing::Brush* brush, drawing::Illustrator* mIllustrator, devices::DeviceHandler* mDeviceHandler, std::shared_ptr<gl::Fbo> fbo, std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha);
 		void modeRectangle();
 		void modeCircle();
 		void modeTriangle();
@@ -34,10 +34,10 @@ namespace touchpoints { namespace ui
 		void drawBrushButtonsFbo();
 		void drawShapesButtonsFbo();
 
-		void slideButtons(app::TouchEvent::Touch touch);
+		void slideButtons(cinder::app::TouchEvent::Touch touch);
 		float getLayerAlpha(int layerNumber);
 		void incrementBackground();
-		void endButtonPress(app::TouchEvent::Touch touch);
+		void endButtonPress(cinder::app::TouchEvent::Touch touch);
 
 		//Functions to get brush values
 

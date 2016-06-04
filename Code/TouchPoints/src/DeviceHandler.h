@@ -51,6 +51,7 @@ namespace touchpoints { namespace devices
 		void updateDefaultMode();
 		void setUpdateStatus();
 
+		inline bool GetEyeXConnected() const { return this->eyeXConnected; };
 	private:
 		int setLeapState();
 		int setMultiTouchState();
@@ -68,7 +69,7 @@ namespace touchpoints { namespace devices
 		//Mode Flags
 		int leapConnected;
 		int multiTouchConnected;
-		int eyeXConnected;
+		bool eyeXConnected;
 		int realSenseConnected;
 		bool realSenseExpressionsEnabled;
 		bool realSenseDrawEnabled;

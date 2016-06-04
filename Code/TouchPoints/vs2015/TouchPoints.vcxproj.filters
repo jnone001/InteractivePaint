@@ -75,6 +75,9 @@
     <ClCompile Include="..\src\TouchPointsApp.cpp">
       <Filter>app</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\EyeXHandler.cpp">
+      <Filter>devices</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Brush.h">
@@ -121,6 +124,9 @@
     </ClInclude>
     <ClInclude Include="..\src\AllShapes.h">
       <Filter>drawing\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\EyeXHandler.h">
+      <Filter>devices</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

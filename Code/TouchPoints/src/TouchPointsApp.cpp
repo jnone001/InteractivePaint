@@ -23,6 +23,7 @@
 #include "DeviceHandler.h"
 #include "Leap.h"
 #include "LeapMath.h"
+#include "EyeXHandler.h"
 
 using namespace ci;
 using namespace std;
@@ -31,81 +32,16 @@ using namespace cinder::app;
 
 namespace touchpoints { namespace app
 {
-	//Device connection status
-	bool eyeXRunning = false;
-
-#define EYEX
-#ifdef EYEX
-
-//Our Tobi EyeX Functionality. Cannot run with Tobii driver soooo...ifdef?
-#include <assert.h>
-#include "eyex/EyeX.h"
-
-#pragma comment (lib, "Tobii.EyeX.Client.lib")
-	//Stores values of eyePosition(where we are looking) from tobii EyeX
-	float gazePositionX = 0.0f;
-	float gazePositionY = 0.0f;
-
-	// ID of the global interactor that provides our data stream; must be unique within the application.
-	static const TX_STRING InteractorId = "Twilight Sparkle";
-
-	// global variables
-	static TX_HANDLE g_hGlobalInteractorSnapshot = TX_EMPTY_HANDLE;
-
-	//Stored Desktop resolution variables.
-	int resolutionX;
-	int resolutionY;
-
-#endif
-#define BACKGROUND_COLORS 8
 #define TOTAL_SYMBOLS 7
-#define TOTAL_SHAPES 7
-#define SWIPE_GESTURE 8
 #define windowWidth  getWindowSize().x
 #define windowHeight getWindowSize().y
 #define FRAME_RATE 120
-
-	//Leap map
-	map<uint32_t, vec2> pointsMap;
-	map<uint32_t, bool> activePointsMap;
-
-	bool imageFlag = false;
-	bool isDrawing = false;
-	bool lockCurrentFrame = false;
-	bool leapDrawFlag = true;
-	bool processing = false;
-	bool radialActive = false;
-	gl::TextureRef imageTexture;
-	int imageNum;
-	float fadeTime = 1;
-
-	/*Code for Proximity Menu*/
-	bool proxActive = false;
-
-	//Layers
-	int currLayer = 0;
-
-	float lineSize = 1.0f;
-	float currentAlpha = 1.0;
-
-	float r, g, b = 256.0f;
-
-	int currColor = 0;
-	int currShape = 0;
-	int currBackground = 0;
-
-	string symbolArray[TOTAL_SYMBOLS];
-
-	//Global EyeX Handler
-	TX_CONTEXTHANDLE hContext = TX_EMPTY_HANDLE;
 
 	//TouchPointsApp, our libcinder app!
 	class TouchPointsApp : public App
 	{
 	public:
 		void setup() override;
-
-		void mouseDown(MouseEvent event) override;
 
 		void touchesBegan(TouchEvent event) override;
 		void touchesMoved(TouchEvent event) override;
@@ -128,7 +64,7 @@ namespace touchpoints { namespace app
 		void drawRadial();
 
 		//Proxyfucntions
-		void drawProx() const;
+		void drawProx();
 
 		/*Leap related functions*/
 		void enableGest(Leap::Controller controller);
@@ -139,6 +75,23 @@ namespace touchpoints { namespace app
 		void gestRecognition(Leap::Frame frame, Leap::Controller controller);
 		void setDefaultMode(Mode::DefaultModes mode);
 
+		//Leap map
+		map<uint32_t, vec2> pointsMap;
+		map<uint32_t, bool> activePointsMap;
+
+		bool processing = false;
+		bool radialActive = false;
+		gl::TextureRef imageTexture;
+		/*Code for Proximity Menu*/
+		bool proxActive = false;
+		float lineSize = 1.0f;
+		float r, g, b = 256.0f;
+		int currShape = 0;
+		bool lockCurrentFrame = false;
+		bool imageFlag = false;
+		bool isDrawing = false;
+		bool leapDrawFlag = true;
+
 		//List of drawUI Flags
 		bool modeButtons = true;
 		bool colorButtons = false;
@@ -147,13 +100,16 @@ namespace touchpoints { namespace app
 		bool layerVisualization = false;
 		bool startUpFlag = true;
 
+		TX_TICKET hGazeTrackingStateChangedTicket = TX_INVALID_TICKET;
+		TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
+		TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
+
 		//Variables to keep track of performance. It is cleared once every second.
 		int frames = 0;
 		int fps = 0;
 
 		void update() override;
 		void draw() override;
-
 	private:
 		//Setup
 		bool setupComplete = false;
@@ -164,7 +120,7 @@ namespace touchpoints { namespace app
 		devices::DeviceHandler deviceHandler;
 		drawing::ImageHandler imageHandler;
 		devices::RealSenseHandler realSenseHandler;
-		//UndoLine undoLine;
+		devices::EyeXHandler eyeXHandler;
 
 		//Keeps time for the last time we checked for connected or disconnected devices
 		std::chrono::milliseconds lastDeviceCheck;
@@ -175,15 +131,7 @@ namespace touchpoints { namespace app
 		Leap::GestureList gestList;
 		Leap::Listener leapListener;
 
-		//EyeX
 		vec2 radialCenter = vec2(windowWidth * .5, windowHeight * .5);
-
-		TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
-		TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
-		TX_TICKET hGazeTrackingStateChangedTicket = TX_INVALID_TICKET;
-		TX_EYEXAVAILABILITY availability;
-		BOOL success;
-		TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
 
 		//Symmetry lines
 		drawing::SymmetryLine mySymmetry;
@@ -261,133 +209,6 @@ namespace touchpoints { namespace app
 		// On mobile, if you disable multitouch then touch events will arrive via mouseDown(), mouseDrag(), etc.
 	}
 
-#ifdef EYEX
-	//eyeX Functions.
-
-	void OnStateReceived(TX_HANDLE hStateBag)
-	{
-		TX_BOOL success;
-		TX_INTEGER eyeTrackingState;
-
-		success = (txGetStateValueAsInteger(hStateBag, TX_STATEPATH_EYETRACKINGSTATE, &eyeTrackingState) == TX_RESULT_OK);
-		if (success)
-		{
-			switch (eyeTrackingState)
-			{
-			case TX_EYETRACKINGDEVICESTATUS_TRACKING:
-				eyeXRunning = true;
-				break;
-			case TX_EYETRACKINGDEVICESTATUS_DEVICENOTCONNECTED:
-				eyeXRunning = false;
-				break;
-			}
-		}
-	}
-
-	void TX_CALLCONVENTION OnEngineStateChanged(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userParam)
-	{
-		TX_RESULT result = TX_RESULT_UNKNOWN;
-		TX_HANDLE hStateBag = TX_EMPTY_HANDLE;
-
-		if (txGetAsyncDataResultCode(hAsyncData, &result) == TX_RESULT_OK &&
-			txGetAsyncDataContent(hAsyncData, &hStateBag) == TX_RESULT_OK)
-		{
-			OnStateReceived(hStateBag);
-			txReleaseObject(&hStateBag);
-		}
-	}
-
-	/*
-	* Initializes g_hGlobalInteractorSnapshot with an interactor that has the Gaze Point behavior.
-	*/
-	BOOL InitializeGlobalInteractorSnapshot(TX_CONTEXTHANDLE hContext)
-	{
-		TX_HANDLE hInteractor = TX_EMPTY_HANDLE;
-		TX_GAZEPOINTDATAPARAMS params = {TX_GAZEPOINTDATAMODE_LIGHTLYFILTERED};
-		BOOL success;
-
-		success = txCreateGlobalInteractorSnapshot(
-			hContext,
-			InteractorId,
-			&g_hGlobalInteractorSnapshot,
-			&hInteractor) == TX_RESULT_OK;
-		success &= txCreateGazePointDataBehavior(hInteractor, &params) == TX_RESULT_OK;
-
-		txReleaseObject(&hInteractor);
-
-		return success;
-	}
-
-	/*
-	* Callback function invoked when a snapshot has been committed.
-	*/
-	void TX_CALLCONVENTION OnSnapshotCommitted(TX_CONSTHANDLE hAsyncData, TX_USERPARAM param)
-	{
-		// check the result code using an assertion.
-		// this will catch validation errors and runtime errors in debug builds. in release builds it won't do anything.
-		TX_RESULT result = TX_RESULT_UNKNOWN;
-		txGetAsyncDataResultCode(hAsyncData, &result);
-		assert(result == TX_RESULT_OK || result == TX_RESULT_CANCELLED);
-	}
-
-	/*
-	* Callback function invoked when the status of the connection to the EyeX Engine has changed.
-	*/
-	void TX_CALLCONVENTION OnEngineConnectionStateChanged(TX_CONNECTIONSTATE connectionState, TX_USERPARAM userParam)
-	{
-		switch (connectionState)
-		{
-		case TX_CONNECTIONSTATE_CONNECTED:
-			{
-				BOOL success;
-				success = txCommitSnapshotAsync(g_hGlobalInteractorSnapshot, OnSnapshotCommitted, NULL) == TX_RESULT_OK;
-				txGetStateAsync(hContext, TX_STATEPATH_EYETRACKING, OnEngineStateChanged, NULL);
-			}
-			break;
-		case TX_CONNECTIONSTATE_DISCONNECTED:
-			eyeXRunning = false;
-			break;
-		}
-	}
-
-	/*
-	* Handles an event from the Gaze Point data stream.
-	*/
-	void OnGazeDataEvent(TX_HANDLE hGazeDataBehavior)
-	{
-		TX_GAZEPOINTDATAEVENTPARAMS eventParams;
-		if (txGetGazePointDataEventParams(hGazeDataBehavior, &eventParams) == TX_RESULT_OK)
-		{
-			gazePositionX = eventParams.X;
-			gazePositionY = eventParams.Y;
-		}
-	}
-
-	/*
-	* Callback function invoked when an event has been received from the EyeX Engine.
-	*/
-	void TX_CALLCONVENTION HandleEvent(TX_CONSTHANDLE hAsyncData, TX_USERPARAM userParam)
-	{
-		TX_HANDLE hEvent = TX_EMPTY_HANDLE;
-		TX_HANDLE hBehavior = TX_EMPTY_HANDLE;
-
-		txGetAsyncDataContent(hAsyncData, &hEvent);
-
-		// NOTE. Uncomment the following line of code to view the event object. The same function can be used with any interaction object.
-		//OutputDebugStringA(txDebugObject(hEvent));
-		if (txGetEventBehavior(hEvent, &hBehavior, TX_BEHAVIORTYPE_GAZEPOINTDATA) == TX_RESULT_OK)
-		{
-			OnGazeDataEvent(hBehavior);
-			txReleaseObject(&hBehavior);
-		}
-
-		// NOTE since this is a very simple application with a single interactor and a single data stream,
-		// our event handling code can be very simple too. A more complex application would typically have to
-		// check for multiple behaviors and route events based on interactor IDs.
-		txReleaseObject(&hEvent);
-	}
-#endif
-
 	void TouchPointsApp::setup()
 	{
 		CI_LOG_I("MT: " << System::hasMultiTouch() << " Max points: " << System::getMaxMultiTouchPoints());
@@ -450,43 +271,28 @@ namespace touchpoints { namespace app
 		//RealSense Setup
 		realSenseHandler = devices::RealSenseHandler(&illustrator);
 
+
 		//Set up UI
 		deviceHandler.deviceConnection();
 		lastDeviceCheck = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
-		gui = ui::UserInterface(windowWidth, windowHeight, eyeXRunning, &brush, &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
+		gui = ui::UserInterface(windowWidth, windowHeight, &brush, &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
 		deviceHandler.deviceConnection();
 		Mode::DefaultModes resultMode = deviceHandler.getDefaultMode();
 		setDefaultMode(resultMode);
 
-		//Sets up eyeX context
-#ifdef EYEX
 		//Get desktop resolution
 		RECT desktop;
 		const HWND hDesktop = GetDesktopWindow();
 		GetWindowRect(hDesktop, &desktop);
-		resolutionX = desktop.right;
-		resolutionY = desktop.bottom;
 
-		// initialize and enable the context that is our link to the EyeX Engine.
-		success = txInitializeEyeX(TX_EYEXCOMPONENTOVERRIDEFLAG_NONE, NULL, NULL, NULL, NULL) == TX_RESULT_OK;
-		success &= txCreateContext(&hContext, TX_FALSE) == TX_RESULT_OK;
-		success &= InitializeGlobalInteractorSnapshot(hContext);
-		success &= txRegisterConnectionStateChangedHandler(hContext, &hConnectionStateChangedTicket, OnEngineConnectionStateChanged, NULL) == TX_RESULT_OK;
-		success &= txRegisterEventHandler(hContext, &hEventHandlerTicket, HandleEvent, NULL) == TX_RESULT_OK;
-		success &= txEnableConnection(hContext) == TX_RESULT_OK;
-		success &= txRegisterStateChangedHandler(hContext, &hGazeTrackingStateChangedTicket, TX_STATEPATH_GAZETRACKING, OnEngineStateChanged, NULL) == TX_RESULT_OK;
-#endif
-	}
-
-	static Area calcCenter(gl::TextureRef imageTexture)
-	{
-		Area image = imageTexture->getBounds();
-		Area window = getWindowBounds();
-		Area center = Area::proportionalFit(window, image, true, false);
-		//Area center(vec2(800, 800), vec2(1100, 1100));
-		return center;
+		TX_CONNECTIONSTATE eyeXConnectedState = deviceHandler.GetEyeXConnected() ? TX_CONNECTIONSTATE_CONNECTED : TX_CONNECTIONSTATE_DISCONNECTED;
+		//eyeXHandler = devices::EyeXHandler(0.0f, 0.0f, desktop.right, desktop.bottom, eyeXConnectedState);
+		eyeXHandler = devices::EyeXHandler();
+		eyeXHandler.SetResolutionX(desktop.right);
+		eyeXHandler.SetResolutionX(desktop.bottom);
+		eyeXHandler.InitEyeX(eyeXConnectedState, hGazeTrackingStateChangedTicket, hConnectionStateChangedTicket, hEventHandlerTicket);
 	}
 
 	void TouchPointsApp::enableGest(Leap::Controller controller)
@@ -576,7 +382,6 @@ namespace touchpoints { namespace app
 					case Leap::Gesture::TYPE_SCREEN_TAP:
 						{
 							Leap::ScreenTapGesture screentap = gesture;
-
 							break;
 						}
 					default:
@@ -847,7 +652,7 @@ namespace touchpoints { namespace app
 		radialActive = true;
 	}
 
-	void TouchPointsApp::drawProx() const
+	void TouchPointsApp::drawProx()
 	{
 		(*proxFbo).bindFramebuffer();
 		glClearColor(1.0, 1.0, 1.0, 0.0);
@@ -893,13 +698,7 @@ namespace touchpoints { namespace app
 		else if (event.getCode() == KeyEvent::KEY_ESCAPE)
 		{
 			//Clears EyeX context then quits the program.
-#ifdef EYEX
-			txDisableConnection(hContext);
-			txReleaseObject(&g_hGlobalInteractorSnapshot);
-			success = txShutdownContext(hContext, TX_CLEANUPTIMEOUT_DEFAULT, TX_FALSE) == TX_RESULT_OK;
-			success &= txReleaseContext(&hContext) == TX_RESULT_OK;
-			success &= txUninitializeEyeX() == TX_RESULT_OK;
-#endif
+			eyeXHandler.EyeXTearDown();
 			quit();
 		}
 		else if (event.getChar() == 'r') //Turns on random color mode
@@ -998,30 +797,33 @@ namespace touchpoints { namespace app
 		{
 			gui.toggleUiFlag();
 		}
-#ifdef EYEX
 		else if (event.getChar() == ' ')
 		{
 			if (deviceHandler.eyeXStatus())
 			{
-				if (gazePositionX <= resolutionX / 2 && gazePositionY <= resolutionY / 2)
+				if (eyeXHandler.GetGazePositionX() <= eyeXHandler.GetResolutionX() / 2 
+					&& eyeXHandler.GetGazePositionY() <= eyeXHandler.GetResolutionY() / 2)
 				{
 					brush.changeShape(Shape::Shape::Line);
 					gui.setModeChangeFlag();
 					imageHandler.loadIcon(SHAPE_LINE);
 				}
-				else if (gazePositionX >= resolutionX / 2 && gazePositionY <= resolutionY / 2)
+				else if (eyeXHandler.GetGazePositionX() >= eyeXHandler.GetResolutionX() / 2 
+					&& eyeXHandler.GetGazePositionY() <= eyeXHandler.GetResolutionY() / 2)
 				{
 					brush.changeShape(Shape::Shape::Circle);
 					gui.setModeChangeFlag();
 					imageHandler.loadIcon(SHAPE_Circle);
 				}
-				else if (gazePositionX <= resolutionX / 2 && gazePositionY >= resolutionY / 2)
+				else if (eyeXHandler.GetGazePositionX() <= eyeXHandler.GetResolutionX() / 2 
+					&& eyeXHandler.GetGazePositionY() >= eyeXHandler.GetResolutionY() / 2)
 				{
 					brush.changeShape(Shape::Shape::Rectangle);
 					gui.setModeChangeFlag();
 					imageHandler.loadIcon(SHAPE_Rectangle);
 				}
-				else if (gazePositionX >= resolutionX / 2 && gazePositionY >= resolutionY / 2)
+				else if (eyeXHandler.GetGazePositionX() >= eyeXHandler.GetResolutionX() / 2 
+					&& eyeXHandler.GetGazePositionY() >= eyeXHandler.GetResolutionY() / 2)
 				{
 					brush.changeShape(Shape::Shape::Triangle);
 					gui.setModeChangeFlag();
@@ -1029,7 +831,6 @@ namespace touchpoints { namespace app
 				}
 			}
 		}
-#endif
 		else if (event.getChar() == 'l')
 		{
 			leapShapeChange();
@@ -1274,8 +1075,6 @@ namespace touchpoints { namespace app
 		}
 	}
 
-	void TouchPointsApp::mouseDown(MouseEvent event) {}
-
 	void TouchPointsApp::update()
 	{
 		if (!setupComplete)
@@ -1457,14 +1256,14 @@ namespace touchpoints { namespace app
 		{
 			gl::color(0.0, 0.0, 0.0, 0.4);
 
-			vec2 gaze1(gazePositionX - 10, gazePositionY);
-			vec2 gaze2(gazePositionX + 10, gazePositionY);
+			vec2 gaze1(eyeXHandler.GetGazePositionX() - 10, eyeXHandler.GetGazePositionY());
+			vec2 gaze2(eyeXHandler.GetGazePositionX() + 10, eyeXHandler.GetGazePositionY());
 
 			gl::drawStrokedCircle(gaze1, 10.0f, 10.0f);
 			gl::drawStrokedCircle(gaze2, 10.0f, 10.0f);
 
 			gl::color(1.0, 1.0, 1.0, 1.0);
-			if (gazePositionX < 500 && gazePositionY < 100)
+			if (eyeXHandler.GetGazePositionX() < 500 && eyeXHandler.GetGazePositionY() < 100)
 			{
 				bool tempBool = true;
 				gui.changeModeButtons(tempBool);
@@ -1475,7 +1274,7 @@ namespace touchpoints { namespace app
 				gui.changeModeButtons(tempBool);
 			}
 
-			if (gazePositionX > windowWidth * .75 && gazePositionY > windowHeight * .6)
+			if (eyeXHandler.GetGazePositionX() > windowWidth * .75 && eyeXHandler.GetGazePositionY() > windowHeight * .6)
 			{
 				gl::draw(uiFbo->getColorTexture());
 			}

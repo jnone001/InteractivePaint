@@ -7,7 +7,7 @@ namespace touchpoints { namespace ui
 {
 	UserInterface::UserInterface() {}
 
-	UserInterface::UserInterface(int mWindowWidth, int mWindowHeight, bool eyeXRun, drawing::Brush* brush, drawing::Illustrator* mIllustrator, devices::DeviceHandler* mDeviceHandler, std::shared_ptr<gl::Fbo> fbo, std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha)
+	UserInterface::UserInterface(int mWindowWidth, int mWindowHeight, drawing::Brush* brush, drawing::Illustrator* mIllustrator, devices::DeviceHandler* mDeviceHandler, std::shared_ptr<gl::Fbo> fbo, std::vector<std::shared_ptr<gl::Fbo>>* fboLayerList, std::vector<float>* fboLayerAlpha)
 	{
 		modeChangeFlag = true;
 		windowWidth = mWindowWidth;
@@ -16,7 +16,6 @@ namespace touchpoints { namespace ui
 		illustrator = mIllustrator;
 		deviceHandler = mDeviceHandler;
 		uiFbo = fbo;
-		eyeXRunning = eyeXRun;
 		uiFboFlag = true;
 		modeButtons = true;
 		brushButtons = false;
