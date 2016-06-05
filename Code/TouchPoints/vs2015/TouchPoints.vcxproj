@@ -196,6 +196,7 @@
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\App.cpp" />
     <ClCompile Include="..\src\Brush.cpp" />
     <ClCompile Include="..\src\DeviceHandler.cpp" />
     <ClCompile Include="..\src\EyeXHandler.cpp" />
@@ -227,6 +228,7 @@
     <ClInclude Include="..\src\TouchCircle.h" />
     <ClInclude Include="..\src\TouchKeyboard.h" />
     <ClInclude Include="..\src\TouchPoint.h" />
+    <ClInclude Include="..\src\TouchPointsApp.h" />
     <ClInclude Include="..\src\TouchRectangle.h" />
     <ClInclude Include="..\src\TouchShape.h" />
     <ClInclude Include="..\src\TouchTriangle.h" />
