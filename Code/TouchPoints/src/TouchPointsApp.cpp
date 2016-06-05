@@ -21,9 +21,9 @@
 #include "RealSenseHandler.h"
 #include "libusb.h"
 #include "DeviceHandler.h"
-#include "Leap.h"
 #include "LeapMath.h"
 #include "EyeXHandler.h"
+#include "LeapMotionHandler.h"
 
 using namespace ci;
 using namespace std;
@@ -32,9 +32,6 @@ using namespace cinder::app;
 
 namespace touchpoints { namespace app
 {
-#define TOTAL_SYMBOLS 7
-#define windowWidth  getWindowSize().x
-#define windowHeight getWindowSize().y
 #define FRAME_RATE 120
 
 	//TouchPointsApp, our libcinder app!
@@ -63,21 +60,10 @@ namespace touchpoints { namespace app
 		bool inInteractiveUi(int x, int y, uint32_t id);
 		void drawRadial();
 
-		//Proxyfucntions
-		void drawProx();
-
-		/*Leap related functions*/
-		void enableGest(Leap::Controller controller);
-		void leapSave();
-		void leapColorChange();
-		void leapShapeChange();
-		void leapDraw(Leap::Frame frame);
-		void gestRecognition(Leap::Frame frame, Leap::Controller controller);
 		void setDefaultMode(Mode::DefaultModes mode);
 
-		//Leap map
-		map<uint32_t, vec2> pointsMap;
-		map<uint32_t, bool> activePointsMap;
+		int windowWidth = getWindowSize().x;
+		int windowHeight = getWindowSize().y;
 
 		bool processing = false;
 		bool radialActive = false;
@@ -100,9 +86,6 @@ namespace touchpoints { namespace app
 		bool layerVisualization = false;
 		bool startUpFlag = true;
 
-		TX_TICKET hGazeTrackingStateChangedTicket = TX_INVALID_TICKET;
-		TX_TICKET hConnectionStateChangedTicket = TX_INVALID_TICKET;
-		TX_TICKET hEventHandlerTicket = TX_INVALID_TICKET;
 
 		//Variables to keep track of performance. It is cleared once every second.
 		int frames = 0;
@@ -121,15 +104,10 @@ namespace touchpoints { namespace app
 		drawing::ImageHandler imageHandler;
 		devices::RealSenseHandler realSenseHandler;
 		devices::EyeXHandler eyeXHandler;
+		devices::LeapMotionHandler leapMotionHandler;
 
 		//Keeps time for the last time we checked for connected or disconnected devices
 		std::chrono::milliseconds lastDeviceCheck;
-
-		//Leap Motion Controller
-		Leap::Controller leapContr;
-		Leap::Frame currentFrame;
-		Leap::GestureList gestList;
-		Leap::Listener leapListener;
 
 		vec2 radialCenter = vec2(windowWidth * .5, windowHeight * .5);
 
@@ -226,21 +204,10 @@ namespace touchpoints { namespace app
 		radialFbo = gl::Fbo::create(windowWidth, windowHeight, format);
 		//Set up fbo for proxy menu
 		proxFbo = gl::Fbo::create(windowWidth, windowHeight, format);
-
 		//Background FBO Testing
 		backgroundFbo = gl::Fbo::create(windowWidth, windowHeight, format);
-
-		//Enable all Leap Gestures
-		TouchPointsApp::enableGest(leapContr);
-
 		//Set up fingerlocation FBo
 		fingerLocationFbo = gl::Fbo::create(windowWidth, windowHeight, format);
-
-		leapContr.config().setFloat("Gesture.Swipe.MinLength", 150.0);
-		leapContr.config().setFloat("Gesture.Swipe.MinVelocity", 500.0);
-		leapContr.config().save();
-
-		leapContr.addListener(leapListener);
 
 		setFrameRate(FRAME_RATE);
 
@@ -265,313 +232,22 @@ namespace touchpoints { namespace app
 		//RealSense Setup
 		realSenseHandler = devices::RealSenseHandler(&illustrator);
 
-
 		//Set up UI
 		deviceHandler.deviceConnection();
 		lastDeviceCheck = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
 
 		gui = ui::UserInterface(windowWidth, windowHeight, &brush, &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
+		leapMotionHandler = devices::LeapMotionHandler(/*imageHandler,*/ windowWidth, windowHeight/*, gui, illustrator, brush*/);
+		leapMotionHandler.InitLeapMotion();
+
 		deviceHandler.deviceConnection();
 		Mode::DefaultModes resultMode = deviceHandler.getDefaultMode();
 		setDefaultMode(resultMode);
 
-		//Get desktop resolution
-		RECT desktop;
-		const HWND hDesktop = GetDesktopWindow();
-		GetWindowRect(hDesktop, &desktop);
-
 		TX_CONNECTIONSTATE eyeXConnectedState = deviceHandler.GetEyeXConnected() ? TX_CONNECTIONSTATE_CONNECTED : TX_CONNECTIONSTATE_DISCONNECTED;
-		eyeXHandler = devices::EyeXHandler(0.0f, 0.0f, desktop.right, desktop.bottom, eyeXConnectedState);
+		eyeXHandler = devices::EyeXHandler(0.0f, 0.0f, windowWidth, windowHeight, eyeXConnectedState);
 		eyeXHandler.InitEyeX();
-	}
-
-	void TouchPointsApp::enableGest(Leap::Controller controller)
-	{
-		controller.enableGesture(Leap::Gesture::TYPE_SWIPE);
-		controller.enableGesture(Leap::Gesture::TYPE_CIRCLE);
-		controller.enableGesture(Leap::Gesture::TYPE_SCREEN_TAP);
-		controller.enableGesture(Leap::Gesture::TYPE_KEY_TAP);
-	}
-
-	void TouchPointsApp::gestRecognition(Leap::Frame frame, Leap::Controller controller)
-	{
-		if (!isDrawing)
-		{
-			//List of all gestures
-			gestList = frame.gestures();
-			//Process gestures...
-			if (!imageHandler.getIconFlag())
-			{
-				//for (int g = 0; g < gestures.count(); ++g)
-				for (Leap::Gesture gesture : gestList)
-				{
-					//Gesture gesture = gestList[g];
-
-					switch (gesture.type())
-					{
-					case Leap::Gesture::TYPE_CIRCLE:
-						{
-							Leap::CircleGesture circle = gesture;
-
-							if (circle.pointable().direction().angleTo(circle.normal()) <= M_PI / 2)
-							{
-								//clockwise circle
-
-								Leap::Vector position = circle.pointable().tipPosition();
-
-								if (position.x < 0 && position.y > 250)
-								{
-									processing = true;
-									leapColorChange();
-								}
-
-								if (position.x < 0 && position.y < 150)
-								{
-									processing = true;
-									leapShapeChange();
-								}
-
-								if (position.x > 0 && position.y > 250)
-								{
-									processing = true;
-									leapSave();
-								}
-
-								if (position.x > 0 && position.y < 150)
-								{
-									proxActive = false;
-								}
-							}
-							else
-							{
-								//counterclockwise circle
-								drawProx();
-							}
-
-							// Calculate angle swept since last frame
-							float sweptAngle = 0;
-							if (circle.state() != Leap::Gesture::STATE_START)
-							{
-								Leap::CircleGesture previousUpdate = Leap::CircleGesture(controller.frame(1).gesture(circle.id()));
-								sweptAngle = (circle.progress() - previousUpdate.progress()) * 2 * M_PI;
-							}
-							break;
-						}
-					case Leap::Gesture::TYPE_SWIPE:
-						{
-							processing = true;
-							leapColorChange();
-							break;
-						}
-					case Leap::Gesture::TYPE_KEY_TAP:
-						{
-							processing = true;
-							leapSave();
-							break;
-						}
-					case Leap::Gesture::TYPE_SCREEN_TAP:
-						{
-							Leap::ScreenTapGesture screentap = gesture;
-							break;
-						}
-					default:
-						std::cout << std::string(2, ' ') << "Unknown gesture type." << std::endl;
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	void TouchPointsApp::leapSave()
-	{
-		if (gui.isBackgroundTransparent())
-		{
-			imageHandler.saveCanvas(vec2(windowWidth, windowHeight), ColorA(gui.getBackgroundColor(), 0.0));
-		}
-		else imageHandler.saveCanvas(vec2(windowWidth, windowHeight), ColorA(gui.getBackgroundColor(), 1.0));
-	}
-
-	void TouchPointsApp::leapDraw(Leap::Frame frame)
-	{
-		//Get all pointables from current leap frame
-		Leap::PointableList pointables = frame.pointables();
-		//Gets a virtual rectangular prism which is within the field of vie of Leap
-		Leap::InteractionBox iBox = frame.interactionBox();
-
-		//Traverse all pointables
-		for (auto& points : pointables)
-		{
-			//Normalize points from iBox
-			Leap::Vector normalizedPosition = iBox.normalizePoint(points.stabilizedTipPosition());
-			//Get x and y coordinate value form normalized value within given window
-			float leapXCoordinate = normalizedPosition.x * windowWidth;
-			float leapYCoordinate = windowHeight - normalizedPosition.y * windowHeight;
-
-			if (points.touchDistance() > 0 && points.touchZone() != Leap::Pointable::Zone::ZONE_NONE)
-			{
-				gl::color(0, 1, 0, 1 - points.touchDistance());
-				gl::drawSolidCircle(vec2(leapXCoordinate, leapYCoordinate), 40);
-				gl::color(1.0, 0.9, 0.5, 1 - points.touchDistance());
-				gl::drawStrokedCircle(vec2(leapXCoordinate, leapYCoordinate), 40.0f, 10.0f);
-				/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
-				if (pointsMap.find(points.id()) != pointsMap.end())
-				{
-					pointsMap.erase(points.id());
-
-					activePointsMap.erase(points.id());
-					illustrator.endTouchShapes(points.id());
-				}
-			}
-			else if (points.touchDistance() <= 0 && !proxActive)
-			{
-				lockCurrentFrame = true;
-
-				//Check to see if id for pointable object is present
-				auto result = pointsMap.find(points.id());
-				//Checks to see if new pointable is drawing
-				if (result == pointsMap.end())
-				{
-					/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
-					illustrator.beginTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate));
-
-					pointsMap.emplace(points.id(), vec2(leapXCoordinate, leapYCoordinate));
-					activePointsMap.emplace(points.id(), true);
-				}
-				else
-				{
-					/*LEAP DRAW ALL SHAPES CODE. NOT READY FOR IMPLEMENTATION*/
-					illustrator.movingTouchShapes(points.id(), vec2(leapXCoordinate, leapYCoordinate), pointsMap[points.id()]);
-					activePointsMap[points.id()] = true;
-					pointsMap[points.id()] = vec2(leapXCoordinate, leapYCoordinate);
-				}
-			}
-		}
-		std::vector<uint32_t> list;
-		for (auto& points : activePointsMap)
-		{
-			if (points.second)
-			{
-				points.second = false;
-			}
-			else
-			{
-				illustrator.endTouchShapes(points.first);
-				list.emplace_back(points.first);
-				pointsMap.erase(points.first);
-			}
-		}
-		for (auto ids : list)
-		{
-			activePointsMap.erase(ids);
-		}
-	}
-
-	void TouchPointsApp::leapShapeChange()
-	{
-		if (currShape != TOTAL_SYMBOLS - 1)
-		{
-			currShape++;
-		}
-		else
-		{
-			currShape = 0;
-		}
-		brush.incrementShape();
-		gui.setModeChangeFlag();
-		switch (brush.getCurrentShape())
-		{
-		case 0:
-			{
-				imageHandler.loadIcon(SHAPE_LINE);
-
-				break;
-			}
-		case 1:
-			{
-				if (!brush.getFilledShapes()) imageHandler.loadIcon(SHAPE_Circle);
-				else imageHandler.loadIcon(SHAPE_Filled_Circle);
-				break;
-			}
-		case 2:
-			{
-				if (!brush.getFilledShapes()) imageHandler.loadIcon(SHAPE_Rectangle);
-				else imageHandler.loadIcon(SHAPE_Filled_Rectangle);
-				imageFlag = true;
-				break;
-			}
-		case 3:
-			{
-				if (!brush.getFilledShapes()) imageHandler.loadIcon(SHAPE_Triangle);
-				else imageHandler.loadIcon(SHAPE_Filled_Triangle);
-				imageFlag = true;
-				break;
-			}
-		default:
-			{
-				break;
-			}
-		}
-	}
-
-	void TouchPointsApp::leapColorChange()
-	{
-		brush.incrementColor();
-		gui.setModeChangeFlag();
-		//Provides correct image to provide feedback
-		switch (brush.getCurrentColor())
-		{
-		case 0:
-			{
-				imageHandler.loadIcon(COLOR_ZERO);
-
-				break;
-			}
-		case 1:
-			{
-				imageHandler.loadIcon(COLOR_ONE);
-
-				break;
-			}
-		case 2:
-			{
-				imageHandler.loadIcon(COLOR_TWO);
-
-				break;
-			}
-		case 3:
-			{
-				imageHandler.loadIcon(COLOR_THREE);
-
-				break;
-			}
-		case 4:
-			{
-				imageHandler.loadIcon(COLOR_FOUR);
-				break;
-			}
-		case 5:
-			{
-				imageHandler.loadIcon(COLOR_FIVE);
-
-				break;
-			}
-		case 6:
-			{
-				imageHandler.loadIcon(COLOR_SIX);
-				break;
-			}
-		case 7:
-			{
-				imageHandler.loadIcon(COLOR_SEVEN);
-				break;
-			}
-		default:
-			{
-				break;
-			}
-		}
 	}
 
 	void TouchPointsApp::drawRadial()
@@ -641,30 +317,6 @@ namespace touchpoints { namespace app
 		(*radialFbo).unbindFramebuffer();
 
 		radialActive = true;
-	}
-
-	void TouchPointsApp::drawProx()
-	{
-		(*proxFbo).bindFramebuffer();
-		glClearColor(1.0, 1.0, 1.0, 0.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-		(*proxFbo).unbindFramebuffer();
-
-		//Draw to radial menu buffer
-		(*proxFbo).bindFramebuffer();
-		//Make background transparent
-		glClearColor(1.0, 1.0, 1.0, 0.0);
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		gl::lineWidth(10);
-		gl::color(0.0, 0.0, 0.0, 1.0);
-		gl::drawLine(vec2(windowWidth * .5, windowHeight), vec2(windowWidth * .5, 0));
-
-		gl::drawLine(vec2(0, windowHeight * .5), vec2(windowWidth, windowHeight * .5));
-
-		(*proxFbo).unbindFramebuffer();
-
-		proxActive = true;
 	}
 
 	/*Mode Change Functions*/
@@ -762,7 +414,7 @@ namespace touchpoints { namespace app
 		}
 		else if (event.getChar() == 'n')
 		{
-			leapSave();
+			leapMotionHandler.leapSave(gui, imageHandler);
 		}
 		else if (event.getChar() == 'j')
 		{
@@ -824,15 +476,15 @@ namespace touchpoints { namespace app
 		}
 		else if (event.getChar() == 'l')
 		{
-			leapShapeChange();
+			leapMotionHandler.leapShapeChange(currShape, imageFlag, brush, gui, imageHandler);
 		}
 		else if (event.getChar() == 'k')
 		{
-			leapColorChange();
+			leapMotionHandler.leapColorChange(brush, gui, imageHandler);
 		}
 		else if (event.getChar() == '1')
 		{
-			leapShapeChange();
+			leapMotionHandler.leapShapeChange(currShape, imageFlag, brush, gui, imageHandler);
 		}
 		else if (event.getChar() == '2')
 		{
@@ -840,7 +492,7 @@ namespace touchpoints { namespace app
 		}
 		else if (event.getChar() == '3')
 		{
-			leapColorChange();
+			leapMotionHandler.leapColorChange(brush, gui, imageHandler);
 		}
 		else if (event.getChar() == '4')
 		{
@@ -879,7 +531,7 @@ namespace touchpoints { namespace app
 			{
 				if ((previousPoint.getY() < currentPoint.getY() + 120) && (previousPoint.getY() > currentPoint.getY() - 120))
 				{
-					leapColorChange();
+					leapMotionHandler.leapColorChange(brush, gui, imageHandler);
 					bufferTouches.erase(previousPoint.getId());
 					bufferTouches.erase(currentPoint.getId());
 					return true;
@@ -906,14 +558,14 @@ namespace touchpoints { namespace app
 				if ((((radialCenter.x - 100) - 30) < x && x < ((radialCenter.x - 100) + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30)))
 				{
 					//brush.changeStaticColor();
-					leapColorChange();
+					leapMotionHandler.leapColorChange(brush, gui, imageHandler);
 					return;
 				}
 
 				if ((((radialCenter.x + 100) - 30) < x && x < ((radialCenter.x + 100) + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30)))
 				{
 					//brush.cycleShape();
-					leapShapeChange();
+					leapMotionHandler.leapShapeChange(currShape, imageFlag, brush, gui, imageHandler);
 					return;
 				}
 
@@ -978,7 +630,7 @@ namespace touchpoints { namespace app
 				//'Extended Touch' Gesture
 				if (touch.getPos() == touch.getPrevPos() && touch.getTime() > myTouch.getTime() + .75)
 				{
-					leapShapeChange();
+					leapMotionHandler.leapShapeChange(currShape, imageFlag, brush, gui, imageHandler);
 					bufferTouches[touch.getId()].clear();
 					bufferTouches[touch.getId()].emplace_front(touch);
 				}
@@ -1130,11 +782,11 @@ namespace touchpoints { namespace app
 					}
 					if (realSenseHandler.getCheekGestureFlag())
 					{
-						leapColorChange();
+						leapMotionHandler.leapColorChange(brush, gui, imageHandler);
 					}
 					if (realSenseHandler.getSmileGestureFlag())
 					{
-						leapShapeChange();
+						leapMotionHandler.leapShapeChange(currShape, imageFlag, brush, gui, imageHandler);
 					}
 					realSenseHandler.resetGesturesFlag();
 				}
@@ -1182,12 +834,12 @@ namespace touchpoints { namespace app
 		//However, this makes it impossible to see green 'hands' on top of images.
 		if (deviceHandler.leapStatus())
 		{
-			currentFrame = leapContr.frame();
+			leapMotionHandler.SetCurrentFrame();
 			if (deviceHandler.leapDraw())
 			{
 				if (leapDrawFlag)
 				{
-					leapDraw(currentFrame);
+					leapMotionHandler.leapDraw(lockCurrentFrame, proxActive, illustrator);
 				}
 			}
 			if (deviceHandler.leapGesture())
@@ -1195,7 +847,7 @@ namespace touchpoints { namespace app
 				if (!lockCurrentFrame)
 				{
 					//Calls specified action from gesture recgonized
-					gestRecognition(currentFrame, leapContr);
+					leapMotionHandler.gestRecognition(isDrawing, processing, proxActive, currShape, imageFlag, brush, gui, imageHandler, proxFbo.get());
 				}
 			}
 			lockCurrentFrame = false;

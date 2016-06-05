@@ -201,6 +201,7 @@
     <ClCompile Include="..\src\EyeXHandler.cpp" />
     <ClCompile Include="..\src\Illustrator.cpp" />
     <ClCompile Include="..\src\ImageHandler.cpp" />
+    <ClCompile Include="..\src\LeapMotionHandler.cpp" />
     <ClCompile Include="..\src\RealSenseHandler.cpp" />
     <ClCompile Include="..\src\SymmetryLine.cpp" />
     <ClCompile Include="..\src\TouchCircle.cpp" />
@@ -220,6 +221,7 @@
     <ClInclude Include="..\src\EyeXHandler.h" />
     <ClInclude Include="..\src\Illustrator.h" />
     <ClInclude Include="..\src\ImageHandler.h" />
+    <ClInclude Include="..\src\LeapMotionHandler.h" />
     <ClInclude Include="..\src\RealSenseHandler.h" />
     <ClInclude Include="..\src\SymmetryLine.h" />
     <ClInclude Include="..\src\TouchCircle.h" />

@@ -78,6 +78,9 @@
     <ClCompile Include="..\src\EyeXHandler.cpp">
       <Filter>devices</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\LeapMotionHandler.cpp">
+      <Filter>devices</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\Brush.h">
@@ -126,6 +129,9 @@
       <Filter>drawing\shapes</Filter>
     </ClInclude>
     <ClInclude Include="..\src\EyeXHandler.h">
+      <Filter>devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\LeapMotionHandler.h">
       <Filter>devices</Filter>
     </ClInclude>
   </ItemGroup>
