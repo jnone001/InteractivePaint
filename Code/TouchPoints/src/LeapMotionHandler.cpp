@@ -6,10 +6,8 @@ namespace touchpoints { namespace devices
 {
 	LeapMotionHandler::LeapMotionHandler() {};
 
-	LeapMotionHandler::LeapMotionHandler(/*drawing::ImageHandler imageHandler,*/ int windowWidth, int windowHeight/*,
-	                                     ui::UserInterface& gui, drawing::Illustrator& illustrator, drawing::Brush& brush*/)
-		: /*imageHandler(imageHandler),*/ windowWidth(windowWidth), windowHeight(windowHeight)/*,
-		  gui(gui), illustrator(illustrator), brush(brush)*/ { };
+	LeapMotionHandler::LeapMotionHandler(int windowWidth, int windowHeight)
+		: windowWidth(windowWidth), windowHeight(windowHeight) {};
 
 	void LeapMotionHandler::InitLeapMotion()
 	{
@@ -29,9 +27,9 @@ namespace touchpoints { namespace devices
 	}
 
 	void LeapMotionHandler::gestRecognition(bool isDrawing, bool& processing, bool& proxActive,
-	                                        int& currShape, bool& imageFlag, drawing::Brush brush,
-											ui::UserInterface gui, drawing::ImageHandler imageHandler, 
-											gl::Fbo* proxFbo)
+	                                        int& currShape, bool& imageFlag, drawing::Brush& brush,
+	                                        ui::UserInterface& gui, drawing::ImageHandler& imageHandler,
+	                                        gl::Fbo* proxFbo)
 	{
 		if (!isDrawing)
 		{
@@ -117,7 +115,7 @@ namespace touchpoints { namespace devices
 		}
 	}
 
-	void LeapMotionHandler::leapSave(ui::UserInterface gui, drawing::ImageHandler imageHandler)
+	void LeapMotionHandler::leapSave(ui::UserInterface& gui, drawing::ImageHandler& imageHandler)
 	{
 		if (gui.isBackgroundTransparent())
 		{
@@ -126,7 +124,7 @@ namespace touchpoints { namespace devices
 		else imageHandler.saveCanvas(vec2(windowWidth, windowHeight), ColorA(gui.getBackgroundColor(), 1.0));
 	}
 
-	void LeapMotionHandler::leapDraw(bool& lockCurrentFrame, bool& proxActive, drawing::Illustrator illustrator)
+	void LeapMotionHandler::leapDraw(bool& lockCurrentFrame, bool& proxActive, drawing::Illustrator& illustrator)
 	{
 		//Get all pointables from current leap frame
 		Leap::PointableList pointables = this->currentFrame.pointables();
@@ -201,8 +199,8 @@ namespace touchpoints { namespace devices
 		}
 	}
 
-	void LeapMotionHandler::leapShapeChange(int& currShape, bool& imageFlag, drawing::Brush brush, 
-		ui::UserInterface gui, drawing::ImageHandler imageHandler)
+	void LeapMotionHandler::leapShapeChange(int& currShape, bool& imageFlag, drawing::Brush& brush,
+	                                        ui::UserInterface& gui, drawing::ImageHandler& imageHandler)
 	{
 		if (currShape != TOTAL_SYMBOLS - 1)
 		{
@@ -249,8 +247,8 @@ namespace touchpoints { namespace devices
 		}
 	}
 
-	void LeapMotionHandler::leapColorChange(drawing::Brush brush, ui::UserInterface gui,
-		drawing::ImageHandler imageHandler)
+	void LeapMotionHandler::leapColorChange(drawing::Brush& brush, ui::UserInterface& gui,
+	                                        drawing::ImageHandler& imageHandler)
 	{
 		brush.incrementColor();
 		gui.setModeChangeFlag();

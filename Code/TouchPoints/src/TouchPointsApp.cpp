@@ -86,7 +86,6 @@ namespace touchpoints { namespace app
 		bool layerVisualization = false;
 		bool startUpFlag = true;
 
-
 		//Variables to keep track of performance. It is cleared once every second.
 		int frames = 0;
 		int fps = 0;
@@ -238,7 +237,7 @@ namespace touchpoints { namespace app
 
 		gui = ui::UserInterface(windowWidth, windowHeight, &brush, &illustrator, &deviceHandler, uiFbo, &layerList, &layerAlpha);
 
-		leapMotionHandler = devices::LeapMotionHandler(/*imageHandler,*/ windowWidth, windowHeight/*, gui, illustrator, brush*/);
+		leapMotionHandler = devices::LeapMotionHandler(windowWidth, windowHeight);
 		leapMotionHandler.InitLeapMotion();
 
 		deviceHandler.deviceConnection();
@@ -444,28 +443,28 @@ namespace touchpoints { namespace app
 		{
 			if (deviceHandler.eyeXStatus())
 			{
-				if (eyeXHandler.GetGazePositionX() <= eyeXHandler.GetResolutionX() / 2 
+				if (eyeXHandler.GetGazePositionX() <= eyeXHandler.GetResolutionX() / 2
 					&& eyeXHandler.GetGazePositionY() <= eyeXHandler.GetResolutionY() / 2)
 				{
 					brush.changeShape(Shape::Shape::Line);
 					gui.setModeChangeFlag();
 					imageHandler.loadIcon(SHAPE_LINE);
 				}
-				else if (eyeXHandler.GetGazePositionX() >= eyeXHandler.GetResolutionX() / 2 
+				else if (eyeXHandler.GetGazePositionX() >= eyeXHandler.GetResolutionX() / 2
 					&& eyeXHandler.GetGazePositionY() <= eyeXHandler.GetResolutionY() / 2)
 				{
 					brush.changeShape(Shape::Shape::Circle);
 					gui.setModeChangeFlag();
 					imageHandler.loadIcon(SHAPE_Circle);
 				}
-				else if (eyeXHandler.GetGazePositionX() <= eyeXHandler.GetResolutionX() / 2 
+				else if (eyeXHandler.GetGazePositionX() <= eyeXHandler.GetResolutionX() / 2
 					&& eyeXHandler.GetGazePositionY() >= eyeXHandler.GetResolutionY() / 2)
 				{
 					brush.changeShape(Shape::Shape::Rectangle);
 					gui.setModeChangeFlag();
 					imageHandler.loadIcon(SHAPE_Rectangle);
 				}
-				else if (eyeXHandler.GetGazePositionX() >= eyeXHandler.GetResolutionX() / 2 
+				else if (eyeXHandler.GetGazePositionX() >= eyeXHandler.GetResolutionX() / 2
 					&& eyeXHandler.GetGazePositionY() >= eyeXHandler.GetResolutionY() / 2)
 				{
 					brush.changeShape(Shape::Shape::Triangle);
@@ -673,48 +672,48 @@ namespace touchpoints { namespace app
 
 		switch (mode)
 		{
-		case Mode::DefaultModes::MLE:
-			gui.changeModeButtons(temp2);
-			break;
-		case Mode::DefaultModes::MLR:
-			gui.changeModeButtons(temp2);
-			break;
-		case Mode::DefaultModes::MER:
-			gui.changeModeButtons(temp2);
-			break;
-		case Mode::DefaultModes::LER:
-			gui.changeModeButtons(temp);
-			break;
-		case Mode::DefaultModes::ML:
-			gui.changeModeButtons(temp2);
-			break;
-		case Mode::DefaultModes::ME:
-			gui.changeModeButtons(temp2);
-			break;
-		case Mode::DefaultModes::MR:
-			gui.changeModeButtons(temp2);
-			break;
-		case Mode::DefaultModes::LE:
-			gui.changeModeButtons(temp);
-			break;
-		case Mode::DefaultModes::LR:
-			gui.changeModeButtons(temp);
-			break;
-		case Mode::DefaultModes::ER:
-			gui.changeModeButtons(temp);
-			break;
-		case Mode::DefaultModes::M:
-			gui.changeModeButtons(temp2);
-			break;
-		case Mode::DefaultModes::L:
-			gui.changeModeButtons(temp);
-			break;
-		case Mode::DefaultModes::E:
-			gui.changeModeButtons(temp);
-			break;
-		case Mode::DefaultModes::R:
-			gui.changeModeButtons(temp);
-			break;
+			case Mode::DefaultModes::MLE:
+				gui.changeModeButtons(temp2);
+				break;
+			case Mode::DefaultModes::MLR:
+				gui.changeModeButtons(temp2);
+				break;
+			case Mode::DefaultModes::MER:
+				gui.changeModeButtons(temp2);
+				break;
+			case Mode::DefaultModes::LER:
+				gui.changeModeButtons(temp);
+				break;
+			case Mode::DefaultModes::ML:
+				gui.changeModeButtons(temp2);
+				break;
+			case Mode::DefaultModes::ME:
+				gui.changeModeButtons(temp2);
+				break;
+			case Mode::DefaultModes::MR:
+				gui.changeModeButtons(temp2);
+				break;
+			case Mode::DefaultModes::LE:
+				gui.changeModeButtons(temp);
+				break;
+			case Mode::DefaultModes::LR:
+				gui.changeModeButtons(temp);
+				break;
+			case Mode::DefaultModes::ER:
+				gui.changeModeButtons(temp);
+				break;
+			case Mode::DefaultModes::M:
+				gui.changeModeButtons(temp2);
+				break;
+			case Mode::DefaultModes::L:
+				gui.changeModeButtons(temp);
+				break;
+			case Mode::DefaultModes::E:
+				gui.changeModeButtons(temp);
+				break;
+			case Mode::DefaultModes::R:
+				gui.changeModeButtons(temp);
+				break;
 		}
 	}
 
@@ -942,4 +941,5 @@ namespace touchpoints { namespace app
 		}
 	}
 }}
+
 CINDER_APP(touchpoints::app::TouchPointsApp, RendererGl, touchpoints::app::prepareSettings);

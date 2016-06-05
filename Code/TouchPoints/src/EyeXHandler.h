@@ -1,7 +1,6 @@
 #pragma once
 #include "eyex-cpp/EyeX.hpp"
 #pragma comment (lib, "Tobii.EyeX.Client.lib")
-#include <bemapiset.h>
 
 namespace touchpoints { namespace devices
 {
