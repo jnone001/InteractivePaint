@@ -7,7 +7,7 @@ namespace touchpoints { namespace drawing
 	{
 	public:
 		TouchPoint();
-		TouchPoint(const vec2& initialPt, const ColorA& color, const float& size);
+		TouchPoint(vec2 initialPt, ColorA color, float size);
 		void addPoint(const vec2& pt);
 		void clearPoints();
 		vec2 getFirstPoint();

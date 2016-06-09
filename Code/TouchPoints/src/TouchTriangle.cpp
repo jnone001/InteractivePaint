@@ -8,7 +8,7 @@ namespace touchpoints { namespace drawing
 {
 	TouchTriangle::TouchTriangle() {}
 
-	TouchTriangle::TouchTriangle(const vec2& point1, const vec2& point2, const vec2& point3, const vec2& baseCenter, const ColorA& color, const float& size, bool& filledShapes)
+	TouchTriangle::TouchTriangle(vec2 point1, vec2 point2, vec2 point3, vec2 baseCenter, ColorA color, float size, bool filledShapes)
 	{
 		mPoint1 = point1;
 		mPoint2 = point2;

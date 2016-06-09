@@ -88,39 +88,39 @@ namespace touchpoints { namespace app
 	void TouchPointsApp::drawRadial()
 	{
 		gl::color(1.0, 1.0, 1.0, 1.0);
-		(*radialFbo).bindFramebuffer();
+		radialFbo->bindFramebuffer();
 		glClearColor(1.0, 1.0, 1.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
-		(*radialFbo).unbindFramebuffer();
+		radialFbo->unbindFramebuffer();
 
 		//Draw to radial menu buffer
-		(*radialFbo).bindFramebuffer();
+		radialFbo->bindFramebuffer();
 		//Make background transparent
 		glClearColor(1.0, 1.0, 1.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		//Center Circle
-		gl::color(1.0, 0.9, 0.5);
+		gl::color(1.0f, 0.9f, 0.5f);
 		gl::drawStrokedCircle(radialCenter, 30.0f, 2.0f);
 
-		gl::color(.24, .24, .24, 0.8);
+		gl::color(.24f, .24f, .24f, 0.8f);
 
 		gl::drawSolidCircle(radialCenter, 29.0f);
 
 		//Draws outer ring
-		gl::color(.24, .24, .24, 0.8);
+		gl::color(.24f, .24f, .24f, 0.8f);
 		gl::drawStrokedCircle(radialCenter, 100.0f, 60.0f);
 
-		gl::color(0.0, 0.0, 0.0, 0.5);
+		gl::color(0.0f, 0.0f, 0.0f, 0.5f);
 		gl::drawStrokedCircle(radialCenter, 131.0f, 2.0f, 300);
 
-		gl::color(0.0, 0.0, 0.0, 0.8);
+		gl::color(0.0f, 0.0f, 0.0f, 0.8f);
 		gl::drawStrokedCircle(radialCenter, 69.0f, 2.0f, 300);
 
 		//Draw left icon
 		gl::color(1.0, 1.0, 1.0, 1.0);
 
-		(*radialFbo).bindFramebuffer();
+		radialFbo->bindFramebuffer();
 
 		//New way to draw icons to FBO.
 		gl::TextureRef texture = gl::Texture::create(loadImage(loadAsset("Colors.png")));
@@ -143,13 +143,13 @@ namespace touchpoints { namespace app
 		gl::draw(texture, Rectf(radialCenter.x - 25, radialCenter.y - 130, radialCenter.x + 25, radialCenter.y - 70));
 
 		//Draw Lower Icon
-		gl::color(1.0, 0.9, 0.5);
+		gl::color(1.0f, 0.9f, 0.5f);
 		gl::drawStrokedCircle(vec2(radialCenter.x, radialCenter.y + 100), 30.0f, 2.0f);
 
 		gl::color(1.0, 1.0, 1.0);
 		gl::drawSolidCircle(vec2(radialCenter.x, radialCenter.y + 100), 29.0f);
 
-		(*radialFbo).unbindFramebuffer();
+		radialFbo->unbindFramebuffer();
 
 		radialActive = true;
 	}
@@ -208,7 +208,7 @@ namespace touchpoints { namespace app
 		}
 		else if (event.getChar() == 'e') //Eraser mode
 		{
-			brush.changeEraserMode(!(brush.getEraserMode()));
+			brush.changeEraserMode(!(brush.IsEraserActive()));
 
 			gui.setModeChangeFlag();
 		}
@@ -387,8 +387,8 @@ namespace touchpoints { namespace app
 
 			if (radialActive)
 			{
-				int x = touch.getX();
-				int y = touch.getY();
+				float x = touch.getX();
+				float y = touch.getY();
 				if ((((radialCenter.x - 100) - 30) < x && x < ((radialCenter.x - 100) + 30)) && ((radialCenter.y - 30) < y && y < (radialCenter.y + 30)))
 				{
 					//brush.changeStaticColor();
@@ -560,6 +560,7 @@ namespace touchpoints { namespace app
 			realSenseHandler.realSenseSetup();
 			setupComplete = true;
 		}
+
 		//Increment the frame counter
 		frames++;
 
@@ -598,7 +599,7 @@ namespace touchpoints { namespace app
 			//Checks if expressions is turned on.
 			if (deviceHandler.realSenseExpressions())
 			{
-				if (illustrator.getActiveDrawings() == 0)
+				if (illustrator.getNumberOfActiveDrawings() == 0)
 				{
 					realSenseHandler.streamData();
 
@@ -637,13 +638,13 @@ namespace touchpoints { namespace app
 
 		//Updates the active shapes being drawn by the user
 		gl::color(1.0, 1.0, 1.0, 1.0);
-		(*activeFbo).bindFramebuffer();
+		activeFbo->bindFramebuffer();
 		//Clears Previous Active Shapes
 		glClearColor(1.0, 1.0, 1.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		//Draws all active Shapes (non-permanent);
 		illustrator.drawActiveShapes();
-		(*activeFbo).unbindFramebuffer();
+		activeFbo->unbindFramebuffer();
 	}
 
 	void TouchPointsApp::draw()
@@ -731,7 +732,7 @@ namespace touchpoints { namespace app
 		/*Draws the frame buffer for UI*/
 		if (deviceHandler.eyeXStatus())
 		{
-			gl::color(0.0, 0.0, 0.0, 0.4);
+			gl::color(0.0f, 0.0f, 0.0f, 0.4f);
 
 			vec2 gaze1(eyeXHandler.GetGazePositionX() - 10, eyeXHandler.GetGazePositionY());
 			vec2 gaze2(eyeXHandler.GetGazePositionX() + 10, eyeXHandler.GetGazePositionY());

@@ -402,7 +402,7 @@ namespace touchpoints { namespace devices
 	{
 		if (hoverZoneFlag)
 		{
-			(*fingerLocation).bindFramebuffer();
+			fingerLocation->bindFramebuffer();
 			glClearColor(0.0, 0.0, 0.0, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 
@@ -410,7 +410,7 @@ namespace touchpoints { namespace devices
 			gl::drawSolidCircle(vec2(xPosition, yPosition), 40);
 			gl::color(1.0, 0.9, 0.5, 1);
 			gl::drawStrokedCircle(vec2(xPosition, yPosition), 40.0f, 10.0f);
-			(*fingerLocation).unbindFramebuffer();
+			fingerLocation->unbindFramebuffer();
 		}
 		else if (realDrawFlag)
 		{
@@ -418,7 +418,7 @@ namespace touchpoints { namespace devices
 			//New cursor is has started to draw
 			if (result == realPointsMap.end())
 			{
-				(*myIllustrator).beginTouchShapes(currentId, vec2(xPosition, yPosition));
+				myIllustrator->beginTouchShapes(currentId, vec2(xPosition, yPosition));
 
 				realPointsMap.emplace(currentId, vec2(xPosition, yPosition));
 				realActivePointsMap.emplace(currentId, true);
@@ -426,7 +426,7 @@ namespace touchpoints { namespace devices
 			else
 			{
 				//Already drawing with current cursor
-				(*myIllustrator).movingTouchShapes(currentId, vec2(xPosition, yPosition), realPointsMap[currentId]);
+				myIllustrator->movingTouchShapes(currentId, vec2(xPosition, yPosition), realPointsMap[currentId]);
 				realActivePointsMap[currentId] = true;
 				realPointsMap[currentId] = vec2(xPosition, yPosition);
 			}
@@ -441,7 +441,7 @@ namespace touchpoints { namespace devices
 			}
 			else
 			{
-				(*myIllustrator).endTouchShapes(points.first);
+				myIllustrator->endTouchShapes(points.first);
 				list.emplace_back(points.first);
 				realPointsMap.erase(points.first);
 			}

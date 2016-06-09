@@ -8,7 +8,7 @@ namespace touchpoints { namespace drawing
 {
 	TouchPoint::TouchPoint() {}
 
-	TouchPoint::TouchPoint(const vec2& initialPt, const ColorA& color, const float& size)
+	TouchPoint::TouchPoint(vec2 initialPt, ColorA color, float size)
 	{
 		pointList.emplace_back(initialPt);
 		mColor = color;

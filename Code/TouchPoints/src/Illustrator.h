@@ -20,7 +20,7 @@ namespace touchpoints {
 			void movingTouchShapes(uint32_t myId, vec2 myPos, vec2 prevPos);
 			void endTouchShapes(uint32_t myId);
 			void missedPoints(int xi, int yi, int xf, int yf, TouchPoint& points);
-			int getActiveDrawings();
+			int getNumberOfActiveDrawings();
 			//Time Machine
 			void saveCurrentFbo();
 			void undoDraw(Color background);
@@ -30,7 +30,7 @@ namespace touchpoints {
 		private:
 			vector<shared_ptr<gl::Fbo>>* mLayerList;
 			Brush* mBrush;
-			int activeDrawings;
+			int numberOfActiveDrawings;
 			map<uint32_t, TouchPoint> myActivePoints;
 			list<TouchPoint> myPoints;
 			map<uint32_t, TouchPoint> myActivePointsEraser;

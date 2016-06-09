@@ -1,14 +1,14 @@
 #pragma once
 #include "cinder/app/App.h"
+#include "IDrawable.h"
 
 using namespace cinder;
 
 namespace touchpoints { namespace drawing
 {
-	struct TouchShape
+	struct TouchShape : public IDrawable
 	{
 	public:
-		virtual void draw() = 0;
 		float size();
 		ColorA getColor();
 		bool getFilledShape();

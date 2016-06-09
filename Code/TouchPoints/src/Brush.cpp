@@ -12,7 +12,7 @@ namespace touchpoints { namespace drawing
 		mFilledShapes = filledShapes;
 		mRandColor = randColor;
 		mMySymmetry = mySymmetry;
-		mEraserMode = eraserMode;
+		isEraserActive = eraserMode;
 		mAlphaColor = alphaColor;
 		mStaticColor = ourColors::ourColors::Black;
 		//Fills our colorList with all our colors
@@ -108,9 +108,9 @@ namespace touchpoints { namespace drawing
 		return mRandColor;
 	}
 
-	bool Brush::getEraserMode()
+	bool Brush::IsEraserActive()
 	{
-		return mEraserMode;
+		return isEraserActive;
 	}
 
 	float Brush::getAlphaColor()
@@ -158,7 +158,7 @@ namespace touchpoints { namespace drawing
 
 	void Brush::changeEraserMode(bool eraserMode)
 	{
-		mEraserMode = eraserMode;
+		isEraserActive = eraserMode;
 	}
 
 	void Brush::changeAlphaColor(float alphaColor)

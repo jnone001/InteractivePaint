@@ -51,9 +51,9 @@ namespace touchpoints { namespace ui
 		shapeButtonsFbo->bindFramebuffer();
 		for (int i = 0; i < 5; i++)
 		{
-			gl::color(1.0, 1.0, 1.0);
+			gl::color(1.0f, 1.0f, 1.0f);
 			gl::drawSolidRect(Rectf(50, 50 * i + 50, 100, 50 * i + 100));
-			gl::color(0.75, 0.75, .75, 1.0);
+			gl::color(0.75f, 0.75f, .75f, 1.0f);
 			gl::drawStrokedRect(Rectf(50, 50 * (i) + 50, 100, 50 * i + 100), uiOutlineSize);
 		}
 
@@ -62,17 +62,17 @@ namespace touchpoints { namespace ui
 		gl::color(1.0, 1.0, 1.0, 1.0);
 		gl::draw(texture, Rectf(55, 255, 95, 295));
 
-		gl::color((*mBrush).getColor());
+		gl::color(mBrush->getColor());
 		gl::lineWidth(2);
 		gl::drawLine(vec2(55, 95), vec2(95, 55));
 
-		if ((*mBrush).getFilledShapes()) gl::drawSolidCircle(vec2(75, 125), 15);
+		if (mBrush->getFilledShapes()) gl::drawSolidCircle(vec2(75, 125), 15);
 		else gl::drawStrokedCircle(vec2(75, 125), 15);
 
-		if ((*mBrush).getFilledShapes()) gl::drawSolidRect(Rectf(60, 188, 90, 160));
+		if (mBrush->getFilledShapes()) gl::drawSolidRect(Rectf(60, 188, 90, 160));
 		else gl::drawStrokedRect(Rectf(60, 188, 90, 160));
 
-		if ((*mBrush).getFilledShapes()) gl::drawSolidTriangle(vec2(55, 240), vec2(95, 240), vec2(73, 205));
+		if (mBrush->getFilledShapes()) gl::drawSolidTriangle(vec2(55, 240), vec2(95, 240), vec2(73, 205));
 		else
 		{
 			gl::drawLine(vec2(55, 240), vec2(95, 240));
@@ -91,9 +91,9 @@ namespace touchpoints { namespace ui
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		gl::lineWidth(5);
-		gl::color(0.0, 0.0, 0.0, 1.0);
+		gl::color(0.0f, 0.0f, 0.0f, 1.0f);
 		gl::drawSolidRect(Rectf(windowWidth * .9, windowHeight * .56, windowWidth, windowHeight * .8));
-		gl::color(1.0, 1.0, 1.0, 1.0);
+		gl::color(1.0f, 1.0f, 1.0f, 1.0f);
 
 		TextLayout layout1;
 		layout1.clear(ColorA(0.2f, 0.2f, 0.2f, 0.2f));
@@ -334,7 +334,7 @@ namespace touchpoints { namespace ui
 		gl::drawStrokedRect(Rectf(100, 150, 200, 200), uiOutlineSize);
 
 		//Enable and Disabled Button
-		if ((*mBrush).getFilledShapes())
+		if (mBrush->getFilledShapes())
 		{
 			gl::color(0.0, 1.0, 0.0, 1.0);
 			gl::drawSolidRect(Rectf(200, 150, 250, 200));
@@ -519,7 +519,7 @@ namespace touchpoints { namespace ui
 
 		colorButtonsFbo->bindFramebuffer();
 		int i = 0;
-		for (auto myColor : (*mBrush).getColorList())
+		for (auto myColor : mBrush->getColorList())
 		{
 			gl::color(myColor);
 			gl::drawSolidRect(Rectf(0, 50 * (i) + 50, 50, 50 * (i) + 100));
@@ -627,15 +627,15 @@ namespace touchpoints { namespace ui
 	{
 		for (auto layer : *layerList)
 		{
-			(*layer).bindFramebuffer();
+			layer->bindFramebuffer();
 			//glClearColor(1.0,1.0,1.0, 0.0);
 			glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, 0.0);
 
 			glClear(GL_COLOR_BUFFER_BIT);
 			//gl::clear(Color(1.0,1.0,1.0)/*ColorA(backgroundColor)*/, 0.0);
-			(*layer).unbindFramebuffer();
+			layer->unbindFramebuffer();
 		}
-		(*illustrator).clearTimeMachine();
+		illustrator->clearTimeMachine();
 	}
 
 	void UserInterface::setModeChangeFlag()
@@ -686,7 +686,7 @@ namespace touchpoints { namespace ui
 		}
 	}
 
-	bool UserInterface::inInteractiveUi(int x, int y, uint32_t id)
+	bool UserInterface::inInteractiveUi(float x, float y, uint32_t id)
 	{
 		//ONLY ON IF MULTITOUCH IS DISABLED!
 		if (deviceHandler->multiTouchStatus() == false)
@@ -763,7 +763,7 @@ namespace touchpoints { namespace ui
 		//modeButtons UI
 
 		//Actual 'Interactive Ui'
-		if ((*illustrator).getActiveDrawings() == 0)
+		if (illustrator->getNumberOfActiveDrawings() == 0)
 		{
 			if (keyboard.getSettingText())
 			{
@@ -866,14 +866,14 @@ namespace touchpoints { namespace ui
 					}
 					else if (x < 150 && y < 50)
 					{
-						//(*mBrush).changeFilledShapes(!(*mBrush).getFilledShapes());
+						//mBrush->changeFilledShapes(!mBrush->getFilledShapes());
 						//modeChangeFlag = true;
 						brushButtons = !brushButtons;
 						return true;
 					}
 					else if (x < 200 && y < 50)
 					{
-						(*(*mBrush).getSymmetry()).toggleSymmetry();
+						mBrush->getSymmetry()->toggleSymmetry();
 						return true;
 					}
 					else if (x < 250 && y < 50)
@@ -888,7 +888,7 @@ namespace touchpoints { namespace ui
 					}
 					else if (x < 350 && y < 50)
 					{
-						(*illustrator).undoDraw(backgroundColor);
+						illustrator->undoDraw(backgroundColor);
 						return true;
 					}
 				}
@@ -902,7 +902,7 @@ namespace touchpoints { namespace ui
 				if (x < 50 && y < (50 * i + 100))
 				{
 					//currColor = i;
-					(*mBrush).changeStaticColor(static_cast<ourColors::ourColors>(i));
+					mBrush->changeStaticColor(static_cast<ourColors::ourColors>(i));
 					colorButtons = false;
 					drawShapesButtonsFbo();
 					modeChangeFlag = true;
@@ -949,35 +949,35 @@ namespace touchpoints { namespace ui
 			//Line Size Plus button
 			if (x > 200 && x < 250 && y > 51 && y < 100)
 			{
-				(*mBrush).increaseLineSize();
+				mBrush->increaseLineSize();
 				modeChangeFlag = true;
 				return true;
 			}
 			//Line Size minus button
 			if (x > 250 && x < 300 && y > 50 && y < 100)
 			{
-				(*mBrush).decreaseLineSize();
+				mBrush->decreaseLineSize();
 				modeChangeFlag = true;
 				return true;
 			}
 			//Transparency Plus button
 			if (x > 200 && x < 250 && y > 101 && y < 150)
 			{
-				(*mBrush).increaseAlpha();
+				mBrush->increaseAlpha();
 				modeChangeFlag = true;
 				return true;
 			}
 			//Transparency minus button
 			if (x > 250 && x < 300 && y > 101 && y < 150)
 			{
-				(*mBrush).decreaseAlpha();
+				mBrush->decreaseAlpha();
 				modeChangeFlag = true;
 				return true;
 			}
 			//Filled Shapes
 			if (x > 200 && x < 250 && y > 151 && y < 200)
 			{
-				(*mBrush).changeFilledShapes(!(*mBrush).getFilledShapes());
+				mBrush->changeFilledShapes(!mBrush->getFilledShapes());
 				drawBrushButtonsFbo();
 				drawShapesButtonsFbo();
 				modeChangeFlag = true;
@@ -989,39 +989,39 @@ namespace touchpoints { namespace ui
 		{
 			if (x > 50 && x < 100 && y < 100)
 			{
-				(*mBrush).changeShape(Shape::Shape::Line);
-				(*mBrush).changeEraserMode(false);
+				mBrush->changeShape(Shape::Shape::Line);
+				mBrush->changeEraserMode(false);
 				shapeButtons = false;
 				modeChangeFlag = true;
 				return true;
 			}
 			if (x > 50 && x < 100 && y < 150)
 			{
-				(*mBrush).changeShape(Shape::Shape::Circle);
-				(*mBrush).changeEraserMode(false);
+				mBrush->changeShape(Shape::Shape::Circle);
+				mBrush->changeEraserMode(false);
 				shapeButtons = false;
 				modeChangeFlag = true;
 				return true;
 			}
 			if (x > 50 && x < 100 && y < 200)
 			{
-				(*mBrush).changeShape(Shape::Shape::Rectangle);
-				(*mBrush).changeEraserMode(false);
+				mBrush->changeShape(Shape::Shape::Rectangle);
+				mBrush->changeEraserMode(false);
 				shapeButtons = false;
 				modeChangeFlag = true;
 				return true;
 			}
 			if (x > 50 && x < 100 && y < 250)
 			{
-				(*mBrush).changeEraserMode(false);
-				(*mBrush).changeShape(Shape::Shape::Triangle);
+				mBrush->changeEraserMode(false);
+				mBrush->changeShape(Shape::Shape::Triangle);
 				shapeButtons = false;
 				modeChangeFlag = true;
 				return true;
 			}
 			if (x > 50 && x < 100 && y < 300)
 			{
-				if (mBrush->getEraserMode()) (*mBrush).changeEraserMode(false);
+				if (mBrush->IsEraserActive()) mBrush->changeEraserMode(false);
 				else mBrush->changeEraserMode(true);
 				shapeButtons = false;
 				modeChangeFlag = true;
@@ -1099,51 +1099,51 @@ namespace touchpoints { namespace ui
 
 	void UserInterface::modeRectangle()
 	{
-		if ((*mBrush).getRandColor())
+		if (mBrush->getRandColor())
 		{
-			ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, (*mBrush).getAlphaColor());
+			ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, mBrush->getAlphaColor());
 
 			gl::color(newColor);
-			if (!(*mBrush).getFilledShapes()) gl::drawStrokedRect(Rectf(windowWidth * .85, windowHeight * .85, windowWidth * .95, windowHeight * .95), (*mBrush).getLineSize());
+			if (!mBrush->getFilledShapes()) gl::drawStrokedRect(Rectf(windowWidth * .85, windowHeight * .85, windowWidth * .95, windowHeight * .95), mBrush->getLineSize());
 			else gl::drawSolidRect(Rectf(windowWidth * .85, windowHeight * .85, windowWidth * .95, windowHeight * .95));
 		}
 
 		else
 		{
-			ColorA newColor((*mBrush).getColor(), (*mBrush).getAlphaColor());
+			ColorA newColor(mBrush->getColor(), mBrush->getAlphaColor());
 			gl::color(newColor);
-			if (!(*mBrush).getFilledShapes()) gl::drawStrokedRect(Rectf(windowWidth * .85, windowHeight * .85, windowWidth * .95, windowHeight * .95), (*mBrush).getLineSize());
+			if (!mBrush->getFilledShapes()) gl::drawStrokedRect(Rectf(windowWidth * .85, windowHeight * .85, windowWidth * .95, windowHeight * .95), mBrush->getLineSize());
 			else gl::drawSolidRect(Rectf(windowWidth * .85, windowHeight * .85, windowWidth * .95, windowHeight * .95));
 		}
 	}
 
 	void UserInterface::modeCircle()
 	{
-		if ((*mBrush).getRandColor())
+		if (mBrush->getRandColor())
 		{
-			ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, (*mBrush).getAlphaColor());
+			ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, mBrush->getAlphaColor());
 			gl::color(newColor);
-			if (!(*mBrush).getFilledShapes()) gl::drawStrokedCircle(vec2(windowWidth * .9, windowHeight * .9), windowHeight * .05, (*mBrush).getLineSize() * 2.0f);
+			if (!mBrush->getFilledShapes()) gl::drawStrokedCircle(vec2(windowWidth * .9, windowHeight * .9), windowHeight * .05, mBrush->getLineSize() * 2.0f);
 			else gl::drawSolidCircle(vec2(windowWidth * .9, windowHeight * .9), windowHeight * .05);
 		}
 		else
 		{
-			ColorA newColor((*mBrush).getColor(), (*mBrush).getAlphaColor());
+			ColorA newColor(mBrush->getColor(), mBrush->getAlphaColor());
 			gl::color(newColor);
-			if (!(*mBrush).getFilledShapes()) gl::drawStrokedCircle(vec2(windowWidth * .9, windowHeight * .9), windowHeight * .05, (*mBrush).getLineSize() * 2.0f);
+			if (!mBrush->getFilledShapes()) gl::drawStrokedCircle(vec2(windowWidth * .9, windowHeight * .9), windowHeight * .05, mBrush->getLineSize() * 2.0f);
 			else gl::drawSolidCircle(vec2(windowWidth * .9, windowHeight * .9), windowHeight * .05);
 		}
 	}
 
 	void UserInterface::modeTriangle()
 	{
-		if ((*mBrush).getRandColor())
+		if (mBrush->getRandColor())
 		{
-			ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, (*mBrush).getAlphaColor());
+			ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, mBrush->getAlphaColor());
 			gl::color(newColor);
-			if (!(*mBrush).getFilledShapes())
+			if (!mBrush->getFilledShapes())
 			{
-				gl::lineWidth((*mBrush).getLineSize());
+				gl::lineWidth(mBrush->getLineSize());
 				gl::drawLine(vec2(windowWidth * .85, windowHeight * .95), vec2(windowWidth * .95, windowHeight * .95));
 				gl::drawLine(vec2(windowWidth * .95, windowHeight * .95), vec2(windowWidth * .9, windowHeight * .85));
 				gl::drawLine(vec2(windowWidth * .9, windowHeight * .85), vec2(windowWidth * .85, windowHeight * .95));
@@ -1152,11 +1152,11 @@ namespace touchpoints { namespace ui
 		}
 		else
 		{
-			ColorA newColor((*mBrush).getColor(), (*mBrush).getAlphaColor());
+			ColorA newColor(mBrush->getColor(), mBrush->getAlphaColor());
 			gl::color(newColor);
-			if (!(*mBrush).getFilledShapes())
+			if (!mBrush->getFilledShapes())
 			{
-				gl::lineWidth((*mBrush).getLineSize());
+				gl::lineWidth(mBrush->getLineSize());
 				gl::drawLine(vec2(windowWidth * .85, windowHeight * .95), vec2(windowWidth * .95, windowHeight * .95));
 				gl::drawLine(vec2(windowWidth * .95, windowHeight * .95), vec2(windowWidth * .9, windowHeight * .85));
 				gl::drawLine(vec2(windowWidth * .9, windowHeight * .85), vec2(windowWidth * .85, windowHeight * .95));
@@ -1167,33 +1167,33 @@ namespace touchpoints { namespace ui
 
 	void UserInterface::modeLine()
 	{
-		if ((*mBrush).getRandColor())
+		if (mBrush->getRandColor())
 		{
 			//Performance Issues with drawing these 3 lines every frame!
-			ColorA newColor1(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, (*mBrush).getAlphaColor());
-			ColorA newColor2(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, (*mBrush).getAlphaColor());
-			ColorA newColor3(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, (*mBrush).getAlphaColor());
+			ColorA newColor1(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, mBrush->getAlphaColor());
+			ColorA newColor2(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, mBrush->getAlphaColor());
+			ColorA newColor3(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, mBrush->getAlphaColor());
 			//gl::color(newColor1);
-			drawing::TouchPoint newTouchPoints1(vec2(windowWidth * .85, windowHeight * .95), newColor1, (*mBrush).getLineSize());
-			(*illustrator).missedPoints(windowWidth * .85, windowHeight * .95, windowWidth * .95, windowHeight * .85, newTouchPoints1);
-			drawing::TouchPoint newTouchPoints2(vec2(windowWidth * .86, windowHeight * .90), newColor2, (*mBrush).getLineSize());
-			(*illustrator).missedPoints(windowWidth * .86, windowHeight * .90, windowWidth * .92, windowHeight * .84, newTouchPoints2);
-			drawing::TouchPoint newTouchPoints3(vec2(windowWidth * .88, windowHeight * .97), newColor3, (*mBrush).getLineSize());
-			(*illustrator).missedPoints(windowWidth * .88, windowHeight * .97, windowWidth * .94, windowHeight * .90, newTouchPoints3);
+			drawing::TouchPoint newTouchPoints1(vec2(windowWidth * .85, windowHeight * .95), newColor1, mBrush->getLineSize());
+			illustrator->missedPoints(windowWidth * .85, windowHeight * .95, windowWidth * .95, windowHeight * .85, newTouchPoints1);
+			drawing::TouchPoint newTouchPoints2(vec2(windowWidth * .86, windowHeight * .90), newColor2, mBrush->getLineSize());
+			illustrator->missedPoints(windowWidth * .86, windowHeight * .90, windowWidth * .92, windowHeight * .84, newTouchPoints2);
+			drawing::TouchPoint newTouchPoints3(vec2(windowWidth * .88, windowHeight * .97), newColor3, mBrush->getLineSize());
+			illustrator->missedPoints(windowWidth * .88, windowHeight * .97, windowWidth * .94, windowHeight * .90, newTouchPoints3);
 			newTouchPoints1.draw();
 			newTouchPoints2.draw();
 			newTouchPoints3.draw();
 		}
 		else
 		{
-			ColorA newColor((*mBrush).getColor(), (*mBrush).getAlphaColor());
+			ColorA newColor(mBrush->getColor(), mBrush->getAlphaColor());
 			gl::color(newColor);
-			drawing::TouchPoint newTouchPoints1(vec2(windowWidth * .85, windowHeight * .95), newColor, (*mBrush).getLineSize());
-			(*illustrator).missedPoints(windowWidth * .85, windowHeight * .95, windowWidth * .95, windowHeight * .85, newTouchPoints1);
-			drawing::TouchPoint newTouchPoints2(vec2(windowWidth * .86, windowHeight * .90), newColor, (*mBrush).getLineSize());
-			(*illustrator).missedPoints(windowWidth * .86, windowHeight * .90, windowWidth * .92, windowHeight * .84, newTouchPoints2);
-			drawing::TouchPoint newTouchPoints3(vec2(windowWidth * .88, windowHeight * .97), newColor, (*mBrush).getLineSize());
-			(*illustrator).missedPoints(windowWidth * .88, windowHeight * .97, windowWidth * .94, windowHeight * .90, newTouchPoints3);
+			drawing::TouchPoint newTouchPoints1(vec2(windowWidth * .85, windowHeight * .95), newColor, mBrush->getLineSize());
+			illustrator->missedPoints(windowWidth * .85, windowHeight * .95, windowWidth * .95, windowHeight * .85, newTouchPoints1);
+			drawing::TouchPoint newTouchPoints2(vec2(windowWidth * .86, windowHeight * .90), newColor, mBrush->getLineSize());
+			illustrator->missedPoints(windowWidth * .86, windowHeight * .90, windowWidth * .92, windowHeight * .84, newTouchPoints2);
+			drawing::TouchPoint newTouchPoints3(vec2(windowWidth * .88, windowHeight * .97), newColor, mBrush->getLineSize());
+			illustrator->missedPoints(windowWidth * .88, windowHeight * .97, windowWidth * .94, windowHeight * .90, newTouchPoints3);
 			newTouchPoints1.draw();
 			newTouchPoints2.draw();
 			newTouchPoints3.draw();
@@ -1208,7 +1208,7 @@ namespace touchpoints { namespace ui
 		if (modeChangeFlag)
 		{
 			modeChangeFlag = false;
-			(*uiFbo).bindFramebuffer();
+			uiFbo->bindFramebuffer();
 
 			gl::lineWidth(5);
 			//Clears the framebuffer to redraw
@@ -1247,13 +1247,13 @@ namespace touchpoints { namespace ui
 			gl::color(0.0, 0.0, 0.0);
 
 			//Switch to draw which shape is represented in the mode box.
-			if ((*mBrush).getEraserMode())
+			if (mBrush->IsEraserActive())
 			{
 				bool tempBool = false;
-				drawing::TouchCircle(vec2(windowWidth * .9, windowHeight * .9), (*mBrush).getLineSize() * 2, Color(1.0, 1.0, 1.0), 1, tempBool).draw();
+				drawing::TouchCircle(vec2(windowWidth * .9, windowHeight * .9), mBrush->getLineSize() * 2, Color(1.0, 1.0, 1.0), 1, tempBool).draw();
 			}
 			else
-				switch ((*mBrush).getShape())
+				switch (mBrush->getShape())
 				{
 				case Shape::Shape::Rectangle:
 					modeRectangle();
@@ -1270,27 +1270,27 @@ namespace touchpoints { namespace ui
 				}
 
 			//auto maxTouches = System::getMaxMultiTouchPoints();
-			if ((*deviceHandler).multiTouchStatus())
+			if (deviceHandler->multiTouchStatus())
 			{
 				gl::color(0.0, 0.0, 1.0);
 				gl::drawSolidRect(Rectf(windowWidth * .81, windowHeight * .81, windowWidth * .83, windowHeight * .83));
 			}
-			if ((*deviceHandler).leapStatus())
+			if (deviceHandler->leapStatus())
 			{
 				gl::color(0.0, 1.0, 0.0);
 				gl::drawSolidRect(Rectf(windowWidth * .84, windowHeight * .81, windowWidth * .86, windowHeight * .83));
 			}
-			if ((*deviceHandler).eyeXStatus())
+			if (deviceHandler->eyeXStatus())
 			{
 				gl::color(1.0, 0.0, 0.0);
 				gl::drawSolidRect(Rectf(windowWidth * .87, windowHeight * .81, windowWidth * .89, windowHeight * .83));
 			}
-			if ((*deviceHandler).realSenseStatus())
+			if (deviceHandler->realSenseStatus())
 			{
 				gl::color(1.0, 1.0, 0.0);
 				gl::drawSolidRect(Rectf(windowWidth * .90, windowHeight * .81, windowWidth * .92, windowHeight * .83));
 			}
-			(*uiFbo).unbindFramebuffer();
+			uiFbo->unbindFramebuffer();
 			//uiFboFlag = false;
 		}
 		if (uiFboFlag)
@@ -1327,7 +1327,7 @@ namespace touchpoints { namespace ui
 			gl::draw(shapeButtonsFbo->getColorTexture());
 		}
 
-		if ((*(*mBrush).getSymmetry()).getSymmetryOn())
+		if (mBrush->getSymmetry()->getSymmetryOn())
 		{
 			for (int i = 0; i < 50; i = i + 2)
 			{
@@ -1338,10 +1338,10 @@ namespace touchpoints { namespace ui
 		}
 		if (layerVisualization)
 		{
-			int y = (*layerList).size();
+			int y = layerList->size();
 			y = y * 200 + 50;
 			int layerNumber = 0;
-			for (auto frame : (*layerList))
+			for (auto frame : *layerList)
 			{
 				gl::color(backgroundColor.r, backgroundColor.g, backgroundColor.b, 1.0);
 				gl::drawSolidRect(Rectf(200, (y - 200), 600, y));

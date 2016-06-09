@@ -8,7 +8,7 @@ namespace touchpoints { namespace drawing
 {
 	TouchRectangle::TouchRectangle() {}
 
-	TouchRectangle::TouchRectangle(const int& x1, const int& y1, const int& x2, const int& y2, const ColorA& color, const float& size, bool& filledShapes)
+	TouchRectangle::TouchRectangle(int x1, int y1, int x2, int y2, ColorA color, float size, bool filledShapes)
 	{
 		mUpperLeftX = x1;
 		mUpperLeftY = y1;

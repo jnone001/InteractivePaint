@@ -6,7 +6,7 @@ namespace touchpoints { namespace drawing
 	struct TouchCircle : public TouchShape
 	{
 		TouchCircle();
-		TouchCircle(const vec2& center, const float& radius, const ColorA& color, const float& size, bool& filledShapes);
+		TouchCircle(vec2 center, float radius, ColorA color, float size, bool filledShapes);
 		void changeRadius(float& radius);
 		float getRadius();
 		void changePosition(vec2 newCenter);

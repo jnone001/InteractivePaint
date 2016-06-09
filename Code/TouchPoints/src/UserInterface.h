@@ -16,7 +16,7 @@ namespace touchpoints { namespace ui
 		void modeTriangle();
 		void modeLine();
 		void drawUi();
-		bool inInteractiveUi(int x, int y, uint32_t id);
+		bool inInteractiveUi(float x, float y, uint32_t id);
 		Color getBackgroundColor();
 		void setModeChangeFlag();
 		void UserInterface::changeBackgroundColor(Color background);

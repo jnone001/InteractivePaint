@@ -22,6 +22,7 @@
     <ProjectGuid>{B7488805-91CA-4772-9742-30A9071ECC53}</ProjectGuid>
     <RootNamespace>TouchPoints</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -75,6 +76,12 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -220,6 +227,8 @@
     <ClInclude Include="..\src\DeviceHandler.h" />
     <ClInclude Include="..\src\Enums.h" />
     <ClInclude Include="..\src\EyeXHandler.h" />
+    <ClInclude Include="..\src\IDeviceHandler.h" />
+    <ClInclude Include="..\src\IDrawable.h" />
     <ClInclude Include="..\src\Illustrator.h" />
     <ClInclude Include="..\src\ImageHandler.h" />
     <ClInclude Include="..\src\LeapMotionHandler.h" />

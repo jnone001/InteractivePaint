@@ -11,19 +11,19 @@ namespace touchpoints { namespace drawing
 	{
 		mLayerList = layerList;
 		mBrush = brush;
-		activeDrawings = 0;
+		numberOfActiveDrawings = 0;
 
 		//Create Map for all Fbo's in Program 
-		for (auto layers : (*mLayerList))
+		for (auto layers : *mLayerList)
 		{
 			std::list<std::shared_ptr<gl::Fbo>> storedFbo;
 			myTimeMachine.insert(make_pair(layers, storedFbo));
 		}
 	}
 
-	int Illustrator::getActiveDrawings()
+	int Illustrator::getNumberOfActiveDrawings()
 	{
-		return activeDrawings;
+		return numberOfActiveDrawings;
 	}
 
 	void Illustrator::drawActiveShapes()
@@ -31,17 +31,17 @@ namespace touchpoints { namespace drawing
 		for (auto& activePoint : myActiveCircles)
 		{
 			activePoint.second.draw();
-			if ((*(*mBrush).getSymmetry()).getSymmetryOn()) (*(*mBrush).getSymmetry()).symmetricCircle(activePoint.second).draw();
+			if (mBrush->getSymmetry()->getSymmetryOn()) mBrush->getSymmetry()->symmetricCircle(activePoint.second).draw();
 		}
 		for (auto& activePoint : myActiveRectangles)
 		{
 			activePoint.second.draw();
-			if ((*(*mBrush).getSymmetry()).getSymmetryOn()) (*(*mBrush).getSymmetry()).symmetricRectangle(activePoint.second).draw();
+			if (mBrush->getSymmetry()->getSymmetryOn()) mBrush->getSymmetry()->symmetricRectangle(activePoint.second).draw();
 		}
 		for (auto& activePoint : myActiveTriangles)
 		{
 			activePoint.second.draw();
-			if ((*(*mBrush).getSymmetry()).getSymmetryOn()) (*(*mBrush).getSymmetry()).symmetricTriangle(activePoint.second).draw();
+			if (mBrush->getSymmetry()->getSymmetryOn()) mBrush->getSymmetry()->symmetricTriangle(activePoint.second).draw();
 		}
 		for (auto& activePoint : myActivePointsEraser)
 		{
@@ -162,71 +162,70 @@ namespace touchpoints { namespace drawing
 		/*Should go here*/
 		saveCurrentFbo();
 
-		if ((*mBrush).getEraserMode())
+		if (mBrush->IsEraserActive())
 		{
-			activeDrawings++;
-			myActivePoints.insert(make_pair(myId, TouchPoint(myPos, (*mBrush).getColor(), (*mBrush).getLineSize() * 2)));
-			bool tempBool = false;
-			myActiveCirclesEraser.insert(make_pair(myId, TouchCircle(myPos, (*mBrush).getLineSize() * 2, Color(0.0, 0.0, 0.0), 1, tempBool)));
+			numberOfActiveDrawings++;
+			myActivePoints.insert(make_pair(myId, TouchPoint(myPos, mBrush->getColor(), mBrush->getLineSize() * 2)));
+			myActiveCirclesEraser.insert(make_pair(myId, TouchCircle(myPos, mBrush->getLineSize() * 2, Color(0.0, 0.0, 0.0), 1, false)));
 		}
 		else
 		{
-			switch ((*mBrush).getShape())
+			switch (mBrush->getShape())
 			{
 			case Shape::Shape::Line:
-				activeDrawings++;
-				if ((*mBrush).getRandColor())
+				numberOfActiveDrawings++;
+				if (mBrush->getRandColor())
 				{
-					ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, (*mBrush).getAlphaColor());
-					myActivePoints.insert(make_pair(myId, TouchPoint(myPos, newColor, (*mBrush).getLineSize())));
+					ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, mBrush->getAlphaColor());
+					myActivePoints.insert(make_pair(myId, TouchPoint(myPos, newColor, mBrush->getLineSize())));
 				}
 				else
 				{
-					myActivePoints.insert(make_pair(myId, TouchPoint(myPos, (*mBrush).getColor(), (*mBrush).getLineSize())));
+					myActivePoints.insert(make_pair(myId, TouchPoint(myPos, mBrush->getColor(), mBrush->getLineSize())));
 				}
 				break;
 
 			case Shape::Shape::Circle:
-				activeDrawings++;
-				if ((*mBrush).getRandColor())
+				numberOfActiveDrawings++;
+				if (mBrush->getRandColor())
 				{
-					ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, (*mBrush).getAlphaColor());
-					bool filledShapes = (*mBrush).getFilledShapes();
-					myActiveCircles.insert(make_pair(myId, TouchCircle(myPos, 30.0f, newColor, (*mBrush).getLineSize(), filledShapes)));
+					ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, mBrush->getAlphaColor());
+					bool filledShapes = mBrush->getFilledShapes();
+					myActiveCircles.insert(make_pair(myId, TouchCircle(myPos, 30.0f, newColor, mBrush->getLineSize(), filledShapes)));
 				}
 				else
 				{
-					bool filledShapes = (*mBrush).getFilledShapes();
-					myActiveCircles.insert(make_pair(myId, TouchCircle(myPos, 30.0f, (*mBrush).getColor(), (*mBrush).getLineSize(), filledShapes)));
+					bool filledShapes = mBrush->getFilledShapes();
+					myActiveCircles.insert(make_pair(myId, TouchCircle(myPos, 30.0f, mBrush->getColor(), mBrush->getLineSize(), filledShapes)));
 				}
 				break;
 
 			case Shape::Shape::Rectangle:
-				activeDrawings++;
-				if ((*mBrush).getRandColor())
+				numberOfActiveDrawings++;
+				if (mBrush->getRandColor())
 				{
-					ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, (*mBrush).getAlphaColor());
-					bool filledShapes = (*mBrush).getFilledShapes();
-					myActiveRectangles.insert(make_pair(myId, TouchRectangle(myPos.x, myPos.y, myPos.x, myPos.y, newColor, (*mBrush).getLineSize(), filledShapes)));
+					ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, mBrush->getAlphaColor());
+					bool filledShapes = mBrush->getFilledShapes();
+					myActiveRectangles.insert(make_pair(myId, TouchRectangle(myPos.x, myPos.y, myPos.x, myPos.y, newColor, mBrush->getLineSize(), filledShapes)));
 				}
 				else
 				{
-					bool filledShapes = (*mBrush).getFilledShapes();
-					myActiveRectangles.insert(make_pair(myId, TouchRectangle(myPos.x, myPos.y, myPos.x, myPos.y, (*mBrush).getColor(), (*mBrush).getLineSize(), filledShapes)));
+					bool filledShapes = mBrush->getFilledShapes();
+					myActiveRectangles.insert(make_pair(myId, TouchRectangle(myPos.x, myPos.y, myPos.x, myPos.y, mBrush->getColor(), mBrush->getLineSize(), filledShapes)));
 				}
 
 			case Shape::Shape::Triangle:
-				activeDrawings++;
-				if ((*mBrush).getRandColor())
+				numberOfActiveDrawings++;
+				if (mBrush->getRandColor())
 				{
-					ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, (*mBrush).getAlphaColor());
-					bool filledShapes = (*mBrush).getFilledShapes();
-					myActiveTriangles.insert(make_pair(myId, TouchTriangle(myPos, myPos, myPos, myPos, newColor, (*mBrush).getLineSize(), filledShapes)));
+					ColorA newColor(CM_HSV, Rand::randFloat(), 0.5f, 1.0f, mBrush->getAlphaColor());
+					bool filledShapes = mBrush->getFilledShapes();
+					myActiveTriangles.insert(make_pair(myId, TouchTriangle(myPos, myPos, myPos, myPos, newColor, mBrush->getLineSize(), filledShapes)));
 				}
 				else
 				{
-					bool filledShapes = (*mBrush).getFilledShapes();
-					myActiveTriangles.insert(make_pair(myId, TouchTriangle(myPos, myPos, myPos, myPos, (*mBrush).getColor(), (*mBrush).getLineSize(), filledShapes)));
+					bool filledShapes = mBrush->getFilledShapes();
+					myActiveTriangles.insert(make_pair(myId, TouchTriangle(myPos, myPos, myPos, myPos, mBrush->getColor(), mBrush->getLineSize(), filledShapes)));
 				}
 			}
 		}
@@ -234,7 +233,7 @@ namespace touchpoints { namespace drawing
 
 	void Illustrator::movingTouchShapes(uint32_t myId, vec2 myPos, vec2 prevPos)
 	{
-		if ((*mBrush).getEraserMode())
+		if (mBrush->IsEraserActive())
 		{
 			if (myActivePoints.find(myId) == myActivePoints.end()) return;
 
@@ -244,7 +243,7 @@ namespace touchpoints { namespace drawing
 
 			myActiveCirclesEraser[myId].changePosition(myPos);
 			//Draws to the layer at the end of the list. Which is drawn on 'top'
-			(*(*mLayerList).back()).bindFramebuffer();
+			mLayerList->back()->bindFramebuffer();
 
 			glEnable(GL_BLEND);
 			glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
@@ -253,7 +252,7 @@ namespace touchpoints { namespace drawing
 			for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();)
 			{
 				oldPoints->draw();
-				if ((*(*mBrush).getSymmetry()).getSymmetryOn()) (*((*mBrush).getSymmetry())).symmetricLine(*oldPoints).draw();
+				if (mBrush->getSymmetry()->getSymmetryOn()) mBrush->getSymmetry()->symmetricLine(*oldPoints).draw();
 				++oldPoints;
 			}
 
@@ -261,13 +260,13 @@ namespace touchpoints { namespace drawing
 			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 			glBlendEquation(GL_FUNC_ADD);
 
-			(*(*mLayerList).back()).unbindFramebuffer();
+			mLayerList->back()->unbindFramebuffer();
 
 			myPoints.clear();
 		}
 		else
 		{
-			switch ((*mBrush).getShape())
+			switch (mBrush->getShape())
 			{
 			case Shape::Shape::Line:
 				if (myActivePoints.find(myId) == myActivePoints.end()) return;
@@ -277,14 +276,14 @@ namespace touchpoints { namespace drawing
 				myActivePoints[myId].clearPoints();
 
 				//Draws to the layer at the end of the list. Which is drawn on 'top'
-				(*(*mLayerList).back()).bindFramebuffer();
+				mLayerList->back()->bindFramebuffer();
 				for (auto oldPoints = myPoints.begin(); oldPoints != myPoints.end();)
 				{
 					oldPoints->draw();
-					if ((*(*mBrush).getSymmetry()).getSymmetryOn()) (*((*mBrush).getSymmetry())).symmetricLine(*oldPoints).draw();
+					if (mBrush->getSymmetry()->getSymmetryOn()) mBrush->getSymmetry()->symmetricLine(*oldPoints).draw();
 					++oldPoints;
 				}
-				(*(*mLayerList).back()).unbindFramebuffer();
+				mLayerList->back()->unbindFramebuffer();
 				myPoints.clear();
 				break;
 
@@ -321,41 +320,41 @@ namespace touchpoints { namespace drawing
 
 	void Illustrator::endTouchShapes(uint32_t myId)
 	{
-		if ((*mBrush).getEraserMode())
+		if (mBrush->IsEraserActive())
 		{
 			if (myActivePoints.find(myId) == myActivePoints.end()) return;
 
-			activeDrawings--;
+			numberOfActiveDrawings--;
 			myActivePoints.erase(myId);
 			myActiveCirclesEraser.erase(myId);
 		}
 
-		switch ((*mBrush).getShape())
+		switch (mBrush->getShape())
 		{
 		case Shape::Shape::Line:
 			{
 				if (myActivePoints.find(myId) == myActivePoints.end()) return;
 
-				activeDrawings--;
+				numberOfActiveDrawings--;
 				myActivePoints.erase(myId);
 			}
 		case Shape::Shape::Circle:
 			{
 				if (myActiveCircles.find(myId) == myActiveCircles.end()) return;
 
-				activeDrawings--;
+				numberOfActiveDrawings--;
 
 				myCircles.push_back(myActiveCircles[myId]);
 
 				//Draws to the layer at the end of the list. Which is drawn on 'top'
-				(*(*mLayerList).back()).bindFramebuffer();
+				mLayerList->back()->bindFramebuffer();
 				for (auto oldPoints = myCircles.begin(); oldPoints != myCircles.end();)
 				{
 					oldPoints->draw();
-					if ((*((*mBrush).getSymmetry())).getSymmetryOn()) (*((*mBrush).getSymmetry())).symmetricCircle(*oldPoints).draw();
+					if (mBrush->getSymmetry()->getSymmetryOn()) mBrush->getSymmetry()->symmetricCircle(*oldPoints).draw();
 					++oldPoints;
 				}
-				(*(*mLayerList).back()).unbindFramebuffer();
+				mLayerList->back()->unbindFramebuffer();
 				myActiveCircles.erase(myId);
 
 				myCircles.clear();
@@ -364,19 +363,19 @@ namespace touchpoints { namespace drawing
 			{
 				if (myActiveRectangles.find(myId) == myActiveRectangles.end()) return;
 
-				activeDrawings--;
+				numberOfActiveDrawings--;
 
 				myRectangles.push_back(myActiveRectangles[myId]);
 
 				//Draws to the layer at the end of the list. Which is drawn on 'top'
-				(*(*mLayerList).back()).bindFramebuffer();
+				mLayerList->back()->bindFramebuffer();
 				for (auto oldPoints = myRectangles.begin(); oldPoints != myRectangles.end();)
 				{
 					oldPoints->draw();
-					if ((*((*mBrush).getSymmetry())).getSymmetryOn()) (*((*mBrush).getSymmetry())).symmetricRectangle(*oldPoints).draw();
+					if (mBrush->getSymmetry()->getSymmetryOn()) mBrush->getSymmetry()->symmetricRectangle(*oldPoints).draw();
 					++oldPoints;
 				}
-				(*(*mLayerList).back()).unbindFramebuffer();
+				mLayerList->back()->unbindFramebuffer();
 				myActiveRectangles.erase(myId);
 
 				myRectangles.clear();
@@ -385,19 +384,19 @@ namespace touchpoints { namespace drawing
 			{
 				if (myActiveTriangles.find(myId) == myActiveTriangles.end()) return;
 
-				activeDrawings--;
+				numberOfActiveDrawings--;
 
 				myTriangles.push_back(myActiveTriangles[myId]);
 				myActiveTriangles.erase(myId);
 				//Draws to the layer at the end of the list. Which is drawn on 'top'
-				(*(*mLayerList).back()).bindFramebuffer();
+				mLayerList->back()->bindFramebuffer();
 				for (auto oldPoints = myTriangles.begin(); oldPoints != myTriangles.end();)
 				{
 					oldPoints->draw();
-					if ((*((*mBrush).getSymmetry())).getSymmetryOn()) (*((*mBrush).getSymmetry())).symmetricTriangle(*oldPoints).draw();
+					if (mBrush->getSymmetry()->getSymmetryOn()) mBrush->getSymmetry()->symmetricTriangle(*oldPoints).draw();
 					++oldPoints;
 				}
-				(*(*mLayerList).back()).unbindFramebuffer();
+				mLayerList->back()->unbindFramebuffer();
 				myActiveTriangles.erase(myId);
 
 				myTriangles.clear();
@@ -408,52 +407,52 @@ namespace touchpoints { namespace drawing
 	//Need to add color background to parameter
 	void Illustrator::saveCurrentFbo()
 	{
-		if (activeDrawings > 0)
+		if (numberOfActiveDrawings > 0)
 		{
 			return;
 		}
 		//Check if the active drawing is occuring
 
-		if (myTimeMachine[(*mLayerList).back()].size() == 100)
+		if (myTimeMachine[mLayerList->back()].size() == 100)
 		{
-			myTimeMachine[(*mLayerList).back()].pop_back();
+			myTimeMachine[mLayerList->back()].pop_back();
 		}
 
 		std::shared_ptr<gl::Fbo> tempFbo;
 
 		gl::Fbo::Format format;
-		tempFbo = gl::Fbo::create((*(*mLayerList).back()).getSize().x
-		                          , (*(*mLayerList).back()).getSize().y
+		tempFbo = gl::Fbo::create(mLayerList->back()->getSize().x
+		                          , mLayerList->back()->getSize().y
 		                          , format);
 
-		(*tempFbo).bindFramebuffer();
+		tempFbo->bindFramebuffer();
 
 		glClearColor(1.0, 1.0, 1.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		gl::color(1.0, 1.0, 1.0, 1.0);
-		gl::draw((*(*mLayerList).back()).getColorTexture());
-		(*tempFbo).unbindFramebuffer();
+		gl::draw(mLayerList->back()->getColorTexture());
+		tempFbo->unbindFramebuffer();
 
 		//Place current fbo on list
-		myTimeMachine[(*mLayerList).back()].emplace_front(tempFbo);
+		myTimeMachine[mLayerList->back()].emplace_front(tempFbo);
 	}
 
 	void Illustrator::undoDraw(Color background)
 	{
-		if (myTimeMachine[(*mLayerList).back()].size() != 0)
+		if (myTimeMachine[mLayerList->back()].size() != 0)
 		{
-			(*(*mLayerList).back()).bindFramebuffer();
+			mLayerList->back()->bindFramebuffer();
 
 			glClearColor(background.r, background.g, background.b, 0.0);
 			glClear(GL_COLOR_BUFFER_BIT);
 			gl::color(1.0, 1.0, 1.0, 1.0);
 
-			gl::draw((*myTimeMachine[(*mLayerList).back()].front()).getColorTexture());
+			gl::draw(myTimeMachine[mLayerList->back()].front()->getColorTexture());
 
-			(*(*mLayerList).back()).unbindFramebuffer();
+			mLayerList->back()->unbindFramebuffer();
 
-			myTimeMachine[(*mLayerList).back()].pop_front();
+			myTimeMachine[mLayerList->back()].pop_front();
 		}
 	}
 
@@ -461,7 +460,7 @@ namespace touchpoints { namespace drawing
 	{
 		//Working
 		myTimeMachine.clear();
-		for (auto layers : (*mLayerList))
+		for (auto layers : *mLayerList)
 		{
 			std::list<std::shared_ptr<gl::Fbo>> storedFbo;
 			myTimeMachine.insert(make_pair(layers, storedFbo));

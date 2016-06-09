@@ -102,7 +102,7 @@ namespace touchpoints { namespace drawing
 		std::shared_ptr<gl::Fbo> saveImageFbo;
 		saveImageFbo = gl::Fbo::create(windowSize.x, windowSize.y, format);
 
-		(*saveImageFbo).bindFramebuffer();
+		saveImageFbo->bindFramebuffer();
 		glClearColor(1.0, 1.0, 1.0, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 		gl::color(background);
@@ -115,7 +115,7 @@ namespace touchpoints { namespace drawing
 			gl::draw(frames->getColorTexture());
 			x++;
 		}
-		(*saveImageFbo).unbindFramebuffer();
+		saveImageFbo->unbindFramebuffer();
 		writeImage(getHomeDirectory() / "Interactive_Paint" / "Saved_Images" / (toString(imageNum) + "." + imageType), (saveImageFbo->getColorTexture())->createSource());
 		imageNum++;
 		loadIcon("Save.png");

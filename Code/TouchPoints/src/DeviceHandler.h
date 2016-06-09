@@ -1,9 +1,10 @@
 #pragma once
 #include "Enums.h"
+#include  "IDeviceHandler.h"
 
 namespace touchpoints { namespace devices
 {
-	struct DeviceHandler
+	struct DeviceHandler 
 	{
 	public:
 		DeviceHandler();

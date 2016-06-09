@@ -6,7 +6,7 @@ namespace touchpoints { namespace drawing
 	struct TouchTriangle : public TouchShape
 	{
 		TouchTriangle();
-		TouchTriangle(const vec2& point1, const vec2& point2, const vec2& point3, const vec2& baseCenter, const ColorA& color, const float& size, bool& filledShapes);
+		TouchTriangle(vec2 point1, vec2 point2, vec2 point3, vec2 baseCenter, ColorA color, float size, bool filledShapes);
 		void changeSize(float x, float y);
 		void draw() override;
 		vec2 getPoint1();

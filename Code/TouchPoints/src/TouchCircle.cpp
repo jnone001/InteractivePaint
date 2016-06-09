@@ -8,7 +8,7 @@ namespace touchpoints { namespace drawing
 {
 	TouchCircle::TouchCircle() {}
 
-	TouchCircle::TouchCircle(const vec2& center, const float& radius, const ColorA& color, const float& size, bool& filledShapes)
+	TouchCircle::TouchCircle(vec2 center, float radius, ColorA color, float size, bool filledShapes)
 	{
 		mRadius = radius;
 		mCenter = center;

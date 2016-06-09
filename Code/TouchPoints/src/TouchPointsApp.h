@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include <list>
+#include <queue>
 #include "SymmetryLine.h"
 #include "Illustrator.h"
 #include "Enums.h"

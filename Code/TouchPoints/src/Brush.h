@@ -17,7 +17,7 @@ namespace touchpoints { namespace drawing
 		bool getFilledShapes();
 		SymmetryLine* getSymmetry();
 		bool getRandColor();
-		bool getEraserMode();
+		bool IsEraserActive();
 		float getAlphaColor();
 		//Change brush 
 		void changeColor(ColorA color);
@@ -46,7 +46,7 @@ namespace touchpoints { namespace drawing
 		bool mFilledShapes;
 		SymmetryLine* mMySymmetry;
 		bool mRandColor;
-		bool mEraserMode;
+		bool isEraserActive;
 		float mAlphaColor;
 		ourColors::ourColors mStaticColor;
 		std::vector<Color> colorList;

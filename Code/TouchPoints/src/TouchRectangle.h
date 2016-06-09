@@ -6,7 +6,7 @@ namespace touchpoints { namespace drawing
 	struct TouchRectangle : public TouchShape
 	{
 		TouchRectangle();
-		TouchRectangle(const int& x1, const int& y1, const int& x2, const int& y2, const ColorA& color, const float& size, bool& filledShapes);
+		TouchRectangle(int x1, int y1, int x2, int y2, ColorA color, float size, bool filledShapes);
 		void changePoint(int x, int y);
 		int upperLeftX();
 		int upperLeftY();
