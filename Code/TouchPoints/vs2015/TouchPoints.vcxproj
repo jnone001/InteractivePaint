@@ -1,0 +1,262 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B7488805-91CA-4772-9742-30A9071ECC53}</ProjectGuid>
+    <RootNamespace>TouchPoints</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\crossguid\include;$(SolutionDir)dependencies\LeapSDK\include;$(SolutionDir)dependencies\libusb-1.0.20\include\libusb-1.0;$(SolutionDir)dependencies\cinder_0.90\include;$(SolutionDir)dependencies\RSSDK\include;$(SolutionDir)dependencies\TobiiEyeXSDK_1.7.480\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0601;_WINDOWS;NOMINMAX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>"..\..\cinder_0.9.0_vc2013\include";..\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>cinder-$(PlatformToolset)_d.lib;OpenGL32.lib;Leap.lib;libusb-1.0.lib;libpxc_d.lib;crossguidd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\libusb-1.0.20\$(PlatformTarget)\dll\;$(SolutionDir)dependencies\RSSDK\lib\$(PlatformTarget)\;$(SolutionDir)dependencies\TobiiEyeXSDK_1.7.480\lib\$(PlatformTarget)\;$(SolutionDir)dependencies\LeapSDK\lib\$(PlatformTarget)\;$(SolutionDir)dependencies\crossguid\lib;$(SolutionDir)dependencies\cinder_0.90\lib\msw\$(PlatformTarget)\</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>LIBCMT;LIBCPMT;LibCmtD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PreBuildEvent>
+      <Command>powershell -ExecutionPolicy ByPass -File "$(SolutionDir)Copy$(Configuration)$(PlatformTarget)Dlls.ps1"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\crossguid\include;$(SolutionDir)dependencies\LeapSDK\include;$(SolutionDir)dependencies\libusb-1.0.20\include\libusb-1.0;$(SolutionDir)dependencies\cinder_0.90\include;$(SolutionDir)dependencies\RSSDK\include;$(SolutionDir)dependencies\TobiiEyeXSDK_1.7.480\include</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0601;_WINDOWS;NOMINMAX;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>"..\..\cinder_0.9.0_vc2013\include";..\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>cinder-$(PlatformToolset)_d.lib;OpenGL32.lib;Leap.lib;libusb-1.0.lib;libpxc_d.lib;crossguidd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\libusb-1.0.20\$(PlatformTarget)\dll\;$(SolutionDir)dependencies\RSSDK\lib\$(PlatformTarget)\;$(SolutionDir)dependencies\TobiiEyeXSDK_1.7.480\lib\$(PlatformTarget)\;$(SolutionDir)dependencies\LeapSDK\lib\$(PlatformTarget)\;$(SolutionDir)dependencies\crossguid\lib;$(SolutionDir)dependencies\cinder_0.90\lib\msw\$(PlatformTarget)\</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <IgnoreSpecificDefaultLibraries>LIBCMT;LIBCPMT</IgnoreSpecificDefaultLibraries>
+    </Link>
+    <PreBuildEvent>
+      <Command>powershell -ExecutionPolicy ByPass -File "$(SolutionDir)Copy$(Configuration)$(PlatformTarget)Dlls.ps1"</Command>
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\LeapSDK\include;$(SolutionDir)dependencies\libusb-1.0.20\include\libusb-1.0;$(SolutionDir)dependencies\cinder_0.90\include;$(SolutionDir)dependencies\RSSDK\include;$(SolutionDir)dependencies\TobiiEyeXSDK_1.7.480\include;$(SolutionDir)dependencies\LeapSDK\include;$(SolutionDir)dependencies\libusb-1.0.20\include\libusb-1.0;$(SolutionDir)dependencies\cinder_0.90\include;$(SolutionDir)dependencies\RSSDK\include;$(SolutionDir)dependencies\TobiiEyeXSDK_1.7.480\include;..\include;"..\..\cinder_0.9.0_vc2013\include"</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0601;_WINDOWS;NOMINMAX;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>"..\..\cinder_0.9.0_vc2013\include";..\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>cinder-$(PlatformToolset)_d.lib;OpenGL32.lib;Leap.lib;libusb-1.0.lib;libpxcmd_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\libusb-1.0.20\MS32\dll;$(SolutionDir)dependencies\RSSDK\lib\Win32;$(SolutionDir)dependencies\TobiiEyeXSDK_1.7.480\lib\x86;$(SolutionDir)dependencies\LeapSDK\lib\x86;$(SolutionDir)dependencies\cinder_0.90\lib\msw\x86</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding />
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+      <IgnoreSpecificDefaultLibraries>LIBCMT;LIBCPMT;LibCmtD;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(SolutionDir)dependencies\LeapSDK\include;$(SolutionDir)dependencies\libusb-1.0.20\include\libusb-1.0;$(SolutionDir)dependencies\cinder_0.90\include;$(SolutionDir)dependencies\RSSDK\include;$(SolutionDir)dependencies\TobiiEyeXSDK_1.7.480\include;..\include;"..\..\cinder_0.9.0_vc2013\include"</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WIN32_WINNT=0x0601;_WINDOWS;NOMINMAX;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader />
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+    </ClCompile>
+    <ProjectReference>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>"..\..\cinder_0.9.0_vc2013\include";..\include</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>cinder-$(PlatformToolset)_d.lib;OpenGL32.lib;Leap.lib;libusb-1.0.lib;libpxcmd_d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\dependencies\libusb-1.0.20\MS32\dll;$(SolutionDir)dependencies\RSSDK\lib\Win32;$(SolutionDir)dependencies\TobiiEyeXSDK_1.7.480\lib\x86;$(SolutionDir)dependencies\LeapSDK\lib\x86;$(SolutionDir)dependencies\cinder_0.90\lib\msw\x86</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateMapFile>true</GenerateMapFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding />
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\App.cpp" />
+    <ClCompile Include="..\src\Brush.cpp" />
+    <ClCompile Include="..\src\DeviceHandler.cpp" />
+    <ClCompile Include="..\src\DrawEvent.cpp" />
+    <ClCompile Include="..\src\EyeXHandler.cpp" />
+    <ClCompile Include="..\src\GuidHash.h" />
+    <ClCompile Include="..\src\IDrawableDeleter.cpp" />
+    <ClCompile Include="..\src\Illustrator.cpp" />
+    <ClCompile Include="..\src\ImageHandler.cpp" />
+    <ClCompile Include="..\src\LeapMotionHandler.cpp" />
+    <ClCompile Include="..\src\RealSenseHandler.cpp" />
+    <ClCompile Include="..\src\Rect.cpp" />
+    <ClCompile Include="..\src\SymmetryLine.cpp" />
+    <ClCompile Include="..\src\TouchCircle.cpp" />
+    <ClCompile Include="..\src\TouchKeyboard.cpp" />
+    <ClCompile Include="..\src\TouchPoint.cpp" />
+    <ClCompile Include="..\src\TouchPointsApp.cpp" />
+    <ClCompile Include="..\src\TouchRectangle.cpp" />
+    <ClCompile Include="..\src\TouchShape.cpp" />
+    <ClCompile Include="..\src\TouchVerticalIsoscelesTriangle.cpp" />
+    <ClCompile Include="..\src\UserInterface.cpp" />
+    <ClCompile Include="..\src\VerticalIsoscelesTriangle.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\AllShapes.h" />
+    <ClInclude Include="..\src\Brush.h" />
+    <ClInclude Include="..\src\DeviceHandler.h" />
+    <ClInclude Include="..\src\DrawEvent.h" />
+    <ClInclude Include="..\src\Enums.h" />
+    <ClInclude Include="..\src\EyeXHandler.h" />
+    <ClInclude Include="..\src\IDeviceHandler.h" />
+    <ClInclude Include="..\src\IDrawable.h" />
+    <ClInclude Include="..\src\IDrawableDeleter.h" />
+    <ClInclude Include="..\src\Illustrator.h" />
+    <ClInclude Include="..\src\ImageHandler.h" />
+    <ClInclude Include="..\src\LeapMotionHandler.h" />
+    <ClInclude Include="..\src\Line.h" />
+    <ClInclude Include="..\src\RealSenseHandler.h" />
+    <ClInclude Include="..\src\Rect.h" />
+    <ClInclude Include="..\src\SymmetryLine.h" />
+    <ClInclude Include="..\src\TemporaryDrawEvent.h" />
+    <ClInclude Include="..\src\TouchCircle.h" />
+    <ClInclude Include="..\src\TouchKeyboard.h" />
+    <ClInclude Include="..\src\TouchPoint.h" />
+    <ClInclude Include="..\src\TouchPointsApp.h" />
+    <ClInclude Include="..\src\TouchRectangle.h" />
+    <ClInclude Include="..\src\TouchShape.h" />
+    <ClInclude Include="..\src\TouchVerticalIsoscelesTriangle.h" />
+    <ClInclude Include="..\src\VerticalIsoscelesTriangle.h" />
+    <ClInclude Include="..\src\UserInterface.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\resources\Icon.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

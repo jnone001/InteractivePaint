@@ -1,0 +1,205 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="drawing">
+      <UniqueIdentifier>{ce6cb9a8-c83f-42b2-9c53-e7f810c06bd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drawing\shapes">
+      <UniqueIdentifier>{97e273a9-d326-4319-9ff6-1e4aeb3d133a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="devices">
+      <UniqueIdentifier>{0c75801b-7f4a-42a8-925c-9f79adf8af9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{60033551-4f7a-4b87-95aa-397d1dd42104}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="app">
+      <UniqueIdentifier>{e2e172f4-c722-42b4-8e36-ace9f1f047e6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{a67ad07c-7318-4ca4-8c71-757f020f1967}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math\geometry">
+      <UniqueIdentifier>{f8d1adae-07b3-4268-9cf5-36bd22e5cafe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="drawing\events">
+      <UniqueIdentifier>{e989ffdf-9f92-408e-9b27-a34aa00b5511}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="misc">
+      <UniqueIdentifier>{b3e3fa83-5d3f-4752-8502-dae21de6b334}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\Brush.cpp">
+      <Filter>drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Illustrator.cpp">
+      <Filter>drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SymmetryLine.cpp">
+      <Filter>drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TouchKeyboard.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\UserInterface.cpp">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\DeviceHandler.cpp">
+      <Filter>devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TouchPointsApp.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TouchPoint.cpp">
+      <Filter>drawing\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TouchCircle.cpp">
+      <Filter>drawing\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TouchShape.cpp">
+      <Filter>drawing\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TouchRectangle.cpp">
+      <Filter>drawing\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ImageHandler.cpp">
+      <Filter>drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\RealSenseHandler.cpp">
+      <Filter>devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TouchPointsApp.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\EyeXHandler.cpp">
+      <Filter>devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\LeapMotionHandler.cpp">
+      <Filter>devices</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\App.cpp">
+      <Filter>app</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\IDrawableDeleter.cpp">
+      <Filter>drawing</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Rect.cpp">
+      <Filter>math\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\VerticalIsoscelesTriangle.cpp">
+      <Filter>math\geometry</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\TouchVerticalIsoscelesTriangle.cpp">
+      <Filter>drawing\shapes</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\DrawEvent.cpp">
+      <Filter>drawing\events</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GuidHash.h">
+      <Filter>misc</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\Brush.h">
+      <Filter>drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Illustrator.h">
+      <Filter>drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\SymmetryLine.h">
+      <Filter>drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\UserInterface.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TouchKeyboard.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\DeviceHandler.h">
+      <Filter>devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\RealSenseHandler.h">
+      <Filter>devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\ImageHandler.h">
+      <Filter>drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Enums.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TouchPoint.h">
+      <Filter>drawing\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TouchCircle.h">
+      <Filter>drawing\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TouchRectangle.h">
+      <Filter>drawing\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TouchShape.h">
+      <Filter>drawing\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\AllShapes.h">
+      <Filter>drawing\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\EyeXHandler.h">
+      <Filter>devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\LeapMotionHandler.h">
+      <Filter>devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TouchPointsApp.h">
+      <Filter>app</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\IDrawable.h">
+      <Filter>drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\IDeviceHandler.h">
+      <Filter>devices</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\IDrawableDeleter.h">
+      <Filter>drawing</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Line.h">
+      <Filter>math\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\Rect.h">
+      <Filter>math\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\VerticalIsoscelesTriangle.h">
+      <Filter>math\geometry</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TouchVerticalIsoscelesTriangle.h">
+      <Filter>drawing\shapes</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\DrawEvent.h">
+      <Filter>drawing\events</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\TemporaryDrawEvent.h">
+      <Filter>drawing\events</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\resources\Icon.ico">
+      <Filter>Resource Files</Filter>
+    </Image>
+  </ItemGroup>
+</Project>

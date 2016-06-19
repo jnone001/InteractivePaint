@@ -1,0 +1,5 @@
+to get latest dependencies clone "https://tamsenior.visualstudio.com/_git/dependencies" from inside this directory
+
+the visual studio build should take care of moving .dll files into the right location, but in case those files get deleted
+just rebuild the project or run '$ powershell -ExecutionPolicy ByPass -File CopyDebugx86Dlls.ps1' with the appropriate
+powershell script. Or just move the dlls your self lol.
