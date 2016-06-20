@@ -72,7 +72,7 @@ namespace touchpoints { namespace drawing
 		vector<TouchVerticalIsoscelesTriangle> temporaryTriangles;
 		unordered_map<Guid, TouchRectangle> activeRectanglesMap;
 		vector<TouchRectangle> temporaryRectangles;
-		unordered_map<int, TouchPoint> activePointsMap;
+		unordered_map<Guid, TouchPoint> activePointsMap;
 		vector<TouchPoint> temporaryPoints;
 
 		queue<DrawEvent> drawEventQueue;

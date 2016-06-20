@@ -151,6 +151,7 @@ namespace touchpoints { namespace devices
 
 			auto currentPoint = vec2(leapXCoordinate, leapYCoordinate);
 			auto pointId = point.id();
+			auto guid = getGuid(pointId);
 			int eventMaxLifeSpan = 1;
 
 			if (touchDistance > 0 && point.touchZone() != Leap::Pointable::Zone::ZONE_NONE)
@@ -158,7 +159,7 @@ namespace touchpoints { namespace devices
 				auto color = distanceToColor(touchDistance);
 				fingerLocationCircles.push_back(drawing::TouchCircle(currentPoint, 40.0f, color, 50.0f, true, 1));
 
-				auto finalizableDrawEventIterator = finalizeableDrawEvents.find(pointId);
+				auto finalizableDrawEventIterator = finalizeableDrawEvents.find(guid);
 				bool finilizableDrawEventWasFound = finalizableDrawEventIterator != finalizeableDrawEvents.end();
 				if (finilizableDrawEventWasFound)
 				{
@@ -168,13 +169,15 @@ namespace touchpoints { namespace devices
 					drawEventsToSendToIllustrator.push_back(finalizableEvent);
 					//delete it from finalizeableDrawEvents
 					finalizeableDrawEvents.erase(finalizableDrawEventIterator);
+					//remove guid associated with this event
+					pointIdToGuidMap.erase(pointId);
 				}
 			}
 			if(touchDistance < 0)
 			{
 				lockCurrentFrame = true;
 
-				auto finalizableDrawEventIterator = finalizeableDrawEvents.find(pointId);
+				auto finalizableDrawEventIterator = finalizeableDrawEvents.find(guid);
 				bool finalizableDrawEventWasFound = finalizableDrawEventIterator != finalizeableDrawEvents.end();
 				
 				if(finalizableDrawEventWasFound) //continuation of series of draw events
@@ -185,7 +188,7 @@ namespace touchpoints { namespace devices
 					finalizableEvent.ResetCurrentAge();
 
 					//check if we are continuing any temp draw events
-					auto tempDrawEventIterator = temporaryDrawEvents.find(pointId);
+					auto tempDrawEventIterator = temporaryDrawEvents.find(guid);
 					bool tempDrawEventWasFound = tempDrawEventIterator != temporaryDrawEvents.end();
 					
 					if (tempDrawEventWasFound) //continuation of previous temp draw event
@@ -202,15 +205,16 @@ namespace touchpoints { namespace devices
 					{
 						auto parentStartLocation = finalizableEvent.GetStartPoint();
 						//create new temp draw event
-						auto newTempDrawEvent = drawing::DrawEvent(currentPoint, parentStartLocation, pointId, false, eventMaxLifeSpan);
-						temporaryDrawEvents.insert_or_assign(pointId, newTempDrawEvent);
+						auto newTempDrawEvent = drawing::DrawEvent(currentPoint, parentStartLocation, guid, false, eventMaxLifeSpan);
+						temporaryDrawEvents.insert_or_assign(guid, newTempDrawEvent);
 					}
 				}
 				else //should be a new series of drawing events
 				{
 					//create new finilizable draw event
-					auto newFinalizableDrawEvent = drawing::DrawEvent(currentPoint, pointId, true, eventMaxLifeSpan);
-					finalizeableDrawEvents.insert_or_assign(pointId, newFinalizableDrawEvent);
+					auto newFinalizableDrawEvent = drawing::DrawEvent(currentPoint, guid, true, eventMaxLifeSpan);
+					createPointIdToGuidMapping(pointId, guid);
+					finalizeableDrawEvents.insert_or_assign(guid, newFinalizableDrawEvent);
 				}
 			}
 		}
@@ -379,7 +383,7 @@ namespace touchpoints { namespace devices
 		proxActive = true;
 	}
 
-	ColorA LeapMotionHandler::distanceToColor(float distance)
+	ColorA LeapMotionHandler::distanceToColor(float distance) 
 	{
 		auto green = ColorA(0.0f, 1.0f, 0.0f, 1);
 		auto limeGreen = ColorA(0.33f, 1.0f, 0.0f, 1);
@@ -424,5 +428,18 @@ namespace touchpoints { namespace devices
 			return crimson;
 		}
 		return red;
+	}
+
+	Guid LeapMotionHandler::getGuid(int pointId)
+	{
+		auto guidIterator = pointIdToGuidMap.find(pointId);
+		bool guidWasFound = guidIterator != pointIdToGuidMap.end();
+
+		return guidWasFound ? guidIterator->second : guidGenerator.newGuid();
+	}
+
+	void LeapMotionHandler::createPointIdToGuidMapping(int pointId, Guid guid)
+	{
+		pointIdToGuidMap.insert_or_assign(pointId, guid);
 	}
 }}

@@ -1,6 +1,8 @@
 #pragma once
 #include "TouchShape.h"
 
+using namespace std;
+
 namespace touchpoints { namespace drawing
 {
 	struct TouchPoint : public TouchShape
@@ -11,9 +13,10 @@ namespace touchpoints { namespace drawing
 		void addPoint(const vec2& pt);
 		void clearPoints();
 		vec2 getFirstPoint();
-		std::vector<vec2> getPointList() const;
+		vector<vec2> getPointList() const;
 		void draw() override;
 	private:
-		std::vector<vec2> pointList;
+		vector<vec2> findMissedPoints(vec2 initialPoint, vec2 finalPoint);
+		vector<vec2> pointList;
 	};
 }}

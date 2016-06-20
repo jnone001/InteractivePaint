@@ -1,9 +1,9 @@
 #pragma once
 #include "Leap.h"
-#include "cinder/Vector.h"
 #include "ImageHandler.h"
 #include "UserInterface.h"
 #include "DrawEvent.h"
+#include "guid.h"
 
 #define TOTAL_SYMBOLS 7
 
@@ -32,11 +32,20 @@ namespace touchpoints { namespace devices
 		inline void SetCurrentFrame() { this->currentFrame = this->leapController.frame(); }
 	private:
 		void drawProx(bool& proxActive, gl::Fbo* proxFbo);
+		ColorA distanceToColor(float distance);
+
+		GuidGenerator guidGenerator;
+		//gets guid mapped to pointId, or returns a new Guid if not mapping exists
+		Guid getGuid(int pointId);
+		void createPointIdToGuidMapping(int pointId, Guid guid);
 
 		//keeping 2 lists of draw events, some that fire constantly while drawing(temporary draw events)
 		//and others that fire only once a touch id draws and then exits draw zone(finalizing the draw event)
-		unordered_map<int, drawing::DrawEvent> finalizeableDrawEvents;
-		unordered_map<int, drawing::DrawEvent> temporaryDrawEvents;
+		unordered_map<Guid, drawing::DrawEvent> finalizeableDrawEvents;
+		unordered_map<Guid, drawing::DrawEvent> temporaryDrawEvents;
+
+		//ensures that illustrator can uniquely identify objects from each device
+		unordered_map<int, Guid> pointIdToGuidMap;
 
 		int windowWidth;
 		int windowHeight;
@@ -44,6 +53,5 @@ namespace touchpoints { namespace devices
 		Leap::Frame currentFrame;
 		Leap::GestureList gestureList;
 		Leap::Listener leapListener;
-		ColorA distanceToColor(float distance);
 	};
 }}

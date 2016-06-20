@@ -673,8 +673,7 @@ namespace touchpoints { namespace drawing
 
 		if(event.ShouldFinalizeShape())
 		{
-			auto guid = guidGenerator.newGuid();
-			addToActiveCircles(circle, guid);
+			addToActiveCircles(circle, event.GetShapeGuid());
 		}
 		else
 		{
@@ -698,7 +697,7 @@ namespace touchpoints { namespace drawing
 
 		if (event.ShouldFinalizeShape())
 		{
-			addToActiveTriangles(triangle, event.GetShapeId());
+			addToActiveTriangles(triangle, event.GetShapeGuid());
 		}
 		else
 		{
@@ -716,7 +715,7 @@ namespace touchpoints { namespace drawing
 
 		if (event.ShouldFinalizeShape())
 		{
-			addToActiveRectangles(rectangle, event.GetShapeId());
+			addToActiveRectangles(rectangle, event.GetShapeGuid());
 		}
 		else
 		{
@@ -726,7 +725,7 @@ namespace touchpoints { namespace drawing
 
 	void Illustrator::lineEventHandler(DrawEvent event)
 	{
-		auto shapeId = event.GetShapeId();
+		auto shapeId = event.GetShapeGuid();
 		//should retrieve by reference?
 		auto parentLineIterator = activePointsMap.find(shapeId);
 		bool isContinuationLine = parentLineIterator != activePointsMap.end();
@@ -736,12 +735,13 @@ namespace touchpoints { namespace drawing
 			auto parentLine = parentLineIterator->second;
 			parentLine.addPoint(event.GetStartPoint());
 			parentLine.addPoint(event.GetEndPoint());
+			activePointsMap.insert_or_assign(shapeId, parentLine);
 		}
 		else
 		{
 			auto newLine = TouchPoint(event.GetStartPoint(), mBrush->getColor(), mBrush->getLineSize());
 			newLine.addPoint(event.GetEndPoint());
-			activePointsMap._Insert_or_assign(shapeId, newLine);
+			activePointsMap.insert_or_assign(shapeId, newLine);
 		}
 	}
 }}

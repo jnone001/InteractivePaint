@@ -1,5 +1,6 @@
 #pragma once
 #include "cinder/Vector.h"
+#include "Guid.h"
 
 using namespace cinder;
 
@@ -9,14 +10,14 @@ namespace touchpoints { namespace drawing
 	{
 	public:
 		DrawEvent();
-		DrawEvent(vec2 startPoint, int sequenceId, bool shouldFinalizeShape, int maxLifeSpan);
-		DrawEvent(vec2 startPoint, int sequenceId, bool shouldFinalizeShape, int maxLifeSpan, int currentAge);
-		DrawEvent(vec2 startPoint, vec2 parentStartPoint, int sequenceId, bool shouldFinalizeShape, int maxLifeSpan);
-		DrawEvent(vec2 startPoint, vec2 parentStartPoint, int sequenceId, bool shouldFinalizeShape, int maxLifeSpan, int currentAge);
+		DrawEvent(vec2 startPoint, Guid guid, bool shouldFinalizeShape, int maxLifeSpan);
+		DrawEvent(vec2 startPoint, Guid guid, bool shouldFinalizeShape, int maxLifeSpan, int currentAge);
+		DrawEvent(vec2 startPoint, vec2 parentStartPoint, Guid guid, bool shouldFinalizeShape, int maxLifeSpan);
+		DrawEvent(vec2 startPoint, vec2 parentStartPoint, Guid guid, bool shouldFinalizeShape, int maxLifeSpan, int currentAge);
 		inline vec2 GetStartPoint() { return startPoint; }
 		inline vec2 GetEndPoint() { return endPoint; }
 		inline vec2 GetParentStartPoint() { return parentStartPoint; }
-		inline int GetShapeId() { return shapeId; }
+		inline Guid GetShapeGuid() { return shapeGuid; }
 		inline bool ShouldFinalizeShape() { return shouldFinalizeShape; }
 		inline bool HasStartPoint() { return hasStartPoint; }
 		inline bool HasEndPoint() { return hasEndPoint; }
@@ -31,7 +32,7 @@ namespace touchpoints { namespace drawing
 		//e.g. shapes that havent been finilized yet
 		vec2 parentStartPoint;
 		//id to group together a sequence of DrawEvents
-		int shapeId;
+		Guid shapeGuid;
 		//flag to let the illustrator know whether to this shape should be commited
 		bool shouldFinalizeShape;
 		bool hasStartPoint;
